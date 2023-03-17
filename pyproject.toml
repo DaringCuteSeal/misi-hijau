@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "misi-hijau"
+version = "0.1.0"
+description = "Misi Hijau adalah permainan petualangan retro tentang edukasi energi terbarukan."
+authors = ["Cikitta W. Tjok <cikitta.1538018@bpkpenabur.sch.id>"]
+license = "GPL"
+readme = "README.md"
+packages = [{include = "misi_hijau"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pyxel = "^1.9.12"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
