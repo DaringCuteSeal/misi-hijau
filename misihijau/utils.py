@@ -1,19 +1,18 @@
 # Copyright 2023 Cikitta Tjok
 
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     http://www.apache.org/licenses/LICENSE-2.0
 
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-# Constructors and functions for a better workflow.
+### Utilities for a better workflow
 
 # Imports
 import pyxel
@@ -21,12 +20,16 @@ from typing import Callable
 from enum import Enum
 from dataclasses import dataclass, field
 
-# Enum Constants
+# Enums
 class Direction(Enum):
     RIGHT = 0
     LEFT = 1
     UP = 2
     DOWN = 3
+
+class SoundType(Enum):
+    AUDIO = 0
+    MUSIC = 1
 
 # Other Constants
 ALPHA_COL = pyxel.COLOR_PURPLE
@@ -34,6 +37,7 @@ WINDOW_WIDTH = 256
 WINDOW_HEIGHT = 256
 MAP_WIDTH = 24 * 8
 MAP_HEIGHT = 97 * 8
+TILE_SIZE = 8
 
 # Functions for Classes
 # XXX remove if not needed
@@ -41,13 +45,14 @@ def tile_to_real(size: int):
     """
     Get real tile size from a tilemap scale.
     """
-    return size * 8
+    return size * TILE_SIZE
 
 
 # 1: Keyboard handling
 class KeyTypes(Enum):
     BTN = 0
     BTNP = 1
+    BTNP_REPEAT = 2
 
 @dataclass
 class KeyFunc:
@@ -58,6 +63,8 @@ class KeyFunc:
     func: Callable[[], None]
     btn_type: KeyTypes = KeyTypes.BTN
     active: bool = True
+    hold_time: int | None = None
+    repeat_time: int | None = None
 
 class KeyListener:
     """
@@ -68,7 +75,7 @@ class KeyListener:
     def __init__(self):
         self.checks: dict[str, KeyFunc] = {}
     
-    def append(self, keyfunc: dict[str, KeyFunc]):
+    def append(self, keyfunc: dict[str, KeyFunc],):
         """
         Append list of key listeners.
         """
@@ -86,7 +93,7 @@ class KeyListener:
                         if pyxel.btn(check[k].binding):
                             check[k].func()
                     case KeyTypes.BTNP:
-                        if pyxel.btnp(check[k].binding):
+                        if pyxel.btnp(check[k].binding, hold=check[k].hold_time, repeat=check[k].repeat_time):
                             check[k].func()
 
 
@@ -145,19 +152,16 @@ class Sprite:
 @dataclass
 class Camera:
     """
-    A 2D camera that follows the player's movement.
+    A 2D camera.
     """
     speed: int = 1
     x: int = 0
     y: int = 0
 
-    def __init__(self, player: Sprite):
+    def __init__(self):
        pyxel.camera()
-       self.player = player
    
     def draw(self):
-        #if not (self.player.coord.y_map < WINDOW_HEIGHT // 2 and self.y == self.player.speed):
-        self.y = self.player.coord.y_map
         pyxel.bltm(0, 0, 0, self.x , self.y, 256, 256)
 
 
@@ -166,33 +170,52 @@ class Camera:
 # 5: Tick handling
 class Ticker():
     """
-    Retro games aren't meant to be smooth. However, Pyxel does support high frame rate. This timer can be used to limit a rate of something without messing with the game's actual FPS.
+    Retro games aren't meant to be smooth. However, Pyxel supports high frame rate. This timer can be used to limit a rate of something without messing with the game's actual FPS.
     """
-    def __init__(self, limit: int):
+    def __init__(self):
         """
         Initialize a new tick timer.
         """
-        self.limit = limit
         self.time_since_last_move = 0
         self.time_last_frame = 0
     
     def update(self):
         """
-        Update tick counts.
+        Update tick counts. Should be run on every game tick by the main game process. Shouldn't be called within sprites.
         """
         time_this_frame = pyxel.frame_count
         self.dt = time_this_frame - self.time_last_frame
         self.time_last_frame = time_this_frame
         self.time_since_last_move += self.dt
     
-    def get(self) -> bool:
+    def get(self, limit: int) -> bool:
         """
         Get status of tick.
         """
-        if self.time_since_last_move >= self.limit:
+        if self.time_since_last_move >= limit:
             self.time_since_last_move = 0
             return True
         return False
+
+
+# 6. Sound handling
+class Sfx():
+    soundtype: SoundType
+    channel: int
+    index: int = 0
+    loop: bool = False
+
+@dataclass
+class Sound():
+    sounds: dict[str, Sfx]
+    ch: int = 0
+
+    def play(self, name: str):
+        match(self.sounds[name].soundtype):
+            case SoundType.AUDIO:
+                pyxel.play(self.ch, self.sounds[name].index, loop=self.sounds[name].loop)
+            case SoundType.MUSIC:
+                pyxel.playm(self.sounds[name].index, loop=self.sounds[name].loop)
 
 
 # Functions

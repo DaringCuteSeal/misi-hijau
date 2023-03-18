@@ -1,19 +1,18 @@
 # Copyright 2023 Cikitta Tjok
 
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     http://www.apache.org/licenses/LICENSE-2.0
 
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-# Sprites for game
+### Sprites for game
 
 import pyxel
 from utils import *
@@ -26,9 +25,12 @@ class State(Enum):
     SHOOT = 2
 
 # Actual sprites
+SoundBank = {
+}
+
 @dataclass
 class Player(Sprite):
-    coord = Coordinate(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2, 8, 8)
+    coord = Coordinate(WINDOW_WIDTH // 2, 22, 128, 20)
     img = 0
     u = 16
     v = 24
@@ -36,11 +38,10 @@ class Player(Sprite):
     h = 8
     colkey = ALPHA_COL
     direction = Direction.DOWN
-    speed = 2
+    speed = w
     moving = False
     costume_i = 0
     state = State.IDLE
-    ticker = Ticker(10)
     costumes = {
         # Left/right
         "r_1": (0, 16),
@@ -61,11 +62,13 @@ class Player(Sprite):
         "walk_f": (24, 24)
     }
     
-    def __init__(self):
+    def __init__(self, cam: Camera, ticker: Ticker):
         """
         Initialize player.
         Camera is needed to limit movement.
         """
+        self.camera = cam
+        self.ticker = ticker
         self.keybindings = {
             "player_right": KeyFunc(pyxel.KEY_RIGHT, lambda: self.move(Direction.RIGHT)),
             "player_left": KeyFunc(pyxel.KEY_LEFT, lambda: self.move(Direction.LEFT)),
@@ -99,41 +102,62 @@ class Player(Sprite):
                 self.w = 8
                 self.set_costume(self.costumes["f_1"])
 
-    def move(self, dir: Direction):
-        self.state = State.MOVE
+    def move(self, dir: Direction, ):
+        self.state = State.IDLE
 
+    def move_repeat(self, dir: Direction):
+
+        if not self.ticker.get(self.speed):
+            return
+
+        self.state = State.MOVE
         match(dir):
             case Direction.RIGHT:
                 self.face(Direction.RIGHT)
                 if self.coord.x < WINDOW_WIDTH - tile_to_real(1) - self.speed:
                     self.coord.x += self.speed
+
             case Direction.LEFT:
                 self.face(Direction.LEFT)
                 if self.coord.x > self.speed:
                     self.coord.x -= self.speed
+
             case Direction.UP:
                 self.face(Direction.UP)
-                if self.coord.y_map > self.speed:
+                if self.coord.y_map > self.speed + 2:
                     self.coord.y_map -= self.speed
+
                 if(
-                    self.coord.y_map == self.speed
-                    and self.coord.y < (WINDOW_HEIGHT // 2 + self.speed)
-                    and self.coord.y > self.speed
+                    self.coord.y_map <= WINDOW_HEIGHT // 2 - self.speed
+                    or self.coord.y_map >= MAP_HEIGHT - WINDOW_HEIGHT // 2 + self.speed
+                    and self.coord.y_map > self.speed * 2
                 ):
                     self.coord.y -= self.speed
+                else:
+                    self.camera.y -= self.camera.speed
+
+                if self.coord.y_map <= WINDOW_HEIGHT // 2 - self.speed:
+                    self.coord.y = self.coord.y_map
 
             case Direction.DOWN:
                 self.face(Direction.DOWN)
-                if self.coord.y_map < MAP_HEIGHT - self.speed:
+
+                if self.coord.y_map < MAP_HEIGHT - self.speed - 2:
                     self.coord.y_map += self.speed
+
                 if(
-                    self.coord.y_map == MAP_HEIGHT - self.speed
-                    and self.coord.y > (WINDOW_HEIGHT // 2 - self.speed)
-                    and self.coord.y < MAP_HEIGHT - self.speed
+                    self.coord.y_map <= WINDOW_HEIGHT // 2 - self.speed
+                    or self.coord.y_map >= MAP_HEIGHT - WINDOW_HEIGHT // 2 + self.speed
+                    and self.coord.y_map > self.speed * 2
                 ):
                     self.coord.y += self.speed
+                else:
+                    self.camera.y += self.camera.speed
 
-        # Since we only scroll vertically, the x_map is useless.
+                if self.coord.y_map >= MAP_HEIGHT - WINDOW_HEIGHT // 2 - self.speed:
+                    self.coord.y = self.coord.y_map
+
+       # Since we only scroll vertically, the x_map is useless.
         # XXX Remove if need during refactoring.
         self.coord.x_map = self.coord.x
         self.update_anim()
@@ -143,8 +167,8 @@ class Player(Sprite):
         """
         Update costume (animation).
         """
-        self.ticker.update()
-        if not self.ticker.get():
+        # Only update animation when it's time to
+        if not self.ticker.get(10):
             return
 
         match(self.direction):
