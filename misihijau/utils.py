@@ -33,7 +33,7 @@ ALPHA_COL = pyxel.COLOR_PURPLE
 WINDOW_WIDTH = 256
 WINDOW_HEIGHT = 256
 MAP_WIDTH = 24 * 8
-MAP_HEIGHT = 128 * 8
+MAP_HEIGHT = 97 * 8
 
 # Functions for Classes
 # XXX remove if not needed
@@ -52,7 +52,7 @@ class KeyTypes(Enum):
 @dataclass
 class KeyFunc:
     """
-    Create a new key listener object.
+    An object with a key and its associated function.
     """
     binding: int
     func: Callable[[], None]
@@ -60,7 +60,10 @@ class KeyFunc:
     active: bool = True
 
 class KeyListener:
-    # TODO: group keybindings by game object so same label can be used
+    """
+    A Key listener that is able to execute functions.
+    """
+    # TODO: group keybindings by game object so same keybindings with same name can exist.
 
     def __init__(self):
         self.checks: dict[str, KeyFunc] = {}
@@ -90,6 +93,7 @@ class KeyListener:
 # 2: Sprites handling
 @dataclass
 class Coordinate:
+    # XXX might be useless.
     x: int = 0
     y: int = 0
     x_map: int = 0
@@ -100,22 +104,49 @@ def default_costumes():
 
 @dataclass
 class Sprite:
+    """
+    A sprite class with some predefined functions to make costume handling easier.
+    """
     coord: Coordinate
     img: int = 0
     u: int = 0
     v: int = 0
     w: int = 8
     h: int = 8
+    speed: int = 1
     colkey: int | None = None
+    costume_i: int = 0
     costumes: dict[str, tuple[int, int]] = field(default_factory=default_costumes)
 
     def draw(self):
+        """
+        Draw (render) character.
+        """
         pyxel.blt(self.coord.x, self.coord.y, self.img, self.u, self.v, self.w, self.h, self.colkey)
+    
+    def set_costume(self, costume: tuple[int, int]):
+        """
+        Set costume based on spritemap coordinate.
+        """
+        self.u = costume[0]
+        self.v = costume[1]
+
+    def costume_toggle(self, costume_1: tuple[int, int], costume_2: tuple[int, int]):
+        """
+        Set costume based on current alternating costume index.
+        """
+        if self.costume_i:
+            self.costume = costume_1
+        else:
+            self.costume = costume_2
 
 
 # 3: Camera handling
 @dataclass
 class Camera:
+    """
+    A 2D camera that follows the player's movement.
+    """
     speed: int = 1
     x: int = 0
     y: int = 0
@@ -125,6 +156,7 @@ class Camera:
        self.player = player
    
     def draw(self):
+        #if not (self.player.coord.y_map < WINDOW_HEIGHT // 2 and self.y == self.player.speed):
         self.y = self.player.coord.y_map
         pyxel.bltm(0, 0, 0, self.x , self.y, 256, 256)
 
@@ -133,16 +165,35 @@ class Camera:
 
 # 5: Tick handling
 class Ticker():
-    def __init__(self):
+    """
+    Retro games aren't meant to be smooth. However, Pyxel does support high frame rate. This timer can be used to limit a rate of something without messing with the game's actual FPS.
+    """
+    def __init__(self, limit: int):
+        """
+        Initialize a new tick timer.
+        """
+        self.limit = limit
         self.time_since_last_move = 0
         self.time_last_frame = 0
     
     def update(self):
-        self.time_this_frame = pyxel.frame_count
-        self.dt = self.time_this_frame - self.time_last_frame
-        self.time_last_frame = self.time_this_frame
+        """
+        Update tick counts.
+        """
+        time_this_frame = pyxel.frame_count
+        self.dt = time_this_frame - self.time_last_frame
+        self.time_last_frame = time_this_frame
         self.time_since_last_move += self.dt
     
+    def get(self) -> bool:
+        """
+        Get status of tick.
+        """
+        if self.time_since_last_move >= self.limit:
+            self.time_since_last_move = 0
+            return True
+        return False
+
 
 # Functions
 def map_to_view(self, camera_pos: Coordinate,) -> tuple[int, int] | bool:

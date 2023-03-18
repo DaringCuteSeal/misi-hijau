@@ -26,7 +26,7 @@ class App:
         Initialize game.
         """
         # Pyxel stuff
-        pyxel.init(utils.WINDOW_WIDTH, utils.WINDOW_HEIGHT, capture_scale=8, title="Exercise 2")
+        pyxel.init(utils.WINDOW_WIDTH, utils.WINDOW_HEIGHT, capture_scale=8, title="Misi Hijau")
         pyxel.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), "res/res.pyxres"))
 
         # Set up components
@@ -80,6 +80,8 @@ class App:
         """
         for o in self.objects:
             o.draw()
+        
+        self.player.update_anim()
         
         self.debugger.draw(self.player, self.camera)
         
