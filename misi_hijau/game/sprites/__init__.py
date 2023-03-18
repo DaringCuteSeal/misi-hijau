@@ -15,7 +15,7 @@
 ### Sprites for game
 
 import pyxel
-from utils import *
+from ..utils import *
 from enum import Enum
 
 # Enums
