@@ -18,7 +18,7 @@
 import pyxel
 from typing import Callable
 from enum import Enum
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 # Enums
 class Direction(Enum):
@@ -96,7 +96,6 @@ class KeyListener:
                         if pyxel.btnp(check[k].binding, hold=check[k].hold_time, repeat=check[k].repeat_time):
                             check[k].func()
 
-
 # 2: Sprites handling
 @dataclass
 class Coordinate:
@@ -108,45 +107,6 @@ class Coordinate:
 
 def default_costumes():
     return {}
-
-@dataclass
-class Sprite:
-    """
-    A sprite class with some predefined functions to make costume handling easier.
-    """
-    coord: Coordinate
-    img: int = 0
-    u: int = 0
-    v: int = 0
-    w: int = 8
-    h: int = 8
-    speed: int = 1
-    colkey: int | None = None
-    costume_i: int = 0
-    costumes: dict[str, tuple[int, int]] = field(default_factory=default_costumes)
-
-    def draw(self):
-        """
-        Draw (render) character.
-        """
-        pyxel.blt(self.coord.x, self.coord.y, self.img, self.u, self.v, self.w, self.h, self.colkey)
-    
-    def set_costume(self, costume: tuple[int, int]):
-        """
-        Set costume based on spritemap coordinate.
-        """
-        self.u = costume[0]
-        self.v = costume[1]
-
-    def costume_toggle(self, costume_1: tuple[int, int], costume_2: tuple[int, int]):
-        """
-        Set costume based on current alternating costume index.
-        """
-        if self.costume_i:
-            self.costume = costume_1
-        else:
-            self.costume = costume_2
-
 
 # 3: Camera handling
 @dataclass
