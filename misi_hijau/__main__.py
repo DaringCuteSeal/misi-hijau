@@ -14,8 +14,8 @@
 
 # Imports
 import pyxel
-import sprites
-import utils
+import game.sprites as sprites
+import game.utils as utils
 import os
 
 # Main App Class
