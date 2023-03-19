@@ -14,7 +14,6 @@
 
 ### Sprites for game
 
-from . import *
 import pyxel
 from ..base import *
 from enum import Enum
@@ -30,7 +29,7 @@ SoundBank = {
 }
 
 @dataclass
-class Player(Sprite):
+class Player(SpriteObj):
     coord = Coordinate(WINDOW_WIDTH // 2, 22, 128, 20)
     img = 0
     u = 16
@@ -103,10 +102,10 @@ class Player(Sprite):
                 self.w = 8
                 self.set_costume(self.costumes["f_1"])
 
-    def move(self, dir: Direction, ):
+    def move_wait(self, dir: Direction):
         self.state = State.IDLE
 
-    def move_repeat(self, dir: Direction):
+    def move(self, dir: Direction):
         if not self.ticker.get(self.speed):
             return
 
@@ -173,10 +172,6 @@ class Player(Sprite):
 
         match self.direction:
             case Direction.RIGHT:
-                self.w = 8
-                if self.direction == Direction.LEFT:
-                    self.coord.x += 8
-
                 match(self.state):
                     case State.IDLE:
                         self.costume_toggle(self.costumes["r_1"], self.costumes["r_2"])
@@ -186,10 +181,6 @@ class Player(Sprite):
                         self.costume_toggle(self.costumes["walk_r"], self.costumes["r_1"])
 
             case Direction.LEFT:
-                self.w = -8
-                if self.direction == Direction.RIGHT:
-                    self.coord.x -= 8
-
                 match(self.state):
                     case State.IDLE:
                         self.costume_toggle(self.costumes["r_1"], self.costumes["r_2"])

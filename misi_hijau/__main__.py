@@ -15,7 +15,7 @@
 # Imports
 import pyxel
 import game.sprites as sprites
-import game.utils as utils
+import game.base as base
 import os
 
 # Main App Class
@@ -25,26 +25,20 @@ class App:
         Initialize game.
         """
         # Pyxel stuff
-        pyxel.init(utils.WINDOW_WIDTH, utils.WINDOW_HEIGHT, capture_scale=8, title="Misi Hijau")
+        pyxel.init(base.WINDOW_WIDTH, base.WINDOW_HEIGHT, capture_scale=8, title="Misi Hijau")
         pyxel.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), "res/res.pyxres"))
 
         # Set up components
         # Make sure the keybind_setup is on the LAST list
         self.debugger = Debugger()
-        self.ticker = utils.Ticker()
-        self.camera = utils.Camera()
+        self.ticker = base.Ticker()
+        self.camera = base.Camera()
         self.player = sprites.Player(self.camera, self.ticker)
 
         self.camera.speed = 2
-
-        self.objects = [
-            self.camera,
-            self.player
-        ]
-
+        print(self.player.keybindings)
         self.keybinds_setup()
 
-        self.sound = utils.Sound(sprites.SoundBank)
         # Run Pyxel!
         pyxel.run(self.update, self.draw)
 
@@ -52,7 +46,12 @@ class App:
         """
         Initialize key listener.
         """
-        self.keylistener = utils.KeyListener()
+
+        self.objects = [
+            self.player
+        ]
+
+        self.keylistener = base.KeyListener()
         for o in self.objects:
             try:
                 self.keylistener.append(o.keybindings)
@@ -65,8 +64,7 @@ class App:
         Anything that initializes the program and only run once should be put on __init__ instead.
         """
 
-        self.camera.x = 0
-        self.camera.y = 0
+        pass
 
     def update(self):
         """
@@ -83,9 +81,9 @@ class App:
         for o in self.objects:
             o.draw()
         
-        self.player.update_anim()
-        
-        self.debugger.draw(self.player, self.camera)
+        self.camera.draw()
+        self.player.draw()
+        self.debugger.text(self.player, self.camera)
         
 
 # 6: Debugging
@@ -93,7 +91,7 @@ class Debugger(App):
     def __init__(self):
         pass
     
-    def draw(self, player, cam):
+    def text(self, player: sprites.Player, cam: base.Camera):
         pyxel.text(10, 10, f"player x: {player.coord.x}, player y: {player.coord.y}", pyxel.COLOR_WHITE)
         pyxel.text(10, 20, f"player x_map: {player.coord.x_map}, player y_map: {player.coord.y_map}", pyxel.COLOR_WHITE)
         pyxel.text(10, 30, f"cam x: {cam.x}, cam y: {cam.y}", pyxel.COLOR_WHITE)

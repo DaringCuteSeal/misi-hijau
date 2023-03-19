@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Imports
-from .player import Player
-from .sound import soundbank
+from .. import base
 
-__all__ = ['Player', 'soundbank']
+soundbank: dict[str, base.Sfx] = {
+    "shoot": base.Sfx(base.SoundType.AUDIO, 0, 10),
+    "explode": base.Sfx(base.SoundType.AUDIO, 0, 11),
+    "track": base.Sfx(base.SoundType.MUSIC, 0, 0)
+}

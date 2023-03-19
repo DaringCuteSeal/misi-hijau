@@ -18,7 +18,7 @@
 import pyxel
 from typing import Callable
 from enum import Enum
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 # Enums
 class Direction(Enum):
@@ -95,6 +95,8 @@ class KeyListener:
                     case KeyTypes.BTNP:
                         if pyxel.btnp(check[k].binding, hold=check[k].hold_time, repeat=check[k].repeat_time):
                             check[k].func()
+                    case _:
+                        pass
 
 # 2: Sprites handling
 @dataclass
@@ -105,8 +107,46 @@ class Coordinate:
     x_map: int = 0
     y_map: int = 0
 
-def default_costumes():
+def default_costumes() -> dict[str, tuple[int, int]]:
     return {}
+
+@dataclass
+class SpriteObj:
+    """
+    A sprite class with some predefined functions to make costume handling easier.
+    """
+    coord: Coordinate
+    img: int = 0
+    u: int = 0
+    v: int = 0
+    w: int = 8
+    h: int = 8
+    speed: int = 1
+    colkey: int | None = None
+    costume_i: int = 0
+    costumes: dict[str, tuple[int, int]] = field(default_factory=default_costumes)
+
+    def draw(self):
+        """
+        Draw (render) character.
+        """
+        pyxel.blt(self.coord.x, self.coord.y, self.img, self.u, self.v, self.w, self.h, self.colkey)
+    
+    def set_costume(self, costume: tuple[int, int]):
+        """
+        Set costume based on spritemap coordinate.
+        """
+        self.u = costume[0]
+        self.v = costume[1]
+
+    def costume_toggle(self, costume_1: tuple[int, int], costume_2: tuple[int, int]):
+        """
+        Set costume based on current alternating costume index.
+        """
+        if self.costume_i:
+            self.costume = costume_1
+        else:
+            self.costume = costume_2
 
 # 3: Camera handling
 @dataclass
@@ -159,6 +199,7 @@ class Ticker():
 
 
 # 6. Sound handling
+@dataclass
 class Sfx():
     soundtype: SoundType
     channel: int
@@ -171,6 +212,9 @@ class Sound():
     ch: int = 0
 
     def play(self, name: str):
+        """
+        Play a sound from soundbank.
+        """
         match(self.sounds[name].soundtype):
             case SoundType.AUDIO:
                 pyxel.play(self.ch, self.sounds[name].index, loop=self.sounds[name].loop)
@@ -179,17 +223,17 @@ class Sound():
 
 
 # Functions
-def map_to_view(self, camera_pos: Coordinate,) -> tuple[int, int] | bool:
+def map_to_view(sprite: SpriteObj, camera_pos: Coordinate) -> tuple[int, int] | bool:
     """
     Get position of object in screen based on its position on the map. Returns `False` if object is not within the camera boundary.
     """
-    screen_x = self.x_map - camera_pos.x
-    screen_y = self.y_map - camera_pos.y
+    screen_x = sprite.coord.x_map - camera_pos.x
+    screen_y = sprite.coord.y_map - camera_pos.y
 
     if screen_x < 0 or screen_x > WINDOW_WIDTH or screen_y < 0 or screen_y > WINDOW_HEIGHT:
         return False
 
-    view_x = screen_x + (WINDOW_WIDTH // 2) - self.x
-    view_y = screen_y + (WINDOW_HEIGHT // 2) - self.y
+    view_x = screen_x + (WINDOW_WIDTH // 2) - sprite.coord.x
+    view_y = screen_y + (WINDOW_HEIGHT // 2) - sprite.coord.y
 
     return view_x, view_y
