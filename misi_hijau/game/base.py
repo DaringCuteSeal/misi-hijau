@@ -18,7 +18,7 @@
 import pyxel
 from typing import Callable
 from enum import Enum
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 # Enums
 class Direction(Enum):
@@ -48,11 +48,10 @@ def tile_to_real(size: int):
     return size * TILE_SIZE
 
 
-# 1: Keyboard handling
+# Keyboard handling
 class KeyTypes(Enum):
     BTN = 0
     BTNP = 1
-    BTNP_REPEAT = 2
 
 @dataclass
 class KeyFunc:
@@ -95,66 +94,15 @@ class KeyListener:
                     case KeyTypes.BTNP:
                         if pyxel.btnp(check[k].binding, hold=check[k].hold_time, repeat=check[k].repeat_time):
                             check[k].func()
-                    case _:
-                        pass
 
-# 2: Sprites handling
-@dataclass
-class Coordinate:
-    # XXX might be useless.
-    x: int = 0
-    y: int = 0
-    x_map: int = 0
-    y_map: int = 0
 
-def default_costumes() -> dict[str, tuple[int, int]]:
-    return {}
-
-@dataclass
-class SpriteObj:
-    """
-    A sprite class with some predefined functions to make costume handling easier.
-    """
-    coord: Coordinate
-    img: int = 0
-    u: int = 0
-    v: int = 0
-    w: int = 8
-    h: int = 8
-    speed: int = 1
-    colkey: int | None = None
-    costume_i: int = 0
-    costumes: dict[str, tuple[int, int]] = field(default_factory=default_costumes)
-
-    def draw(self):
-        """
-        Draw (render) character.
-        """
-        pyxel.blt(self.coord.x, self.coord.y, self.img, self.u, self.v, self.w, self.h, self.colkey)
-    
-    def set_costume(self, costume: tuple[int, int]):
-        """
-        Set costume based on spritemap coordinate.
-        """
-        self.u = costume[0]
-        self.v = costume[1]
-
-    def costume_toggle(self, costume_1: tuple[int, int], costume_2: tuple[int, int]):
-        """
-        Set costume based on current alternating costume index.
-        """
-        if self.costume_i:
-            self.costume = costume_1
-        else:
-            self.costume = costume_2
-
-# 3: Camera handling
+# Camera handling
 @dataclass
 class Camera:
     """
     A 2D camera.
     """
-    speed: int = 1
+    speed: int = 2
     x: int = 0
     y: int = 0
 
@@ -165,9 +113,10 @@ class Camera:
         pyxel.bltm(0, 0, 0, self.x , self.y, 256, 256)
 
 
-# 4: Text handling
+# Text handling
+# TODO
 
-# 5: Tick handling
+# Tick handling
 class Ticker():
     """
     Retro games aren't meant to be smooth. However, Pyxel supports high frame rate. This timer can be used to limit a rate of something without messing with the game's actual FPS.
@@ -198,7 +147,7 @@ class Ticker():
         return False
 
 
-# 6. Sound handling
+# Sound handling
 @dataclass
 class Sfx():
     soundtype: SoundType
@@ -207,20 +156,79 @@ class Sfx():
     loop: bool = False
 
 @dataclass
-class Sound():
-    sounds: dict[str, Sfx]
+class SoundPlayer():
     ch: int = 0
 
-    def play(self, name: str):
+    def play(self, bank: dict[str, Sfx], name: str):
         """
         Play a sound from soundbank.
         """
-        match(self.sounds[name].soundtype):
+        match(bank[name].soundtype):
             case SoundType.AUDIO:
-                pyxel.play(self.ch, self.sounds[name].index, loop=self.sounds[name].loop)
+                pyxel.play(self.ch, bank[name].index, loop=bank[name].loop)
             case SoundType.MUSIC:
-                pyxel.playm(self.sounds[name].index, loop=self.sounds[name].loop)
+                pyxel.playm(bank[name].index, loop=bank[name].loop)
 
+
+# Sprites handling
+@dataclass
+class Coordinate:
+    # XXX might be useless.
+    x: int = 0
+    y: int = 0
+    x_map: int = 0
+    y_map: int = 0
+
+@dataclass
+class SpriteObj:
+    """
+    A sprite class with some predefined functions to make costume handling easier.
+    """
+    coord: Coordinate
+    img: int = 0
+    u: int = 0
+    v: int = 0
+    w: int = 8
+    h: int = 8
+    speed: int = 1
+    colkey: int | None = None
+    costume_i: int = 0
+    keybindings: dict[str, KeyFunc] = {}
+    soundbank: dict[str, Sfx] = {}
+    costumes: dict[str, tuple[int, int]] = {}
+
+    def draw(self):
+        """
+        Draw (render) character.
+        """
+        pyxel.blt(self.coord.x, self.coord.y, self.img, self.u, self.v, self.w, self.h, self.colkey)
+    
+    def set_costume(self, costume: tuple[int, int]):
+        """
+        Set costume based on spritemap coordinate.
+        """
+        self.u = costume[0]
+        self.v = costume[1]
+
+    def costume_toggle(self, costume_1: tuple[int, int], costume_2: tuple[int, int]):
+        """
+        Set costume based on current alternating costume index.
+        """
+        if self.costume_i:
+            self.costume = costume_1
+        else:
+            self.costume = costume_2
+
+# Manager of (almost) Everything here
+@dataclass
+class GameStateManager:
+    """
+    A set of game components.
+    """
+    soundplayer: SoundPlayer
+    camera: Camera
+    ticker: Ticker
+    keylistener: KeyListener
 
 # Functions
 def map_to_view(sprite: SpriteObj, camera_pos: Coordinate) -> tuple[int, int] | bool:

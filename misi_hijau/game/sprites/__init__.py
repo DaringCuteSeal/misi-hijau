@@ -14,6 +14,5 @@
 
 # Imports
 from .player import Player
-from .sound import soundbank
 
-__all__ = ['Player', 'soundbank']
+__all__ = ['Player']

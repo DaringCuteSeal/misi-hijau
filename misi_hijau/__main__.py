@@ -31,12 +31,15 @@ class App:
         # Set up components
         # Make sure the keybind_setup is on the LAST list
         self.debugger = Debugger()
-        self.ticker = base.Ticker()
-        self.camera = base.Camera()
-        self.player = sprites.Player(self.camera, self.ticker)
+        ticker = base.Ticker()
+        camera = base.Camera()
+        soundplayer = base.SoundPlayer()
+        keylistener = base.KeyListener()
+        self.game = base.GameStateManager(soundplayer, camera, ticker, keylistener)
 
-        self.camera.speed = 2
-        print(self.player.keybindings)
+        # Set up sprites
+        self.player = sprites.Player(self.game)
+
         self.keybinds_setup()
 
         # Run Pyxel!
@@ -51,10 +54,9 @@ class App:
             self.player
         ]
 
-        self.keylistener = base.KeyListener()
         for o in self.objects:
             try:
-                self.keylistener.append(o.keybindings)
+                self.game.keylistener.append(o.keybindings)
             except AttributeError:
                 continue
 
@@ -71,8 +73,8 @@ class App:
         Update the state of the game.
         """
 
-        self.keylistener.check()
-        self.ticker.update()
+        self.game.keylistener.check()
+        self.game.ticker.update()
 
     def draw(self):
         """
@@ -81,9 +83,9 @@ class App:
         for o in self.objects:
             o.draw()
         
-        self.camera.draw()
+        self.game.camera.draw()
         self.player.draw()
-        self.debugger.text(self.player, self.camera)
+        self.debugger.text(self.player, self.game.camera)
         
 
 # 6: Debugging
