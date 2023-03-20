@@ -13,22 +13,27 @@ I might release this as a separate project and continue to maintain it...
 I don't know, I'm not even sure if brain capability is enough for that. Or maybe nobody needs it anyway because I can't find ANY GOOD RESOURCE ABOUT PYXEL DESPITE THE FACT THAT THE PROJECT PAGE HAS OVER 11k STARS.
 
 ## Mar 15-20
-- [ ] Finish basic enhancement utilities for pyxel
+- [x] Finish basic enhancement utilities for pyxel
     - [x] Key listener (partial)
     - [x] Camera
     - [x] Sprites
-    - [ ] Ticker
-- [ ] Player movements
+    - [x] Ticker
+- [x] Player movements
 - [x] Camera movements
 - [ ] Player animations
-- [ ] Just wrap this entire thing around my smol brain
+- [x] Just wrap this entire thing around my smol brain
 
 ## Mar 20-25
-- [ ] More work on sprites
+- [ ] Level designs
+- [x] Level handling
 - [ ] Handle enemies
-- [ ] Actually have a clear story
 - [ ] Actually finish enhancement utilities
-    - [ ] Handler for messages
+    - [ ] Handler for text
 
 ## Mar 26-30
 - [ ] Piece up everything together
+
+## ???
+
+## Apr 5-10
+???

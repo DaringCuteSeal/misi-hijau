@@ -55,13 +55,13 @@ class App:
         Initialize key listener.
         """
 
-        self.objects = [
-            self.player
-        ]
+        self.objects = {
+            "player": self.player
+        }
 
         for o in self.objects:
             try:
-                self.game.keylistener.append(o.keybindings)
+                self.game.keylistener.append(o, self.objects[o].keybindings)
             except AttributeError:
                 continue
 
@@ -86,14 +86,14 @@ class App:
         Render (draw) frame to screen.
         """
         for o in self.objects:
-            o.draw()
+            self.objects[o].draw()
         
         self.game.camera.draw(self.game.levelhandler.curr_level.levelmap)
         self.player.draw()
         self.debugger.text(self.player, self.game.camera)
         
 
-# 6: Debugging
+# Debugging
 class Debugger(App):
     def __init__(self):
         pass
@@ -102,6 +102,6 @@ class Debugger(App):
         pyxel.text(10, 10, f"player x: {player.coord.x}, player y: {player.coord.y}", pyxel.COLOR_WHITE)
         pyxel.text(10, 20, f"player x_map: {player.coord.x_map}, player y_map: {player.coord.y_map}", pyxel.COLOR_WHITE)
         pyxel.text(10, 30, f"cam x: {cam.x}, cam y: {cam.y}", pyxel.COLOR_WHITE)
-        pyxel.text(10, 40, f"mouse x: {pyxel.mouse_x}, mouse y: {pyxel.mouse_y}", pyxel.COLOR_WHITE)
+        pyxel.text(10, 40, f"player x_vel: {player.x_vel}, y_vel: {player.y_vel}", pyxel.COLOR_WHITE)
 
 App() if __name__ == "__main__" else None

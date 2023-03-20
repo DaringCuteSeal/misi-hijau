@@ -16,7 +16,7 @@
 
 # Imports
 import pyxel
-from typing import Callable
+from typing import Callable, Optional
 from enum import Enum
 from dataclasses import dataclass, field
 
@@ -56,38 +56,58 @@ class KeyFunc:
     func: Callable[[], None]
     btn_type: KeyTypes = KeyTypes.BTN
     active: bool = True
-    hold_time: int | None = None
-    repeat_time: int | None = None
+    hold_time: Optional[int] = None
+    repeat_time: Optional[int] = None
+
 
 class KeyListener:
     """
-    A Key listener that is able to execute functions.
+    A Key listener to execute functions. Operates in a dictionary like this:
+    {
+        "slotname": {
+            "function_name": KeyFunc
+        }
+    }
+    A function name that is set to "none" will be treated as the function to be run when none of the keys bound are pressed.
     """
-    # TODO: group keybindings by game object so same keybindings with same name can exist.
 
     def __init__(self):
-        self.checks: dict[str, KeyFunc] = {}
-    
-    def append(self, keyfunc: dict[str, KeyFunc],):
+        self.checks: dict[str, dict[str, KeyFunc]] = {}
+
+    def append(self, slot: str, keyfunc_dict: dict[str, KeyFunc]):
         """
         Append list of key listeners.
         """
-        self.checks.update(keyfunc)
+        self.checks[slot] = {}
+        self.checks[slot].update(keyfunc_dict)
+
+    def set_none_binding(self, slot: str, function: Callable[[], None]):
+        """
+        Assign a function to be executed when none of the keys from a slot was pressed.
+        """
+        if not self.checks[slot]["none"]:
+            self.checks[slot]["none"] = KeyFunc(0, function, KeyTypes.BTN, True)
 
     def check(self):
         """
         Loop through key listeners and run function if key is pressed.
         """
-        check = self.checks
-        for k in check:
-            if check[k].active:
-                match(check[k].btn_type):
-                    case KeyTypes.BTN:
-                        if pyxel.btn(check[k].binding):
-                            check[k].func()
-                    case KeyTypes.BTNP:
-                        if pyxel.btnp(check[k].binding, hold=check[k].hold_time, repeat=check[k].repeat_time):
-                            check[k].func()
+        for slot in self.checks:
+            no_key_pressed = True
+            for key in self.checks[slot].values():
+                if key.active:
+                    match(key.btn_type):
+                        case KeyTypes.BTN:
+                            if pyxel.btn(key.binding):
+                                key.func()
+                                no_key_pressed = False
+                        case KeyTypes.BTNP:
+                            if pyxel.btnp(key.binding, hold=key.hold_time, repeat=key.repeat_time):
+                                key.func()
+                                no_key_pressed = False
+            if no_key_pressed and self.checks[slot].get("none") and self.checks[slot]["none"].active:
+                self.checks[slot]["none"].func()
+
 
 # Level handling
 @dataclass
@@ -95,8 +115,8 @@ class LevelMap:
     """
     A level map.
     """
-    map_x: int # Offset x of tilemap
-    map_y: int # Offset y of tilemap
+    map_x: int # Offset x of tilemap in tilemap scale (TILE_SIZE)
+    map_y: int # Offset y of tilemap in tilemap scale (TILE_SIZE)
     level_width: int
     level_height: int
 
@@ -110,6 +130,9 @@ class Level:
     levelmap: LevelMap
 
 class LevelHandler:
+    """
+    Handler for levels.
+    """
     def __init__(self, levels: list[Level]):
         self.levels = levels
         self.curr_level = levels[0]
@@ -126,9 +149,9 @@ class Camera:
     """
     A 2D camera.
     """
-    speed: int = 8
-    x: int = 0
-    y: int = 0
+    speed: float = 8
+    x: float = 0
+    y: float = 0
 
     def __init__(self):
        pyxel.camera()
@@ -198,11 +221,11 @@ class SoundPlayer():
 # Sprites handling
 @dataclass
 class Coordinate:
-    # XXX might be useless.
-    x: int = 0
-    y: int = 0
-    x_map: int = 0
-    y_map: int = 0
+    # ↓ needs to be float because we use smooth movements and accels/decels might need to use decimal numbers.
+    x: float = 0
+    y: float = 0
+    x_map: float = 0
+    y_map: float = 0
 
 @dataclass
 class SpriteObj:
@@ -215,7 +238,7 @@ class SpriteObj:
     v: int = 0
     w: int = 8
     h: int = 8
-    speed: int = 1
+    speed: float = 1
     colkey: int | None = None
     costume_i: int = 0
     keybindings: dict[str, KeyFunc] = field(default_factory=dict[str, KeyFunc])
@@ -257,7 +280,7 @@ class GameStateManager:
     levelhandler: LevelHandler
 
 # Functions
-def map_to_view(sprite: SpriteObj, camera_pos: tuple[int, int]) -> tuple[int, int] | bool:
+def map_to_view(sprite: SpriteObj, camera_pos: tuple[float, float]) -> tuple[float, float] | bool:
     """
     Get position of object in screen based on its position on the map. Returns `False` if object is not within the camera boundary.
     """

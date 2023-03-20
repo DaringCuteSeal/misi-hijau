@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from misi_hijau.game.base import Level, LevelMap, PlayerShip
+from .base import Level, LevelMap, PlayerShip
 
 map_1 = LevelMap(0, 0, 32, 72)
 map_2 = LevelMap(0, 0, 32, 72)
