@@ -16,6 +16,7 @@
 import pyxel
 import game.sprites as sprites
 import game.base as base
+from game.levels import levels
 import os
 
 # Main App Class
@@ -35,11 +36,15 @@ class App:
         camera = base.Camera()
         soundplayer = base.SoundPlayer()
         keylistener = base.KeyListener()
-        self.game = base.GameStateManager(soundplayer, camera, ticker, keylistener)
+        levelhandler = base.LevelHandler(levels)
+        self.game = base.GameStateManager(soundplayer, camera, ticker, keylistener, levelhandler)
 
+        # Set up level
+        self.game.levelhandler.curr_level = levels[0]
         # Set up sprites
         self.player = sprites.Player(self.game)
 
+        # Set up keybindings
         self.keybinds_setup()
 
         # Run Pyxel!
@@ -83,7 +88,7 @@ class App:
         for o in self.objects:
             o.draw()
         
-        self.game.camera.draw()
+        self.game.camera.draw(self.game.levelhandler.curr_level.levelmap)
         self.player.draw()
         self.debugger.text(self.player, self.game.camera)
         
@@ -98,6 +103,5 @@ class Debugger(App):
         pyxel.text(10, 20, f"player x_map: {player.coord.x_map}, player y_map: {player.coord.y_map}", pyxel.COLOR_WHITE)
         pyxel.text(10, 30, f"cam x: {cam.x}, cam y: {cam.y}", pyxel.COLOR_WHITE)
         pyxel.text(10, 40, f"mouse x: {pyxel.mouse_x}, mouse y: {pyxel.mouse_y}", pyxel.COLOR_WHITE)
-        pyxel.text(10, 50, f"player state: {player.state}", pyxel.COLOR_WHITE)
 
 App() if __name__ == "__main__" else None

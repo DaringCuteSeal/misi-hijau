@@ -12,6 +12,9 @@ python = "^3.10"
 pyxel = "^1.9.12"
 
 
+[tool.poetry.group.dev.dependencies]
+yapf = "^0.32.0"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

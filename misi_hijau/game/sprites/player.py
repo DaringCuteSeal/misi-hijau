@@ -16,13 +16,6 @@
 
 import pyxel
 from ..base import *
-from enum import Enum
-
-# Enums
-class PlayerState(Enum):
-    IDLE = 0
-    MOVE = 1
-    SHOOT = 2
 
 # Actual sprites
 SoundBank = {
@@ -30,36 +23,18 @@ SoundBank = {
 
 @dataclass
 class Player(SpriteObj):
-    coord = Coordinate(WINDOW_WIDTH // 2, 22, 128, 20)
     img = 0
-    u = 16
-    v = 24
-    w = 8
-    h = 8
+    u = 32
+    v = 0
+    w = 16
+    h = 16
     colkey = ALPHA_COL
     direction = Direction.DOWN
-    speed = w
+    speed = 3
     moving = False
     costume_i = 0
-    state = PlayerState.IDLE
+    coord = Coordinate(0, 0, 3, 450)
     costumes = {
-        # Left/right
-        "r_1": (0, 16),
-        "r_2": (8, 16),
-        "shoot_r": (0, 24),
-        "walk_r": (8, 24),
-
-        # Up (back)
-        "u_1": (16, 16),
-        "u_2": (16, 16),
-        "shoot_u": (32, 24),
-        "walk_u": (24, 16),
-
-        # Down (front)
-        "f_1": (16, 24),
-        "f_2": (16, 32),
-        "shoot_f": (24, 32),
-        "walk_f": (24, 24)
     }
     
     def __init__(self, game: GameStateManager):
@@ -68,6 +43,7 @@ class Player(SpriteObj):
         Camera is needed to limit movement.
         """
         self.camera = game.camera
+        self.level = game.levelhandler.get_curr().idx
         self.ticker = game.ticker
         self.keybindings = {
             "player_right": KeyFunc(pyxel.KEY_RIGHT, lambda: self.move(Direction.RIGHT)),
@@ -77,147 +53,52 @@ class Player(SpriteObj):
             "player_shoot": KeyFunc(pyxel.KEY_SPACE, lambda: self.shoot())
         }
 
-        self.soundbank: dict[str, Sfx] = {
+        self.soundbank = {
             "shoot": Sfx(SoundType.AUDIO, 0, 10),
             "explode": Sfx(SoundType.AUDIO, 0, 11),
             "track": Sfx(SoundType.MUSIC, 0, 0)
         }
-    def face(self, dir: Direction):
-        """
-        Switch character's direction and set the correct costume (circumventing the tick logic).
-        """
-        # If direction is already correct, don't switch costume.
-        if dir == self.direction:
-            return
 
-        self.direction = dir
+        self.costumes = {
+            "ship_1": (32, 0),
+            "ship_2": (48, 16),
+            "ship_3": (32, 32),
+        }
 
-        match dir:
+    def move(self, direction: Direction):
+        match direction:
             case Direction.RIGHT:
-                self.w = 8
-                self.set_costume(self.costumes["r_1"])
-            case Direction.LEFT:
-                self.w = -8
-                if self.direction == Direction.RIGHT:
-                    self.coord.x -= 8
-                self.set_costume(self.costumes["r_1"])
-            case Direction.UP:
-                self.w = 8
-                self.set_costume(self.costumes["u_1"])
-            case Direction.DOWN:
-                self.w = 8
-                self.set_costume(self.costumes["f_1"])
-
-    def move_wait(self, dir: Direction):
-        self.state = PlayerState.IDLE
-
-    def move(self, dir: Direction):
-        if not self.ticker.get(self.speed):
-            return
-
-        self.state = PlayerState.MOVE
-        match dir:
-            case Direction.RIGHT:
-                self.face(Direction.RIGHT)
-                if self.coord.x < WINDOW_WIDTH - tile_to_real(1) - self.speed:
-                    self.coord.x += self.speed
+                if self.coord.x_map < tile_to_real(MAP_WIDTH) - self.speed - TILE_SIZE*2:
+                    self.coord.x_map += self.speed
 
             case Direction.LEFT:
-                self.face(Direction.LEFT)
-                if self.coord.x > self.speed:
-                    self.coord.x -= self.speed
+                if self.coord.x_map > self.speed:
+                    self.coord.x_map -= self.speed
 
             case Direction.UP:
-                self.face(Direction.UP)
-                if self.coord.y_map > self.speed + 2:
+                if self.coord.y_map > self.speed:
                     self.coord.y_map -= self.speed
 
-                if(
-                    self.coord.y_map <= WINDOW_HEIGHT // 2 - self.speed
-                    or self.coord.y_map >= MAP_HEIGHT - WINDOW_HEIGHT // 2 + self.speed
-                    and self.coord.y_map > self.speed * 2
-                ):
-                    self.coord.y -= self.speed
-                else:
-                    self.camera.y -= self.camera.speed
-
-                if self.coord.y_map <= WINDOW_HEIGHT // 2 - self.speed:
-                    self.coord.y = self.coord.y_map
-
             case Direction.DOWN:
-                self.face(Direction.DOWN)
-
-                if self.coord.y_map < MAP_HEIGHT - self.speed - 2:
+                if self.coord.y_map < tile_to_real(MAP_HEIGHT) - self.speed - TILE_SIZE*2:
                     self.coord.y_map += self.speed
+    
+    def cam_update(self):
+        self.camera.y = self.coord.y_map
 
-                if(
-                    self.coord.y_map <= WINDOW_HEIGHT // 2 - self.speed
-                    or self.coord.y_map >= MAP_HEIGHT - WINDOW_HEIGHT // 2 + self.speed
-                    and self.coord.y_map > self.speed * 2
-                ):
-                    self.coord.y += self.speed
-                else:
-                    self.camera.y += self.camera.speed
+        if self.camera.y > tile_to_real(MAP_HEIGHT) - WINDOW_HEIGHT // 2:
+            self.camera.y = tile_to_real(MAP_HEIGHT) - WINDOW_HEIGHT // 2
+        if self.camera.y < WINDOW_HEIGHT // 2:
+            self.camera.y = WINDOW_HEIGHT // 2
 
-                if self.coord.y_map >= MAP_HEIGHT - WINDOW_HEIGHT // 2 - self.speed:
-                    self.coord.y = self.coord.y_map
+    def costume_update():
+        self.set_costume(self.c)
 
-       # Since we only scroll vertically, the x_map is useless.
-        # XXX Remove if need during refactoring.
-        self.coord.x_map = self.coord.x
-        self.update_anim()
-        self.state = PlayerState.IDLE
+    def draw(self):
 
-    def shoot(self):
-        self.state = PlayerState.SHOOT
+        self.coord.y = self.coord.y_map - self.camera.y + WINDOW_HEIGHT // 2
+        self.coord.x = self.coord.x_map
+        self.cam_update()
+        self.costume_update()
 
-    def update_anim(self):
-        """
-        Update costume (animation).
-        """
-        # Only update animation when it's time to
-        if not self.ticker.get(10):
-            return
-
-        match self.direction:
-            case Direction.RIGHT:
-                match self.state:
-                    case PlayerState.IDLE:
-                        self.costume_toggle(self.costumes["r_1"], self.costumes["r_2"])
-                    case PlayerState.SHOOT:
-                        self.costume_toggle(self.costumes["shoot_r"], self.costumes["r_1"])
-                    case PlayerState.MOVE:
-                        self.costume_toggle(self.costumes["walk_r"], self.costumes["r_1"])
-
-            case Direction.LEFT:
-                match self.state:
-                    case PlayerState.IDLE:
-                        self.costume_toggle(self.costumes["r_1"], self.costumes["r_2"])
-                    case PlayerState.SHOOT:
-                        self.costume_toggle(self.costumes["shoot_r"], self.costumes["r_1"])
-                    case PlayerState.MOVE:
-                        self.costume_toggle(self.costumes["walk_r"], self.costumes["r_1"])
-            
-            case Direction.UP:
-                self.w = 8
-                match self.state:
-                    case PlayerState.IDLE:
-                        self.costume_toggle(self.costumes["u_1"], self.costumes["u_2"])
-                    case PlayerState.SHOOT:
-                        self.costume_toggle(self.costumes["shoot_u"], self.costumes["u_1"])
-                    case PlayerState.MOVE:
-                        self.costume_toggle(self.costumes["walk_u"], self.costumes["u_1"])
-
-            case Direction.DOWN:
-                self.w = 8
-                match self.state:
-                    case PlayerState.IDLE:
-                        self.costume_toggle(self.costumes["f_1"], self.costumes["f_2"])
-                    case PlayerState.SHOOT:
-                        self.costume_toggle(self.costumes["shoot_f"], self.costumes["f_1"])
-                    case PlayerState.MOVE:
-                        self.costume_toggle(self.costumes["walk_f"], self.costumes["f_1"])
-
-                
-        self.set_costume(self.costume)
-        self.costume_i = not self.costume_i
+        pyxel.blt(self.coord.x, self.coord.y, self.img, self.u, self.v, self.w, self.h, self.colkey)
