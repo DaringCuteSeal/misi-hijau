@@ -20,8 +20,10 @@ I don't know, I'm not even sure if brain capability is enough for that. Or maybe
     - [x] Ticker
 - [x] Player movements
 - [x] Camera movements
-- [ ] Player animations
+- [x] Player animations
 - [x] Just wrap this entire thing around my smol brain
+
+DONE BOI!!! JUST IN TIME <3
 
 ## Mar 20-25
 - [ ] Level designs

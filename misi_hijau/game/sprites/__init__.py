@@ -13,6 +13,6 @@
 # limitations under the License.
 
 # Imports
-from .player import Player
+from .player import Player, Flame
 
-__all__ = ['Player']
+__all__ = ['Player', 'Flame']

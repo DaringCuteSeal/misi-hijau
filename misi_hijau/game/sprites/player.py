@@ -14,23 +14,40 @@
 
 ### Sprites for game
 
+from dataclasses import dataclass
 import pyxel
 from enum import Enum
-from ..base import *
+from ..base import (
+    ALPHA_COL,
+    TILE_SIZE,
+    WINDOW_HEIGHT,
+    Coordinate,
+    Direction,
+    GameStateManager,
+    KeyFunc,
+    PlayerShip,
+    Sfx,
+    SoundType,
+    SpriteObj,
+    Ticker,
+    tile_to_real 
+)
 
 class PlayerState(Enum):
     IDLE = 0
     MOVING = 1
 
-@dataclass
-class Fire(SpriteObj):
-    img = 0
-    u = 32
-    v = 16
-    w = 16
-    h = 8
-    colkey = ALPHA_COL
-
+class Flame(SpriteObj):
+    def __init__(self):
+        self.img = 0
+        self.u = 32
+        self.v = 16
+        self.w = 16
+        self.h = 8
+        self.colkey = ALPHA_COL
+        self.flames = [(32, 16), (32, 24)]
+        self.coord = Coordinate(0, 0, 0, 0)
+        self.ticker = Ticker(5)
 
 @dataclass
 class Player(SpriteObj):
@@ -51,7 +68,7 @@ class Player(SpriteObj):
         "space2": (48, 16)
     }
     
-    def __init__(self, game: GameStateManager):
+    def __init__(self, game: GameStateManager, flame: Flame):
         """
         Initialize player.
         Camera is needed to limit movement.
@@ -62,7 +79,6 @@ class Player(SpriteObj):
             "player_up": KeyFunc(pyxel.KEY_UP, lambda: self.move_handler(Direction.UP)),
             "player_down": KeyFunc(pyxel.KEY_DOWN, lambda: self.move_handler(Direction.DOWN)),
             "player_shoot": KeyFunc(pyxel.KEY_SPACE, lambda: self.shoot()),
-            # "none": KeyFunc(0, lambda: self.idle(), KeyTypes.BTN)
         }
 
         self.soundbank = {
@@ -76,12 +92,14 @@ class Player(SpriteObj):
             "ship_3": (32, 32),
         }
             
-        self.init_costume(game.levelhandler.get_curr().ship)
-        self.camera = game.camera
-        self.levelmap = game.levelhandler.get_curr().levelmap # only run ONCE; we don't want to get the level on every tick.
+        level = game.levelhandler.get_curr()
+        self.level_idx = level.idx
+        self.levelmap = level.levelmap # only run ONCE; we don't want to get the level on every tick.
         self.coord = Coordinate(0, 0, tile_to_real(self.levelmap.level_width) // 2, 450)
-        self.ticker = game.ticker
-
+        self.init_costume(game.levelhandler.get_curr().ship)
+        self.flame = flame
+        self.camera = game.camera
+        self.ticker = Ticker(3)
 
     def init_costume(self, ship: PlayerShip):
         match ship:
@@ -113,8 +131,24 @@ class Player(SpriteObj):
         self.x_vel -= self.drag * self.x_vel
         self.y_vel -= self.drag * self.y_vel
 
+        if self.coord.x_map < self.speed:
+            self.coord.x_map = self.speed
+        if self.coord.x_map > tile_to_real(self.levelmap.level_width) - TILE_SIZE * 2:
+            self.coord.x_map = tile_to_real(self.levelmap.level_width) - TILE_SIZE * 2
+        if self.coord.y_map > tile_to_real(self.levelmap.level_height) - TILE_SIZE * 2:
+            self.coord.y_map = tile_to_real(self.levelmap.level_height) - TILE_SIZE * 2
+        if self.coord.y_map < self.speed:
+            self.coord.y_map = self.speed
+
     def shoot(self):
         pass
+
+    def flame_update(self):
+        self.flame.coord.x = self.coord.x
+        self.flame.coord.y = self.coord.y + self.h
+        if self.flame.ticker.get():
+            self.flame.set_costume(self.flame.flames[pyxel.frame_count % 2])
+        self.flame.draw()
 
     def cam_update(self):
         self.camera.y = self.coord.y_map
@@ -124,15 +158,14 @@ class Player(SpriteObj):
         if self.camera.y < WINDOW_HEIGHT // 2:
             self.camera.y = WINDOW_HEIGHT // 2
 
-    def costume_update(self):
-        # self.set_costume(self.c)
-        pass
-    
     def draw(self):
-
         self.coord.y = self.coord.y_map - self.camera.y + WINDOW_HEIGHT / 2
         self.coord.x = self.coord.x_map
         self.move()
         self.cam_update()
+
+        if not self.level_idx == 3:
+            self.flame.ticker.update()
+            self.flame_update()
 
         pyxel.blt(self.coord.x, self.coord.y, self.img, self.u, self.v, self.w, self.h, self.colkey)

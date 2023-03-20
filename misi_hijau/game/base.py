@@ -113,10 +113,10 @@ class KeyListener:
 @dataclass
 class LevelMap:
     """
-    A level map.
+    A level map. All values are in tilemap scale (TILE_SIZE)
     """
-    map_x: int # Offset x of tilemap in tilemap scale (TILE_SIZE)
-    map_y: int # Offset y of tilemap in tilemap scale (TILE_SIZE)
+    map_x: int # Offset x of tilemap
+    map_y: int # Offset y of tilemap
     level_width: int
     level_height: int
 
@@ -165,16 +165,17 @@ class Camera:
 
 # Tick handling
 # XXX An entity SHOULD have their own ticker. If there's only one GLOBAL ticker, everything would be messed up.
-class Ticker():
+class Ticker:
     """
     Retro games aren't meant to be smooth. However, Pyxel supports high frame rate. This timer can be used to limit a rate of something without messing with the game's actual FPS.
     """
-    def __init__(self):
+    def __init__(self, frame_limit: float):
         """
         Initialize a new tick timer for an entity.
         """
         self.time_since_last_move = 0
         self.time_last_frame = 0
+        self.limit = frame_limit
     
     def update(self):
         """
@@ -185,15 +186,15 @@ class Ticker():
         self.time_last_frame = time_this_frame
         self.time_since_last_move += self.dt
     
-    def get(self, limit: int) -> bool:
+    def get(self) -> bool:
         """
         Get status of tick.
         """
-        if self.time_since_last_move >= limit:
+        
+        if self.time_since_last_move * 10 >= self.limit * 10:
             self.time_since_last_move = 0
             return True
         return False
-
 
 # Sound handling
 @dataclass
@@ -230,7 +231,7 @@ class Coordinate:
 @dataclass
 class SpriteObj:
     """
-    A sprite class with some predefined functions to make costume handling easier.
+    A sprite object class with some predefined functions to make costume handling easier.
     """
     coord: Coordinate
     img: int = 0
@@ -275,7 +276,6 @@ class GameStateManager:
     """
     soundplayer: SoundPlayer
     camera: Camera
-    ticker: Ticker
     keylistener: KeyListener
     levelhandler: LevelHandler
 

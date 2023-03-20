@@ -32,18 +32,17 @@ class App:
         # Set up components
         # Make sure the keybind_setup is on the LAST list
         self.debugger = Debugger()
-        ticker = base.Ticker()
         camera = base.Camera()
         soundplayer = base.SoundPlayer()
         keylistener = base.KeyListener()
         levelhandler = base.LevelHandler(levels)
-        self.game = base.GameStateManager(soundplayer, camera, ticker, keylistener, levelhandler)
+        self.game = base.GameStateManager(soundplayer, camera, keylistener, levelhandler)
 
         # Set up level
-        self.game.levelhandler.curr_level = levels[0]
+        self.game.levelhandler.curr_level = levels[2]
         # Set up sprites
-        self.player = sprites.Player(self.game)
-
+        fire = sprites.Flame()
+        self.player = sprites.Player(self.game, fire)
         # Set up keybindings
         self.keybinds_setup()
 
@@ -79,7 +78,6 @@ class App:
         """
 
         self.game.keylistener.check()
-        self.game.ticker.update()
 
     def draw(self):
         """
@@ -90,7 +88,7 @@ class App:
         
         self.game.camera.draw(self.game.levelhandler.curr_level.levelmap)
         self.player.draw()
-        self.debugger.text(self.player, self.game.camera)
+        # self.debugger.text(self.player, self.game.camera)
         
 
 # Debugging
