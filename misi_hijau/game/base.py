@@ -81,7 +81,7 @@ class KeyListener:
 
     def append(self, slot: str, keyfunc_dict: dict[str, KeyFunc]):
         """
-        Append list of key listeners.
+        Append (update) list of key listeners.
         """
         self.checks[slot] = {}
         self.checks[slot].update(keyfunc_dict)
@@ -166,47 +166,48 @@ class Camera:
 
 
 # Info text handling
+def ReturnStr(string: str) -> str:
+    return string
+
 @dataclass
 class StatusbarItem:
     """
-    A text that can be appended to statusbar.
+    Item to be displayed in the statusbar.
     """
-    string: str
-    x: int
-    y: int
-    color: int = pyxel.COLOR_WHITE
+    function: Callable[[], str] # a function that returns a string.
+    color: int
 
 class Statusbar:
     """
-    Game statusbar which holds an array of string to be displayed.
+    Game statusbar which holds an array of items (`StatusBarItem`) to be displayed.
     """
     def __init__(self):
-        self.strings: list[StatusbarItem]
-        self.def_gap_y = 5
+        self.items: list[StatusbarItem] = []
+        self.def_x = TILE_SIZE + 2
+        self.def_gap_y = 8
     
-    def add(self, string: str, gap_y: int | None = None):
+    def append(self, items: list[StatusbarItem]):
         """
-        Append a new item to statusbar. Accepts string; automatically calculates the item position.
+        Append (extend) an array of `StatusBarItem` to the statusbar's store.
         """
-        gap_y = self.def_gap_y if gap_y == None else gap_y
-        if not self.strings[0]:
-            x = 5
-            y = 5
-        else:
-            x = 5
-            y = self.strings[-1].y + 5
-        
-        item = StatusbarItem(string, x, y)
-            
-        self.strings.append(item)
+        self.items.extend(items)
 
     def clear(self):
-        self.strings = []
+        """
+        Clear the statusbar.
+        """
+        self.items = []
     
     def draw(self):
-        for item in self.strings:
-            pyxel.text(item.x, item.y, item.string, item.color)
-
+        """
+        Draw statusbar.
+        """
+        last_y = 0
+        x = self.def_x
+        for item in self.items:
+            y = last_y + self.def_gap_y
+            string = item.function()
+            pyxel.text(x, y, string, item.color)
 
 # Tick handling
 class Ticker:
@@ -269,7 +270,7 @@ class SoundPlayer():
 # Sprites handling
 @dataclass
 class Coordinate:
-    # ↓ needs to be float because we use smooth movements and accels/decels might need to use decimal numbers.
+    # ↓ needs to be float because we use smooth movements and acceleration/drag might increment the coordinate values by some non-round number.
     x: float = 0
     y: float = 0
     x_map: float = 0
@@ -289,6 +290,7 @@ class SpriteObj:
     speed: float = 1
     colkey: int | None = None
     costume_i: int = 0
+    # XXX: maybe these fields can be avoided if we just declare em in __init__()?
     keybindings: dict[str, KeyFunc] = field(default_factory=dict[str, KeyFunc])
     soundbank: dict[str, Sfx] = field(default_factory=dict[str, Sfx])
     costumes: dict[str, tuple[int, int]] = field(default_factory=dict[str, tuple[int, int]])
@@ -315,6 +317,18 @@ class SpriteObj:
         else:
             self.costume = costume_2
 
+    def map_to_view(self, cam_coord: tuple[float, float]):
+        """
+        Get position of object in viewport based on its position on the map and assign it to the viewport x and y (`self.coord.x` and `self.coord.y`); will be set to -11 if location is not within the camera boundary.
+        """
+
+        self.coord.y = self.coord.y_map - cam_coord[1] + WINDOW_HEIGHT / 2
+        self.coord.x = self.coord.x_map
+
+        if self.coord.x < 0 or self.coord.x > WINDOW_WIDTH or self.coord.y < 0 or self.coord.y > WINDOW_HEIGHT:
+            self.coord.y, self.coord.x = -11, -11
+
+
 # Manager of (almost) Everything here
 @dataclass
 class GameStateManager:
@@ -328,18 +342,6 @@ class GameStateManager:
     statusbar: Statusbar
 
 # Functions
-def map_to_view(sprite: SpriteObj, camera_pos: tuple[float, float]) -> tuple[float, float] | bool:
-    """
-    Get position of object in screen based on its position on the map. Returns `False` if object is not within the camera boundary.
-    """
-
-    screen_x = sprite.coord.x_map - camera_pos[0]
-    screen_y = sprite.coord.y_map - camera_pos[1]
-
-    if screen_x < 0 or screen_x > WINDOW_WIDTH or screen_y < 0 or screen_y > WINDOW_HEIGHT:
-        return False
-
-    return (screen_x, screen_y)
 
 def tile_to_real(size: int) -> int:
     """

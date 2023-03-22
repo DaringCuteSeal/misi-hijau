@@ -29,6 +29,9 @@ from ..base import (
     SoundType,
     SpriteObj,
     Ticker,
+    Camera,
+    KeyTypes,
+    StatusbarItem,
     tile_to_real 
 )
 
@@ -36,6 +39,27 @@ class PlayerState(Enum):
     IDLE = 0
     MOVING = 1
 
+@dataclass
+class Bullet(SpriteObj):
+    w = 2
+    h = 8
+    speed = 3
+    color = pyxel.COLOR_LIME
+
+    def __init__(self, coord: Coordinate, camera: Camera):
+        self.coord = coord
+        self.camera = camera
+        self.is_dead = False
+
+    def draw(self):
+        self.coord.y_map -= self.speed
+        self.map_to_view((self.camera.x, self.camera.y))
+        pyxel.rect(self.coord.x, self.coord.y, self.w, self.h, self.color)
+
+        if self.coord.y_map < 0:
+            self.is_dead = True
+
+    
 class Flame(SpriteObj):
     def __init__(self):
         self.img = 0
@@ -62,12 +86,7 @@ class Player(SpriteObj):
     x_vel = 0
     y_vel = 0
 
-    costumes = {
-        "space1": (32, 0),
-        "space2": (48, 16)
-    }
-    
-    def __init__(self, game: GameStateManager, flame: Flame):
+    def __init__(self, game: GameStateManager):
         """
         Initialize player.
         Camera is needed to limit movement.
@@ -77,7 +96,7 @@ class Player(SpriteObj):
             "player_left": KeyFunc(pyxel.KEY_LEFT, lambda: self.move_handler(Direction.LEFT)),
             "player_up": KeyFunc(pyxel.KEY_UP, lambda: self.move_handler(Direction.UP)),
             "player_down": KeyFunc(pyxel.KEY_DOWN, lambda: self.move_handler(Direction.DOWN)),
-            "player_shoot": KeyFunc(pyxel.KEY_SPACE, lambda: self.shoot()),
+            "player_shoot": KeyFunc(pyxel.KEY_SPACE, lambda: self.shoot(), KeyTypes.BTNP, hold_time=10, repeat_time=10),
         }
 
         self.soundbank = {
@@ -90,13 +109,21 @@ class Player(SpriteObj):
             "ship_2": (48, 16),
             "ship_3": (32, 32),
         }
+
+        self.statusbar_items = [
+            StatusbarItem(self.get_speed, pyxel.COLOR_WHITE)
+        ]
             
         level = game.levelhandler.curr_level
         self.level_idx = level.idx
         self.levelmap = level.levelmap # only run ONCE; we don't want to get the level on every tick.
+        
+        self.statusbar = game.statusbar
+        self.statusbar.append(self.statusbar_items)
         self.coord = Coordinate(0, 0, tile_to_real(self.levelmap.level_width) // 2, 450)
         self.init_costume(game.levelhandler.curr_level.ship)
-        self.flame = flame
+        self.flame = Flame()
+        self.bullets: list[Bullet] = []
         self.camera = game.camera
         self.ticker = Ticker(3)
 
@@ -140,7 +167,10 @@ class Player(SpriteObj):
             self.coord.y_map = self.speed
 
     def shoot(self):
-        pass
+        self.bullets.append(Bullet(
+            Coordinate(0, 0, self.coord.x_map + self.w // 2 - Bullet.w, self.coord.y_map - self.h // 2),
+            self.camera
+            ))
 
     def flame_update(self):
         self.flame.coord.x = self.coord.x
@@ -158,13 +188,29 @@ class Player(SpriteObj):
             self.camera.y = WINDOW_HEIGHT // 2
 
     def draw(self):
-        self.coord.y = self.coord.y_map - self.camera.y + WINDOW_HEIGHT / 2
-        self.coord.x = self.coord.x_map
+        self.map_to_view((self.camera.x, self.camera.y))
         self.move()
         self.cam_update()
 
         if not self.level_idx == 3:
             self.flame.ticker.update()
             self.flame_update()
+        
+        if len(self.bullets) > 0:
+            for bullet in self.bullets:
+                bullet.draw()
+                if bullet.is_dead:
+                    self.bullets.remove(bullet)
 
+        self.statusbar.draw()
         pyxel.blt(self.coord.x, self.coord.y, self.img, self.u, self.v, self.w, self.h, self.colkey)
+    
+    # Functions for statusbar
+    def get_speed(self) -> str:
+        magnitude = pyxel.sqrt(self.y_vel * self.y_vel + self.x_vel * self.x_vel)
+        magnitude = pyxel.floor(magnitude * 100)
+        string = f"Speed: {magnitude} km/h"
+        return string
+    
+    def get_minerals_count(self):
+        pass

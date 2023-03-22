@@ -19,6 +19,9 @@ import pyxel
 
 class Game():
     def __init__(self):
+        """
+        Game initialization.
+        """
         # Set up components
         # Make sure the keybind_setup is on the LAST list
         camera = base.Camera()
@@ -28,24 +31,29 @@ class Game():
         statusbar = base.Statusbar()
         self.game_collection = base.GameStateManager(soundplayer, camera, keylistener, levelhandler, statusbar)
 
+        # Set up level
+        self.game_collection.levelhandler.set_lvl(levels[0])
+
         # Set up sprites
         self.sprites: dict[str, base.SpriteObj] = {}
         self.init_sprites()
-
-        # Set up level
-        self.game_collection.levelhandler.set_lvl(levels[0])
 
         # Set up keybindings
         self.keybinds_setup() 
 
 
     def scene_setup(self):
+        """
+        Scene initialization.
+        """
         pass
 
     def init_sprites(self):
+        """
+        Initialize game sprites.
+        """
         # Set up player
-        fire = sprites.Flame()
-        player = sprites.Player(self.game_collection, fire)
+        player = sprites.Player(self.game_collection)
         self.sprites.update({"player": player})
 
     def keybinds_setup(self):
@@ -64,14 +72,29 @@ class Game():
                 continue
 
     def update(self):
+        """
+        Update game.
+        """
         self.game_collection.keylistener.check()
     
     def draw_game_loop(self):
+        """
+        Draw game.
+        """
         self.game_collection.camera.draw(self.game_collection.levelhandler.curr_level.levelmap)
+
+        # ONLY FOR TESTING
 
         for i in self.sprites:
             self.sprites[i].draw()
-        
+        self.game_collection.statusbar.draw()
+
+    
+    ##########################################################
+    # All functions defined below are only used for TESTING. #
+    ##########################################################
+
+
 
 # Debugging
 class Debugger:

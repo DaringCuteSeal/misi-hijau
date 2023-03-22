@@ -12,8 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Imports
-from .player import Player, Flame
-from .stars import Stars
+from dataclasses import dataclass
+import pyxel
+from ..base import (
+    SpriteObj,
+)
 
-__all__ = ['Player', 'Flame', 'Stars']
+@dataclass
+class Stars(SpriteObj):
+    pass
