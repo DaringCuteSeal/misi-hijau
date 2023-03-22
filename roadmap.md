@@ -31,6 +31,7 @@ DONE BOI!!! JUST IN TIME <3
 - [ ] Handle enemies
 - [ ] Actually finish enhancement utilities
     - [ ] Handler for text
+- [ ] Organize game initialization
 
 ## Mar 26-30
 - [ ] Piece up everything together

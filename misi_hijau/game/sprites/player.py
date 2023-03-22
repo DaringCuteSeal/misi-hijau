@@ -19,7 +19,6 @@ import pyxel
 from enum import Enum
 from ..base import (
     ALPHA_COL,
-    TILE_SIZE,
     WINDOW_HEIGHT,
     Coordinate,
     Direction,
@@ -92,11 +91,11 @@ class Player(SpriteObj):
             "ship_3": (32, 32),
         }
             
-        level = game.levelhandler.get_curr()
+        level = game.levelhandler.curr_level
         self.level_idx = level.idx
         self.levelmap = level.levelmap # only run ONCE; we don't want to get the level on every tick.
         self.coord = Coordinate(0, 0, tile_to_real(self.levelmap.level_width) // 2, 450)
-        self.init_costume(game.levelhandler.get_curr().ship)
+        self.init_costume(game.levelhandler.curr_level.ship)
         self.flame = flame
         self.camera = game.camera
         self.ticker = Ticker(3)
@@ -133,10 +132,10 @@ class Player(SpriteObj):
 
         if self.coord.x_map < self.speed:
             self.coord.x_map = self.speed
-        if self.coord.x_map > tile_to_real(self.levelmap.level_width) - TILE_SIZE * 2:
-            self.coord.x_map = tile_to_real(self.levelmap.level_width) - TILE_SIZE * 2
-        if self.coord.y_map > tile_to_real(self.levelmap.level_height) - TILE_SIZE * 2:
-            self.coord.y_map = tile_to_real(self.levelmap.level_height) - TILE_SIZE * 2
+        if self.coord.x_map > tile_to_real(self.levelmap.level_width) - self.w:
+            self.coord.x_map = tile_to_real(self.levelmap.level_width) - self.w
+        if self.coord.y_map > tile_to_real(self.levelmap.level_height) - self.h:
+            self.coord.y_map = tile_to_real(self.levelmap.level_height) - self.h
         if self.coord.y_map < self.speed:
             self.coord.y_map = self.speed
 

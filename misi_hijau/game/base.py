@@ -62,10 +62,15 @@ class KeyFunc:
 
 class KeyListener:
     """
-    A Key listener to execute functions. Operates in a dictionary like this:
+    A Key listener to execute functions. Operates with a dictionary like this:
     {
-        "slotname": {
-            "function_name": KeyFunc
+        "slot1": {
+            "a_function": KeyFunc,
+            "other_function": KeyFunc
+        }
+        "slot2": {
+            "a_function": KeyFunc,
+            "other_function": KeyFunc
         }
     }
     A function name that is set to "none" will be treated as the function to be run when none of the keys bound are pressed.
@@ -140,7 +145,7 @@ class LevelHandler:
     def set_lvl(self, level: Level):
         self.curr_level = level
 
-    def get_curr(self) -> Level:
+    def get_curr(self) -> Level: # will deprecate?
         return self.curr_level
 
 # Camera handling
@@ -160,11 +165,50 @@ class Camera:
         pyxel.bltm(0, 0, 0, self.x + levelmap.map_x, self.y + levelmap.map_y, 256, 256)
 
 
-# Text handling
-# TODO
+# Info text handling
+@dataclass
+class StatusbarItem:
+    """
+    A text that can be appended to statusbar.
+    """
+    string: str
+    x: int
+    y: int
+    color: int = pyxel.COLOR_WHITE
+
+class Statusbar:
+    """
+    Game statusbar which holds an array of string to be displayed.
+    """
+    def __init__(self):
+        self.strings: list[StatusbarItem]
+        self.def_gap_y = 5
+    
+    def add(self, string: str, gap_y: int | None = None):
+        """
+        Append a new item to statusbar. Accepts string; automatically calculates the item position.
+        """
+        gap_y = self.def_gap_y if gap_y == None else gap_y
+        if not self.strings[0]:
+            x = 5
+            y = 5
+        else:
+            x = 5
+            y = self.strings[-1].y + 5
+        
+        item = StatusbarItem(string, x, y)
+            
+        self.strings.append(item)
+
+    def clear(self):
+        self.strings = []
+    
+    def draw(self):
+        for item in self.strings:
+            pyxel.text(item.x, item.y, item.string, item.color)
+
 
 # Tick handling
-# XXX An entity SHOULD have their own ticker. If there's only one GLOBAL ticker, everything would be messed up.
 class Ticker:
     """
     Retro games aren't meant to be smooth. However, Pyxel supports high frame rate. This timer can be used to limit a rate of something without messing with the game's actual FPS.
@@ -199,6 +243,9 @@ class Ticker:
 # Sound handling
 @dataclass
 class Sfx():
+    """
+    An SFX entry.
+    """
     soundtype: SoundType
     channel: int
     index: int = 0
@@ -278,6 +325,7 @@ class GameStateManager:
     camera: Camera
     keylistener: KeyListener
     levelhandler: LevelHandler
+    statusbar: Statusbar
 
 # Functions
 def map_to_view(sprite: SpriteObj, camera_pos: tuple[float, float]) -> tuple[float, float] | bool:
