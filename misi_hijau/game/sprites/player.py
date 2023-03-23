@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-### Sprites for game
-
 from dataclasses import dataclass
 import pyxel
 from enum import Enum
+from math import sqrt # pyxel.sqrt(0) returns denormalized number; we need it to be 0.
+from .stars import Stars
 from ..base import (
     ALPHA_COL,
     WINDOW_HEIGHT,
@@ -45,6 +45,11 @@ class Bullet(SpriteObj):
     h = 8
     speed = 3
     color = pyxel.COLOR_LIME
+    # uh why do i need to add these...
+    keybindings = {}
+    costumes = {}
+    soundbank = {}
+    
 
     def __init__(self, coord: Coordinate, camera: Camera):
         self.coord = coord
@@ -120,12 +125,14 @@ class Player(SpriteObj):
         
         self.statusbar = game.statusbar
         self.statusbar.append(self.statusbar_items)
-        self.coord = Coordinate(0, 0, tile_to_real(self.levelmap.level_width) // 2, 450)
+        self.coord = Coordinate(0, 0, tile_to_real(self.levelmap.level_width) // 2, tile_to_real(self.levelmap.level_height) - tile_to_real(4))
         self.init_costume(game.levelhandler.curr_level.ship)
+        self.ticker = Ticker(3)
+
         self.flame = Flame()
+        self.stars = Stars(100, game)
         self.bullets: list[Bullet] = []
         self.camera = game.camera
-        self.ticker = Ticker(3)
 
     def init_costume(self, ship: PlayerShip):
         match ship:
@@ -159,12 +166,14 @@ class Player(SpriteObj):
 
         if self.coord.x_map < self.speed:
             self.coord.x_map = self.speed
-        if self.coord.x_map > tile_to_real(self.levelmap.level_width) - self.w:
+        elif self.coord.x_map > tile_to_real(self.levelmap.level_width) - self.w:
             self.coord.x_map = tile_to_real(self.levelmap.level_width) - self.w
-        if self.coord.y_map > tile_to_real(self.levelmap.level_height) - self.h:
+        elif self.coord.y_map > tile_to_real(self.levelmap.level_height) - self.h:
             self.coord.y_map = tile_to_real(self.levelmap.level_height) - self.h
-        if self.coord.y_map < self.speed:
+        elif self.coord.y_map < self.speed:
             self.coord.y_map = self.speed
+        else:
+            self.stars.update()
 
     def shoot(self):
         self.bullets.append(Bullet(
@@ -181,6 +190,8 @@ class Player(SpriteObj):
 
     def cam_update(self):
         self.camera.y = self.coord.y_map
+        self.camera.dir_y = self.y_vel
+        self.camera.dir_x = self.x_vel
 
         if self.camera.y > tile_to_real(self.levelmap.level_height) - WINDOW_HEIGHT // 2:
             self.camera.y = tile_to_real(self.levelmap.level_height) - WINDOW_HEIGHT // 2
@@ -188,6 +199,7 @@ class Player(SpriteObj):
             self.camera.y = WINDOW_HEIGHT // 2
 
     def draw(self):
+        self.stars.draw()
         self.map_to_view((self.camera.x, self.camera.y))
         self.move()
         self.cam_update()
@@ -207,7 +219,7 @@ class Player(SpriteObj):
     
     # Functions for statusbar
     def get_speed(self) -> str:
-        magnitude = pyxel.sqrt(self.y_vel * self.y_vel + self.x_vel * self.x_vel)
+        magnitude = sqrt(self.y_vel * self.y_vel + self.x_vel * self.x_vel)
         magnitude = pyxel.floor(magnitude * 100)
         string = f"Speed: {magnitude} km/h"
         return string

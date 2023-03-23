@@ -36,6 +36,11 @@ class PlayerShip(Enum):
     SHIP2 = 1
     SHIP3 = 2
 
+class EnemyType(Enum):
+    ENEMY_1 = 0 # Krelth
+    ENEMY_2 = 1 # Naxor
+    ENEMY_3 = 2 # Octyca
+
 # Other Constants
 ALPHA_COL = pyxel.COLOR_PURPLE
 WINDOW_WIDTH = 256
@@ -133,6 +138,7 @@ class Level:
     idx: int
     ship: PlayerShip
     levelmap: LevelMap
+    max_minerals: int
 
 class LevelHandler:
     """
@@ -157,6 +163,9 @@ class Camera:
     speed: float = 8
     x: float = 0
     y: float = 0
+    # where the camera is heading; should be the same as player's vel variable. Only used by stars
+    dir_x: float = 0
+    dir_y: float = 0
 
     def __init__(self):
        pyxel.camera()
@@ -174,7 +183,7 @@ class StatusbarItem:
     """
     Item to be displayed in the statusbar.
     """
-    function: Callable[[], str] # a function that returns a string.
+    function: Callable[[], str] # unction that returns a string.
     color: int
 
 class Statusbar:
@@ -183,7 +192,8 @@ class Statusbar:
     """
     def __init__(self):
         self.items: list[StatusbarItem] = []
-        self.def_x = TILE_SIZE + 2
+        self.def_x = TILE_SIZE + 3
+        self.def_y = 4
         self.def_gap_y = 8
     
     def append(self, items: list[StatusbarItem]):
@@ -191,6 +201,12 @@ class Statusbar:
         Append (extend) an array of `StatusBarItem` to the statusbar's store.
         """
         self.items.extend(items)
+    
+    def add(self, item: StatusbarItem):
+        """
+        Add a `StatusBarItem` to the statusbar's store.
+        """
+        self.items.append(item)
 
     def clear(self):
         """
@@ -202,7 +218,7 @@ class Statusbar:
         """
         Draw statusbar.
         """
-        last_y = 0
+        last_y = -self.def_gap_y + self.def_y
         x = self.def_x
         for item in self.items:
             y = last_y + self.def_gap_y
@@ -319,14 +335,14 @@ class SpriteObj:
 
     def map_to_view(self, cam_coord: tuple[float, float]):
         """
-        Get position of object in viewport based on its position on the map and assign it to the viewport x and y (`self.coord.x` and `self.coord.y`); will be set to -11 if location is not within the camera boundary.
+        Get position of object in viewport based on its position on the map and assign it to the viewport x and y (`self.coord.x` and `self.coord.y`); will be set to -20 if location is not within the camera boundary.
         """
 
         self.coord.y = self.coord.y_map - cam_coord[1] + WINDOW_HEIGHT / 2
         self.coord.x = self.coord.x_map
 
         if self.coord.x < 0 or self.coord.x > WINDOW_WIDTH or self.coord.y < 0 or self.coord.y > WINDOW_HEIGHT:
-            self.coord.y, self.coord.x = -11, -11
+            self.coord.y, self.coord.x = -20, -20
 
 
 # Manager of (almost) Everything here

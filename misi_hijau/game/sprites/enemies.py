@@ -12,8 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Imports
-from .player import Player
-from .enemies import Enemies
+from dataclasses import dataclass
+import pyxel
+from ..base import(
+    Coordinate,
+    SpriteObj,
+    EnemyType
+)
 
-__all__ = ['Player', 'Enemies' ]
+@dataclass
+class EnemyEntity():
+    enemy_type: EnemyType
+    coordinate: Coordinate
+
+class Enemies(SpriteObj):
+    pass

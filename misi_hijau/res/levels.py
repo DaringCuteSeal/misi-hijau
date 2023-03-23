@@ -23,7 +23,7 @@ map_2 = LevelMap(0, 0, 32, 72)
 map_3 = LevelMap(0, 0, 32, 72)
 
 levels: list[Level] = [
-    Level(1, PlayerShip.SHIP1, map_1),
-    Level(2, PlayerShip.SHIP2, map_2),
-    Level(3, PlayerShip.SHIP3, map_3) # note: ship does not have extra flame
+    Level(1, PlayerShip.SHIP1, map_1, 15),
+    Level(2, PlayerShip.SHIP2, map_2, 15),
+    Level(3, PlayerShip.SHIP3, map_3, 15) # note: ship does not have extra flame
 ]

@@ -1,0 +1,2 @@
+# Where to Start
+The first thing you should read is the [\_\_main\_\_.py file](/misi_hijau/__main__.py). It contains the `App` class which is the class used to wrap the Pyxel `update` and `draw` functions.

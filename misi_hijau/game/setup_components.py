@@ -42,6 +42,7 @@ class Game():
         self.keybinds_setup() 
 
 
+
     def scene_setup(self):
         """
         Scene initialization.
@@ -53,8 +54,14 @@ class Game():
         Initialize game sprites.
         """
         # Set up player
-        player = sprites.Player(self.game_collection)
-        self.sprites.update({"player": player})
+        # Stars need to be located at the back of everything, so we separate it.
+
+        self.sprites.update(
+            {
+                # Order MATTERS.
+                "player": sprites.Player(self.game_collection)
+            }
+        )
 
     def keybinds_setup(self):
         """
@@ -81,13 +88,13 @@ class Game():
         """
         Draw game.
         """
-        self.game_collection.camera.draw(self.game_collection.levelhandler.curr_level.levelmap)
 
-        # ONLY FOR TESTING
+        self.game_collection.camera.draw(self.game_collection.levelhandler.curr_level.levelmap)
 
         for i in self.sprites:
             self.sprites[i].draw()
         self.game_collection.statusbar.draw()
+
 
     
     ##########################################################
@@ -98,11 +105,15 @@ class Game():
 
 # Debugging
 class Debugger:
-    def __init__(self):
-        pass
+    def __init__(self, player: sprites.Player, game: base.GameStateManager):
+        self.player = player
+        self.cam = game.camera
+        game.statusbar.add(base.StatusbarItem(self.draw, pyxel.COLOR_WHITE))
     
-    def draw(self, player: sprites.Player, cam: base.Camera):
-        pyxel.text(10, 10, f"player x: {player.coord.x}, player y: {player.coord.y}", pyxel.COLOR_WHITE)
-        pyxel.text(10, 20, f"player x_map: {player.coord.x_map}, player y_map: {player.coord.y_map}", pyxel.COLOR_WHITE)
-        pyxel.text(10, 30, f"cam x: {cam.x}, cam y: {cam.y}", pyxel.COLOR_WHITE)
-        pyxel.text(10, 40, f"player x_vel: {player.x_vel}, y_vel: {player.y_vel}", pyxel.COLOR_WHITE)
+    def draw(self) -> str:
+        return f"""
+player x: {self.player.coord.x}, player y: {self.player.coord.y}
+player x_map: {self.player.coord.x_map}, player y_map: {self.player.coord.y_map}
+cam x: {self.cam.x}, cam y: {self.cam.y}
+player x_vel: {self.player.x_vel}, y_vel: {self.player.y_vel}
+"""
