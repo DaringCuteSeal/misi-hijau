@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Imports
 from .player import Player
 from .enemies import Enemies
 
-__all__ = ['Player', 'Enemies' ]
+__all__ = ['Player', 'Enemies']

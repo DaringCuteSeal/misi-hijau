@@ -13,8 +13,9 @@
 # limitations under the License.
 
 from game import base
-from res.levels import levels
+import game.sprites.classes as sprite_classes
 import game.sprites as sprites
+from res.levels import levels
 import pyxel
 
 class Game():
@@ -35,12 +36,10 @@ class Game():
         self.game_collection.levelhandler.set_lvl(levels[0])
 
         # Set up sprites
-        self.sprites: dict[str, base.SpriteObj] = {}
         self.init_sprites()
 
         # Set up keybindings
         self.keybinds_setup() 
-
 
 
     def scene_setup(self):
@@ -56,20 +55,19 @@ class Game():
         # Set up player
         # Stars need to be located at the back of everything, so we separate it.
 
-        self.sprites.update(
-            {
+        self.sprites_collection: dict[str, sprite_classes.Sprite] = {
                 # Order MATTERS.
                 "player": sprites.Player(self.game_collection)
             }
-        )
+        self.sprites = sprite_classes.SpriteGroup(self.sprites_collection)
 
     def keybinds_setup(self):
         """
         Initialize key listener.
         """
 
-        objects_with_keybinds: dict[str, base.SpriteObj] = {
-            "player": self.sprites["player"]
+        objects_with_keybinds: dict[str, sprite_classes.Sprite] = {
+            "player": self.sprites_collection["player"]
         }
 
         for o in objects_with_keybinds:
@@ -91,8 +89,7 @@ class Game():
 
         self.game_collection.camera.draw(self.game_collection.levelhandler.curr_level.levelmap)
 
-        for i in self.sprites:
-            self.sprites[i].draw()
+        self.sprites.render()
         self.game_collection.statusbar.draw()
 
 

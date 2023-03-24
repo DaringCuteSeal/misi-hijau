@@ -18,11 +18,11 @@ from ..base import (
     WINDOW_HEIGHT,
     WINDOW_WIDTH,
     GameStateManager,
-    SpriteObj,
 )
+from .classes import Sprite
 
 @dataclass
-class Stars(SpriteObj):
+class Stars(Sprite):
     """
     Stars that scrolls in the background.
     """
@@ -35,16 +35,16 @@ class Stars(SpriteObj):
             self.stars.append((
                 pyxel.rndi(0, WINDOW_WIDTH),
                 pyxel.rndi(0, WINDOW_HEIGHT),
-                pyxel.rndf(0.1, 0.3)
+                pyxel.rndf(1, 5)
             ))
         
     def update(self):
         for i, (x, y, speed) in enumerate(self.stars):
-            y += self.camera.dir_y / (13 + speed*2)
+            y += (self.camera.dir_y / (8 + speed)) * -1
             if y >= WINDOW_HEIGHT:
                 y -= WINDOW_HEIGHT
             self.stars[i] = (x, y, speed)
 
     def draw(self):
         for x, y, speed in self.stars:
-            pyxel.pset(x, y, pyxel.COLOR_CYAN if speed > 0.2 else pyxel.COLOR_NAVY)
+            pyxel.pset(x, y, pyxel.COLOR_CYAN if speed < 3 else pyxel.COLOR_NAVY)

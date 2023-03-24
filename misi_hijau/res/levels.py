@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import pyxel
+
 from game.base import (
     Level,
     LevelMap,
@@ -23,7 +25,7 @@ map_2 = LevelMap(0, 0, 32, 72)
 map_3 = LevelMap(0, 0, 32, 72)
 
 levels: list[Level] = [
-    Level(1, PlayerShip.SHIP1, map_1, 15),
-    Level(2, PlayerShip.SHIP2, map_2, 15),
-    Level(3, PlayerShip.SHIP3, map_3, 15) # note: ship does not have extra flame
+    Level(1, PlayerShip.SHIP1, map_1, 15, pyxel.COLOR_LIME),
+    Level(2, PlayerShip.SHIP2, map_2, 15, pyxel.COLOR_LIGHT_BLUE),
+    Level(3, PlayerShip.SHIP3, map_3, 15, pyxel.COLOR_GRAY) # note: ship does not have extra flame
 ]

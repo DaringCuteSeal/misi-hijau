@@ -15,20 +15,8 @@
 from dataclasses import dataclass
 from enum import Enum
 import pyxel
-from .classes import (
-    SpriteCoordinate,
-    Sprite,
+from ..base import(
 )
 
-class EnemyType(Enum):
-    ENEMY_1 = 0 # Krelth/Grug
-    ENEMY_2 = 1 # Naxor/Phong
-    ENEMY_3 = 2 # Octyca/Squidge
-
-@dataclass
-class EnemyEntity():
-    enemy_type: EnemyType
-    coordinate: SpriteCoordinate
-
-class Enemies(Sprite):
-    pass
+class MineralTypes(Enum):
+    MINERAL_1 = 

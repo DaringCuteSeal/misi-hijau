@@ -31,6 +31,7 @@ class App:
         self.game = Game()
 
         # Run Pyxel!
+        print("Selamat datang di Misi Hijau!")
         pyxel.run(self.update, self.draw)
 
 

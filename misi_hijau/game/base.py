@@ -12,13 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-### Utilities for a better workflow
 
 # Imports
 import pyxel
 from typing import Callable, Optional
 from enum import Enum
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 # Enums
 class Direction(Enum):
@@ -35,11 +34,6 @@ class PlayerShip(Enum):
     SHIP1 = 0
     SHIP2 = 1
     SHIP3 = 2
-
-class EnemyType(Enum):
-    ENEMY_1 = 0 # Krelth
-    ENEMY_2 = 1 # Naxor
-    ENEMY_3 = 2 # Octyca
 
 # Other Constants
 ALPHA_COL = pyxel.COLOR_PURPLE
@@ -139,6 +133,7 @@ class Level:
     ship: PlayerShip
     levelmap: LevelMap
     max_minerals: int
+    bullet_color: int
 
 class LevelHandler:
     """
@@ -281,68 +276,6 @@ class SoundPlayer():
                 pyxel.play(self.ch, bank[name].index, loop=bank[name].loop)
             case SoundType.MUSIC:
                 pyxel.playm(bank[name].index, loop=bank[name].loop)
-
-
-# Sprites handling
-@dataclass
-class Coordinate:
-    # ↓ needs to be float because we use smooth movements and acceleration/drag might increment the coordinate values by some non-round number.
-    x: float = 0
-    y: float = 0
-    x_map: float = 0
-    y_map: float = 0
-
-@dataclass
-class SpriteObj:
-    """
-    A sprite object class with some predefined functions to make costume handling easier.
-    """
-    coord: Coordinate
-    img: int = 0
-    u: int = 0
-    v: int = 0
-    w: int = 8
-    h: int = 8
-    speed: float = 1
-    colkey: int | None = None
-    costume_i: int = 0
-    # XXX: maybe these fields can be avoided if we just declare em in __init__()?
-    keybindings: dict[str, KeyFunc] = field(default_factory=dict[str, KeyFunc])
-    soundbank: dict[str, Sfx] = field(default_factory=dict[str, Sfx])
-    costumes: dict[str, tuple[int, int]] = field(default_factory=dict[str, tuple[int, int]])
-
-    def draw(self):
-        """
-        Draw (render) character.
-        """
-        pyxel.blt(self.coord.x, self.coord.y, self.img, self.u, self.v, self.w, self.h, self.colkey)
-    
-    def set_costume(self, costume: tuple[int, int]):
-        """
-        Set costume based on spritemap coordinate.
-        """
-        self.u = costume[0]
-        self.v = costume[1]
-
-    def costume_toggle(self, costume_1: tuple[int, int], costume_2: tuple[int, int]):
-        """
-        Set costume based on current alternating costume index.
-        """
-        if self.costume_i:
-            self.costume = costume_1
-        else:
-            self.costume = costume_2
-
-    def map_to_view(self, cam_coord: tuple[float, float]):
-        """
-        Get position of object in viewport based on its position on the map and assign it to the viewport x and y (`self.coord.x` and `self.coord.y`); will be set to -20 if location is not within the camera boundary.
-        """
-
-        self.coord.y = self.coord.y_map - cam_coord[1] + WINDOW_HEIGHT / 2
-        self.coord.x = self.coord.x_map
-
-        if self.coord.x < 0 or self.coord.x > WINDOW_WIDTH or self.coord.y < 0 or self.coord.y > WINDOW_HEIGHT:
-            self.coord.y, self.coord.x = -20, -20
 
 
 # Manager of (almost) Everything here

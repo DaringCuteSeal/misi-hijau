@@ -15,58 +15,76 @@
 from dataclasses import dataclass
 import pyxel
 from enum import Enum
-from math import sqrt # pyxel.sqrt(0) returns denormalized number; we need it to be 0.
+from math import sqrt # pyxel.sqrt(0) returns denormalized number; we need it to return 0.
+from .classes import Sprite, SpriteCoordinate
 from .stars import Stars
 from ..base import (
     ALPHA_COL,
     WINDOW_HEIGHT,
-    Coordinate,
     Direction,
     GameStateManager,
     KeyFunc,
     PlayerShip,
     Sfx,
     SoundType,
-    SpriteObj,
     Ticker,
     Camera,
     KeyTypes,
     StatusbarItem,
     tile_to_real 
 )
-
+    
 class PlayerState(Enum):
     IDLE = 0
     MOVING = 1
 
 @dataclass
-class Bullet(SpriteObj):
+class Bullet(Sprite):
     w = 2
     h = 8
     speed = 3
-    color = pyxel.COLOR_LIME
     # uh why do i need to add these...
     keybindings = {}
     costumes = {}
     soundbank = {}
-    
 
-    def __init__(self, coord: Coordinate, camera: Camera):
+    def __init__(self, coord: SpriteCoordinate, color: int, cam: Camera):
         self.coord = coord
-        self.camera = camera
+        self.color = color
+        self.camera = cam
         self.is_dead = False
+    
+    def update(self):
+        self.map_to_view(self.camera.y)
 
     def draw(self):
-        self.coord.y_map -= self.speed
-        self.map_to_view((self.camera.x, self.camera.y))
         pyxel.rect(self.coord.x, self.coord.y, self.w, self.h, self.color)
 
-        if self.coord.y_map < 0:
-            self.is_dead = True
 
+class Bullets():
+    def __init__(self, camera: Camera):
+        self.bullets: list[Bullet] = []
+        self.camera = camera
     
-class Flame(SpriteObj):
-    def __init__(self):
+    def append(self, bullet: Bullet):
+        self.bullets.append(bullet)
+
+    def draw(self):
+        if len(self.bullets) > 0:
+            for bullet in self.bullets:
+
+                bullet.coord.y_map -= bullet.speed
+
+                bullet.update()
+                bullet.draw()
+                if bullet.coord.y_map < 0:
+                    bullet.is_dead = True
+
+                if bullet.is_dead:
+                    self.bullets.remove(bullet)
+    
+class Flame(Sprite):
+    def __init__(self, cam: Camera):
         self.img = 0
         self.u = 32
         self.v = 16
@@ -74,11 +92,26 @@ class Flame(SpriteObj):
         self.h = 8
         self.colkey = ALPHA_COL
         self.flames = [(32, 16), (32, 24)]
-        self.coord = Coordinate(0, 0, 0, 0)
+        self.coord = SpriteCoordinate(0, 0, 0, 0)
         self.ticker = Ticker(5)
+        self.camera = cam
+    
+    def draw(self):
+        if self.ticker.get():
+            self.set_costume(self.flames[pyxel.frame_count % 2])
+
+        pyxel.blt(self.coord.x, self.coord.y, self.img, self.u, self.v, self.w, self.h, self.colkey)
+        print("flame drawn")
+
+    def update(self):
+        self.ticker.update()
+
+    def flame_update(self, player_x: float, player_y: float, player_h: int):
+        self.coord.x = player_x
+        self.coord.y = player_y + player_h
 
 @dataclass
-class Player(SpriteObj):
+class Player(Sprite):
     img = 0
     u = 32
     v = 0
@@ -119,20 +152,21 @@ class Player(SpriteObj):
             StatusbarItem(self.get_speed, pyxel.COLOR_WHITE)
         ]
             
-        level = game.levelhandler.curr_level
+        level = game.levelhandler.get_curr()
         self.level_idx = level.idx
         self.levelmap = level.levelmap # only run ONCE; we don't want to get the level on every tick.
+        self.bullet_color = level.bullet_color
         
         self.statusbar = game.statusbar
         self.statusbar.append(self.statusbar_items)
-        self.coord = Coordinate(0, 0, tile_to_real(self.levelmap.level_width) // 2, tile_to_real(self.levelmap.level_height) - tile_to_real(4))
+        self.coord = SpriteCoordinate(0, 0, tile_to_real(self.levelmap.level_width) // 2, tile_to_real(self.levelmap.level_height) - tile_to_real(4))
         self.init_costume(game.levelhandler.curr_level.ship)
         self.ticker = Ticker(3)
-
-        self.flame = Flame()
-        self.stars = Stars(100, game)
-        self.bullets: list[Bullet] = []
         self.camera = game.camera
+
+        self.flame = Flame(self.camera)
+        self.stars = Stars(100, game)
+        self.bullets = Bullets(game.camera)
 
     def init_costume(self, ship: PlayerShip):
         match ship:
@@ -177,42 +211,41 @@ class Player(SpriteObj):
 
     def shoot(self):
         self.bullets.append(Bullet(
-            Coordinate(0, 0, self.coord.x_map + self.w // 2 - Bullet.w, self.coord.y_map - self.h // 2),
+            SpriteCoordinate(0, 0, self.coord.x_map + self.w // 2 - Bullet.w, self.coord.y_map - self.h // 2),
+            self.bullet_color,
             self.camera
             ))
 
-    def flame_update(self):
-        self.flame.coord.x = self.coord.x
-        self.flame.coord.y = self.coord.y + self.h
-        if self.flame.ticker.get():
-            self.flame.set_costume(self.flame.flames[pyxel.frame_count % 2])
-        self.flame.draw()
-
     def cam_update(self):
         self.camera.y = self.coord.y_map
-        self.camera.dir_y = self.y_vel
-        self.camera.dir_x = self.x_vel
 
         if self.camera.y > tile_to_real(self.levelmap.level_height) - WINDOW_HEIGHT // 2:
             self.camera.y = tile_to_real(self.levelmap.level_height) - WINDOW_HEIGHT // 2
-        if self.camera.y < WINDOW_HEIGHT // 2:
+            self.camera.dir_y = 0
+        elif self.camera.y < WINDOW_HEIGHT // 2:
             self.camera.y = WINDOW_HEIGHT // 2
+            self.camera.dir_y = 0
+        else:
+            self.camera.dir_y = self.y_vel
+            self.camera.dir_x = self.x_vel
+        
 
-    def draw(self):
-        self.stars.draw()
-        self.map_to_view((self.camera.x, self.camera.y))
-        self.move()
+    def update(self):
         self.cam_update()
+        self.flame.flame_update(self.coord.x, self.coord.y, self.h)
+        self.map_to_view(self.camera.y)
 
         if not self.level_idx == 3:
             self.flame.ticker.update()
-            self.flame_update()
+            self.flame.update()
         
-        if len(self.bullets) > 0:
-            for bullet in self.bullets:
-                bullet.draw()
-                if bullet.is_dead:
-                    self.bullets.remove(bullet)
+
+    def draw(self):
+        self.stars.draw()
+        self.flame.draw()
+        self.move()
+
+        self.bullets.draw()
 
         self.statusbar.draw()
         pyxel.blt(self.coord.x, self.coord.y, self.img, self.u, self.v, self.w, self.h, self.colkey)
@@ -223,6 +256,4 @@ class Player(SpriteObj):
         magnitude = pyxel.floor(magnitude * 100)
         string = f"Speed: {magnitude} km/h"
         return string
-    
-    def get_minerals_count(self):
-        pass
+
