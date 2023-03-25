@@ -1,4 +1,4 @@
-# Copyright 2023 Cikitta Tjok
+# Copyright 2023 Cikitta Tjok <daringcuteseal@gmail.com>
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -75,21 +75,31 @@ class Sprite(ABC):
 
     def map_to_view(self, cam_y: float):
         """
-        Get position of object in viewport based on its position on the map and assign it to the viewport x and y (`self.coord.x` and `self.coord.y`); will be set to -20 if location is not within the camera boundary.
+        Get position of object in viewport based on its position on the map and assign it to the viewport x and y (`self.coord.x` and `self.coord.y`). Returns True if sprite is within camera boundary; else returns False.
         Note: the x isn't required as argument because we only scroll in y direction.
         """
 
         self.coord.x = self.coord.x_map
-        self.coord.y = self.coord.y_map - cam_y + base.WINDOW_HEIGHT / 2
+        self.coord.y = self.coord.y_map - cam_y + base.WINDOW_HEIGHT / 2 
+    
+    def is_sprite_in_viewport(self) -> bool:
 
-        if self.coord.x < 0 or self.coord.x > base.WINDOW_WIDTH or self.coord.y < 0 or self.coord.y > base.WINDOW_HEIGHT:
-            self.coord.y, self.coord.x = -20, -20
+        if self.coord.x < -10 or self.coord.x > base.WINDOW_WIDTH or self.coord.y < -10 or self.coord.y > base.WINDOW_HEIGHT:
+            return False
+        else:
+            return True
 
 class SpriteGroup:
-    def __init__(self, sprites: dict[str, Sprite]):
+    def __init__(self, sprites: dict[str, Sprite], game: base.GameStateManager):
         self.sprites = sprites
+        self.game = game
     
-    def render(self):
+    def update(self):
         for i in self.sprites:
             self.sprites[i].update()
+
+    def render(self):
+        for i in self.sprites:
             self.sprites[i].draw()
+
+        self.game.statusbar.draw()

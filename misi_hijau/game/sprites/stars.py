@@ -1,4 +1,4 @@
-# Copyright 2023 Cikitta Tjok
+# Copyright 2023 Cikitta Tjok <daringcuteseal@gmail.com>
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -43,6 +43,8 @@ class Stars(Sprite):
             y += (self.camera.dir_y / (8 + speed)) * -1
             if y >= WINDOW_HEIGHT:
                 y -= WINDOW_HEIGHT
+            if y <= 0:
+                y = WINDOW_HEIGHT
             self.stars[i] = (x, y, speed)
 
     def draw(self):

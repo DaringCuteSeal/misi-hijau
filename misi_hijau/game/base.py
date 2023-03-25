@@ -1,4 +1,4 @@
-# Copyright 2023 Cikitta Tjok
+# Copyright 2023 Cikitta Tjok <daringcuteseal@gmail.com>
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -123,6 +123,7 @@ class LevelMap:
     map_y: int # Offset y of tilemap
     level_width: int
     level_height: int
+    enemies_map: list[tuple[int, int]]
 
 @dataclass
 class Level:
@@ -130,8 +131,8 @@ class Level:
     A level.
     """
     idx: int
-    ship: PlayerShip
     levelmap: LevelMap
+    ship: PlayerShip
     max_minerals: int
     bullet_color: int
 
@@ -146,7 +147,7 @@ class LevelHandler:
     def set_lvl(self, level: Level):
         self.curr_level = level
 
-    def get_curr(self) -> Level: # will deprecate?
+    def get_curr(self) -> Level:
         return self.curr_level
 
 # Camera handling
@@ -166,13 +167,10 @@ class Camera:
        pyxel.camera()
    
     def draw(self, levelmap: LevelMap):
-        pyxel.bltm(0, 0, 0, self.x + levelmap.map_x, self.y + levelmap.map_y, 256, 256)
+        pyxel.bltm(0, 0, 0, self.x + tile_to_real(levelmap.map_x), self.y + tile_to_real(levelmap.map_y), 256, 256)
 
 
-# Info text handling
-def ReturnStr(string: str) -> str:
-    return string
-
+# Statusbar handling
 @dataclass
 class StatusbarItem:
     """
@@ -188,7 +186,7 @@ class Statusbar:
     def __init__(self):
         self.items: list[StatusbarItem] = []
         self.def_x = TILE_SIZE + 3
-        self.def_y = 4
+        self.def_y = 10
         self.def_gap_y = 8
     
     def append(self, items: list[StatusbarItem]):
@@ -267,15 +265,15 @@ class Sfx():
 class SoundPlayer():
     ch: int = 0
 
-    def play(self, bank: dict[str, Sfx], name: str):
+    def play(self, sfx: Sfx):
         """
         Play a sound from soundbank.
         """
-        match(bank[name].soundtype):
+        match(sfx.soundtype):
             case SoundType.AUDIO:
-                pyxel.play(self.ch, bank[name].index, loop=bank[name].loop)
+                pyxel.play(self.ch, sfx.index, loop=sfx.loop)
             case SoundType.MUSIC:
-                pyxel.playm(bank[name].index, loop=bank[name].loop)
+                pyxel.playm(sfx.index, loop=sfx.loop)
 
 
 # Manager of (almost) Everything here

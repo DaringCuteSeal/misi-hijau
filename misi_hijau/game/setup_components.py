@@ -1,4 +1,4 @@
-# Copyright 2023 Cikitta Tjok
+# Copyright 2023 Cikitta Tjok <daringcuteseal@gmail.com>
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from game import base
-from game.sprites import Sprite, SpriteGroup, player, enemies, minerals
+from game.sprites import Sprite, SpriteGroup, player, bullets, minerals, enemy
 from res.levels import levels
 import pyxel
 
@@ -40,6 +40,8 @@ class Game():
         # Set up keybindings
         self.keybinds_setup() 
 
+        # self.debugger = Debugger(self.sprites_collection["player"], self.game_collection) #type: ignore
+
 
     def scene_setup(self):
         """
@@ -52,13 +54,20 @@ class Game():
         Initialize game sprites.
         """
         # Set up player
-        # Stars need to be located at the back of everything, so we separate it.
+        spr_bullets = bullets.Bullets(self.game_collection.camera)
+        spr_player = player.Player(self.game_collection, spr_bullets)
+        spr_enemies = enemy.EnemyGroup(enemy.EnemyType.ENEMY_1, self.game_collection, spr_player, spr_bullets)
+
+        self.game_collection.statusbar.add(base.StatusbarItem(spr_player.get_speed, pyxel.COLOR_YELLOW)) # XXX testing only
+        # plz fix statusbar :) :) :)
 
         self.sprites_collection: dict[str, Sprite] = {
                 # Order MATTERS.
-                "player": player.Player(self.game_collection)
+                "bullets": spr_bullets,
+                "player": spr_player,
+                "enemies": spr_enemies
             }
-        self.sprites = SpriteGroup(self.sprites_collection)
+        self.sprites = SpriteGroup(self.sprites_collection, self.game_collection)
 
     def keybinds_setup(self):
         """
@@ -79,6 +88,7 @@ class Game():
         """
         Update game.
         """
+        self.sprites.update()
         self.game_collection.keylistener.check()
     
     def draw_game_loop(self):
@@ -87,9 +97,7 @@ class Game():
         """
 
         self.game_collection.camera.draw(self.game_collection.levelhandler.curr_level.levelmap)
-
         self.sprites.render()
-        self.game_collection.statusbar.draw()
 
 
     

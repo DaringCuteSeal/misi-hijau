@@ -32,11 +32,14 @@ DONE BOI!!! JUST IN TIME <3
 - [x] Statusbar in base.py
 - [x] Organize game initialization
 
-## Mar 26-30
+## Mar 26-30 
+- [ ] PERFORMANCE IMPROVEMENTS!
+    - [ ] Reduce the amount of draw calls
+- [ ] Fix the crappy statusbar that broke after my sprites restructuring
+
+## Mar 31-Apr 5
 - [ ] Slideshows in base.py
 - [ ] Add coherent storyline
-
-## ???
 
 ## Apr 5-10
 - [ ] Work on video

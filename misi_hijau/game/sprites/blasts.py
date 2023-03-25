@@ -1,4 +1,4 @@
-# Copyright 2023 Cikitta Tjok
+# Copyright 2023 Cikitta Tjok <daringcuteseal@gmail.com>
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,22 +12,3 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from dataclasses import dataclass
-from enum import Enum
-import pyxel
-from . import SpriteCoordinate, Sprite
-
-class EnemyType(Enum):
-    ENEMY_1 = 0 # Krelth/Grug
-    ENEMY_2 = 1 # Naxor/Phong
-    ENEMY_3 = 2 # Octyca/Squidge
-
-class EnemyEntity(Sprite):
-    enemy_type: EnemyType 
-    coordinate: SpriteCoordinate
-
-    def __init__(self):
-        a = a
-
-class Enemies(Sprite):
-    pass

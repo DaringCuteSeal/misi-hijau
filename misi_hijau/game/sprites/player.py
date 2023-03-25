@@ -1,4 +1,4 @@
-# Copyright 2023 Cikitta Tjok
+# Copyright 2023 Cikitta Tjok <daringcuteseal@gmail.com>
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ from dataclasses import dataclass
 import pyxel
 from enum import Enum
 from math import sqrt # pyxel.sqrt(0) returns denormalized number; we need it to return 0.
-from . import Sprite, SpriteCoordinate
+from . import Sprite, SpriteCoordinate, bullets
 from .stars import Stars
 from ..base import (
     ALPHA_COL,
@@ -38,50 +38,6 @@ class PlayerState(Enum):
     IDLE = 0
     MOVING = 1
 
-@dataclass
-class Bullet(Sprite):
-    w = 2
-    h = 8
-    speed = 3
-    # uh why do i need to add these...
-    keybindings = {}
-    costumes = {}
-    soundbank = {}
-
-    def __init__(self, coord: SpriteCoordinate, color: int, cam: Camera):
-        self.coord = coord
-        self.color = color
-        self.camera = cam
-        self.is_dead = False
-    
-    def update(self):
-        self.map_to_view(self.camera.y)
-
-    def draw(self):
-        pyxel.rect(self.coord.x, self.coord.y, self.w, self.h, self.color)
-
-
-class Bullets():
-    def __init__(self, camera: Camera):
-        self.bullets: list[Bullet] = []
-        self.camera = camera
-    
-    def append(self, bullet: Bullet):
-        self.bullets.append(bullet)
-
-    def draw(self):
-        if len(self.bullets) > 0:
-            for bullet in self.bullets:
-
-                bullet.coord.y_map -= bullet.speed
-
-                bullet.update()
-                bullet.draw()
-                if bullet.coord.y_map < 0:
-                    bullet.is_dead = True
-
-                if bullet.is_dead:
-                    self.bullets.remove(bullet)
     
 class Flame(Sprite):
     def __init__(self, cam: Camera):
@@ -99,8 +55,8 @@ class Flame(Sprite):
     def draw(self):
         if self.ticker.get():
             self.set_costume(self.flames[pyxel.frame_count % 2])
-
         pyxel.blt(self.coord.x, self.coord.y, self.img, self.u, self.v, self.w, self.h, self.colkey)
+
 
     def update(self):
         self.ticker.update()
@@ -128,11 +84,17 @@ class Player(Sprite):
     x_vel = 0
     y_vel = 0
 
-    def __init__(self, game: GameStateManager):
-        """
-        Initialize player.
-        Camera is needed to limit movement.
-        """
+    soundbank = {
+        "shoot": Sfx(SoundType.AUDIO, 0, 10),
+    }
+
+    costumes = {
+        "ship_1": (32, 0),
+        "ship_2": (48, 16),
+        "ship_3": (32, 32),
+    }
+
+    def __init__(self, game: GameStateManager, bullets: bullets.Bullets):
         self.keybindings = {
             "player_right": KeyFunc(pyxel.KEY_RIGHT, lambda: self.move_handler(Direction.RIGHT)),
             "player_left": KeyFunc(pyxel.KEY_LEFT, lambda: self.move_handler(Direction.LEFT)),
@@ -141,36 +103,27 @@ class Player(Sprite):
             "player_shoot": KeyFunc(pyxel.KEY_SPACE, lambda: self.shoot(), KeyTypes.BTNP, hold_time=10, repeat_time=10),
         }
 
-        self.soundbank = {
-            "shoot": Sfx(SoundType.AUDIO, 0, 10),
-            "explode": Sfx(SoundType.AUDIO, 0, 11),
-        }
-
-        self.costumes = {
-            "ship_1": (32, 0),
-            "ship_2": (48, 16),
-            "ship_3": (32, 32),
-        }
-
         self.statusbar_items = [
             StatusbarItem(self.get_speed, pyxel.COLOR_WHITE)
         ]
             
         level = game.levelhandler.get_curr()
         self.level_idx = level.idx
-        self.levelmap = level.levelmap # only run ONCE; we don't want to get the level on every tick.
+        levelmap = level.levelmap # only run ONCE; we don't want to get the level on every tick.
+        self.level_width = tile_to_real(levelmap.level_width)
+        self.level_height = tile_to_real(levelmap.level_height)
         self.bullet_color = level.bullet_color
         
         self.statusbar = game.statusbar
-        self.statusbar.append(self.statusbar_items)
-        self.coord = SpriteCoordinate(0, 0, tile_to_real(self.levelmap.level_width) // 2, tile_to_real(self.levelmap.level_height) - tile_to_real(4))
+        self.coord = SpriteCoordinate(0, 0, self.level_width // 2, self.level_height - tile_to_real(4))
         self.init_costume(game.levelhandler.curr_level.ship)
         self.ticker = Ticker(3)
         self.camera = game.camera
+        self.soundplayer = game.soundplayer
 
         self.flame = Flame(self.camera)
         self.stars = Stars(100, game)
-        self.bullets = Bullets(game.camera)
+        self.bullets = bullets
 
     def init_costume(self, ship: PlayerShip):
         match ship:
@@ -204,27 +157,27 @@ class Player(Sprite):
 
         if self.coord.x_map < self.speed:
             self.coord.x_map = self.speed
-        elif self.coord.x_map > tile_to_real(self.levelmap.level_width) - self.w:
-            self.coord.x_map = tile_to_real(self.levelmap.level_width) - self.w
-        elif self.coord.y_map > tile_to_real(self.levelmap.level_height) - self.h:
-            self.coord.y_map = tile_to_real(self.levelmap.level_height) - self.h
+        elif self.coord.x_map > self.level_width - self.w:
+            self.coord.x_map = self.level_width - self.w
+        else:
+            self.stars.update()
+
+        if self.coord.y_map > self.level_height - self.h:
+            self.coord.y_map = self.level_height - self.h
         elif self.coord.y_map < self.speed:
             self.coord.y_map = self.speed
         else:
             self.stars.update()
 
     def shoot(self):
-        self.bullets.append(Bullet(
-            SpriteCoordinate(0, 0, self.coord.x_map + self.w // 2 - Bullet.w, self.coord.y_map - self.h // 2),
-            self.bullet_color,
-            self.camera
-            ))
+        self.soundplayer.play(self.soundbank["shoot"])
+        self.bullets.append(self.coord.x_map + self.w // 2 - 2, self.coord.y_map - self.h // 2, self.bullet_color)
 
     def cam_update(self):
         self.camera.y = self.coord.y_map
 
-        if self.camera.y > tile_to_real(self.levelmap.level_height) - WINDOW_HEIGHT // 2:
-            self.camera.y = tile_to_real(self.levelmap.level_height) - WINDOW_HEIGHT // 2
+        if self.camera.y > self.level_height - WINDOW_HEIGHT // 2:
+            self.camera.y = self.level_height - WINDOW_HEIGHT // 2
             self.camera.dir_y = 0
         elif self.camera.y < WINDOW_HEIGHT // 2:
             self.camera.y = WINDOW_HEIGHT // 2
@@ -235,9 +188,10 @@ class Player(Sprite):
         
 
     def update(self):
-        self.cam_update()
         self.map_to_view(self.camera.y)
+        self.cam_update()
         self.flame.flame_update(self.coord.x, self.coord.y, self.h)
+        self.move()
 
         if not self.level_idx == 3:
             self.flame.ticker.update()
@@ -247,14 +201,16 @@ class Player(Sprite):
     def draw(self):
         self.stars.draw()
         self.flame.draw()
-        self.move()
 
         self.bullets.draw()
 
-        self.statusbar.draw()
         pyxel.blt(self.coord.x, self.coord.y, self.img, self.u, self.v, self.w, self.h, self.colkey)
     
     # Functions for statusbar
+    def test(self) -> str:
+        string = f"{self.accel}"
+        return string
+
     def get_speed(self) -> str:
         magnitude = sqrt(self.y_vel * self.y_vel + self.x_vel * self.x_vel)
         magnitude = pyxel.floor(magnitude * 100)
