@@ -13,8 +13,7 @@
 # limitations under the License.
 
 from game import base
-import game.sprites.classes as sprite_classes
-import game.sprites as sprites
+from game.sprites import Sprite, SpriteGroup, player, enemies, minerals
 from res.levels import levels
 import pyxel
 
@@ -55,18 +54,18 @@ class Game():
         # Set up player
         # Stars need to be located at the back of everything, so we separate it.
 
-        self.sprites_collection: dict[str, sprite_classes.Sprite] = {
+        self.sprites_collection: dict[str, Sprite] = {
                 # Order MATTERS.
-                "player": sprites.Player(self.game_collection)
+                "player": player.Player(self.game_collection)
             }
-        self.sprites = sprite_classes.SpriteGroup(self.sprites_collection)
+        self.sprites = SpriteGroup(self.sprites_collection)
 
     def keybinds_setup(self):
         """
         Initialize key listener.
         """
 
-        objects_with_keybinds: dict[str, sprite_classes.Sprite] = {
+        objects_with_keybinds: dict[str, Sprite] = {
             "player": self.sprites_collection["player"]
         }
 
@@ -102,7 +101,7 @@ class Game():
 
 # Debugging
 class Debugger:
-    def __init__(self, player: sprites.Player, game: base.GameStateManager):
+    def __init__(self, player: player.Player, game: base.GameStateManager):
         self.player = player
         self.cam = game.camera
         game.statusbar.add(base.StatusbarItem(self.draw, pyxel.COLOR_WHITE))

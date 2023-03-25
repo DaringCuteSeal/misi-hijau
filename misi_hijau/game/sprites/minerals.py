@@ -12,11 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from dataclasses import dataclass
 from enum import Enum
+from . import Sprite
 import pyxel
-from ..base import(
-)
 
 class MineralTypes(Enum):
-    MINERAL_1 = 
+    MINERAL_1 = 0

@@ -19,7 +19,7 @@ from ..base import (
     WINDOW_WIDTH,
     GameStateManager,
 )
-from .classes import Sprite
+from . import Sprite
 
 @dataclass
 class Stars(Sprite):

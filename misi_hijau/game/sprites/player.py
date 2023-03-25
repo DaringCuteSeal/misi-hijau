@@ -16,7 +16,7 @@ from dataclasses import dataclass
 import pyxel
 from enum import Enum
 from math import sqrt # pyxel.sqrt(0) returns denormalized number; we need it to return 0.
-from .classes import Sprite, SpriteCoordinate
+from . import Sprite, SpriteCoordinate
 from .stars import Stars
 from ..base import (
     ALPHA_COL,
@@ -101,7 +101,6 @@ class Flame(Sprite):
             self.set_costume(self.flames[pyxel.frame_count % 2])
 
         pyxel.blt(self.coord.x, self.coord.y, self.img, self.u, self.v, self.w, self.h, self.colkey)
-        print("flame drawn")
 
     def update(self):
         self.ticker.update()
@@ -112,6 +111,11 @@ class Flame(Sprite):
 
 @dataclass
 class Player(Sprite):
+    """
+    Game player.
+    Controls background stars, flame, and bullets.
+    Stars are located in stars.py, while flame and bullets are combined in player.py (this file).
+    """
     img = 0
     u = 32
     v = 0
@@ -232,8 +236,8 @@ class Player(Sprite):
 
     def update(self):
         self.cam_update()
-        self.flame.flame_update(self.coord.x, self.coord.y, self.h)
         self.map_to_view(self.camera.y)
+        self.flame.flame_update(self.coord.x, self.coord.y, self.h)
 
         if not self.level_idx == 3:
             self.flame.ticker.update()
