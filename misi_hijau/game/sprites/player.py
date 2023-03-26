@@ -18,7 +18,7 @@ from enum import Enum
 from math import sqrt # pyxel.sqrt(0) returns denormalized number; we need it to return 0.
 from . import Sprite, SpriteCoordinate, bullets
 from .stars import Stars
-from ..base import (
+from ..components import (
     ALPHA_COL,
     WINDOW_HEIGHT,
     Direction,

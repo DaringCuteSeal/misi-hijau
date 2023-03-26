@@ -289,7 +289,6 @@ class GameStateManager:
     statusbar: Statusbar
 
 # Functions
-
 def tile_to_real(size: int) -> int:
     """
     Get real tile size from a tilemap scale.
@@ -298,3 +297,4 @@ def tile_to_real(size: int) -> int:
 
 def round_to_tile(size: int) -> int:
     return pyxel.ceil(size / TILE_SIZE) * TILE_SIZE
+

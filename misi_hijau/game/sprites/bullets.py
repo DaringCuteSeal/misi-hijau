@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from . import Sprite, SpriteCoordinate
-from ..base import Camera
+from ..components import Camera
 import pyxel
 
 class Bullet(Sprite):

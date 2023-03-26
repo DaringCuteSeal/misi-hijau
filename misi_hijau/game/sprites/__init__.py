@@ -15,7 +15,7 @@
 # Imports
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
-from .. import base
+from .. import components
 
 # Classes for sprites
 
@@ -42,8 +42,8 @@ class Sprite(ABC):
     colkey: int | None = None
     costume_i: int = 0
     # XXX: maybe these fields can be avoided if we just declare em in __init__()?
-    keybindings: dict[str, base.KeyFunc] = field(default_factory=dict[str, base.KeyFunc])
-    soundbank: dict[str, base.Sfx] = field(default_factory=dict[str, base.Sfx])
+    keybindings: dict[str, components.KeyFunc] = field(default_factory=dict[str, components.KeyFunc])
+    soundbank: dict[str, components.Sfx] = field(default_factory=dict[str, components.Sfx])
     costumes: dict[str, tuple[int, int]] = field(default_factory=dict[str, tuple[int, int]])
 
     @abstractmethod
@@ -80,17 +80,17 @@ class Sprite(ABC):
         """
 
         self.coord.x = self.coord.x_map
-        self.coord.y = self.coord.y_map - cam_y + base.WINDOW_HEIGHT / 2 
+        self.coord.y = self.coord.y_map - cam_y + components.WINDOW_HEIGHT / 2 
     
     def is_sprite_in_viewport(self) -> bool:
 
-        if self.coord.x < -10 or self.coord.x > base.WINDOW_WIDTH or self.coord.y < -10 or self.coord.y > base.WINDOW_HEIGHT:
+        if self.coord.x < -10 or self.coord.x > components.WINDOW_WIDTH or self.coord.y < -10 or self.coord.y > components.WINDOW_HEIGHT:
             return False
         else:
             return True
 
 class SpriteGroup:
-    def __init__(self, sprites: dict[str, Sprite], game: base.GameStateManager):
+    def __init__(self, sprites: dict[str, Sprite], game: components.GameStateManager):
         self.sprites = sprites
         self.game = game
     
@@ -103,3 +103,13 @@ class SpriteGroup:
             self.sprites[i].draw()
 
         self.game.statusbar.draw()
+
+def is_colliding(sprite1: Sprite, sprite2: Sprite) -> bool:
+    if (
+        sprite1.coord.x + sprite1.w > sprite2.coord.x
+        and sprite2.coord.x + sprite2.w > sprite1.coord.x
+        and sprite1.coord.y + sprite1.h > sprite2.coord.y
+        and sprite2.coord.y + sprite2.h > sprite1.coord.y
+    ):
+        return True
+    return False

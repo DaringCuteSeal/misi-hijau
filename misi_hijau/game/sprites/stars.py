@@ -14,7 +14,7 @@
 
 from dataclasses import dataclass
 import pyxel
-from ..base import (
+from ..components import (
     WINDOW_HEIGHT,
     WINDOW_WIDTH,
     GameStateManager,

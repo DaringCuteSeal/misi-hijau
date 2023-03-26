@@ -14,7 +14,7 @@
 
 # Imports
 import pyxel
-import game.base as base
+import game.components as components
 import os
 from game.setup_components import Game
 
@@ -25,7 +25,7 @@ class App:
         Initialize game.
         """
         # Pyxel stuff
-        pyxel.init(base.WINDOW_WIDTH, base.WINDOW_HEIGHT, capture_scale=8, title="Misi Hijau")
+        pyxel.init(components.WINDOW_WIDTH, components.WINDOW_HEIGHT, capture_scale=8, title="Misi Hijau")
         pyxel.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), "res/res.pyxres"))
 
         self.game = Game()

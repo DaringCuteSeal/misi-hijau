@@ -14,8 +14,8 @@
 
 import pyxel
 from enum import Enum
-from ..base import ALPHA_COL, Camera, GameStateManager, Level, Sfx, SoundType, Ticker, tile_to_real
-from . import Sprite, SpriteCoordinate, player, bullets
+from ..components import ALPHA_COL, Camera, GameStateManager, Level, Sfx, SoundType, Ticker, tile_to_real
+from . import Sprite, SpriteCoordinate, player, bullets, is_colliding
 
 class EnemyType(Enum):
     ENEMY_1 = 0 # Krelth/Grug
@@ -119,12 +119,7 @@ class EnemyGroup(Sprite):
             enemy.update()
 
             for bullet in self.bullets.bullets:
-                if (
-                    enemy.coord.x + enemy.w > bullet.coord.x
-                    and bullet.coord.x + bullet.w > enemy.coord.x
-                    and enemy.coord.y + enemy.h > bullet.coord.y
-                    and bullet.coord.y + bullet.h > enemy.coord.y
-                ):
+                if is_colliding(bullet, enemy):
                     enemy.is_dead = True
                     self.enemies.remove(enemy)
                     bullet.is_dead = True
