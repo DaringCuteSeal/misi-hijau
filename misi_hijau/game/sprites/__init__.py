@@ -51,12 +51,18 @@ class Sprite(ABC):
         """
         Draw (render) sprite.
         """
-        pass
     
     @abstractmethod
     def update(self):
-        pass
-    
+        """
+        Update sprite state.
+        """
+
+    def reset(self):
+        """
+        Function to be run when level restarts.
+        """
+
     def set_costume(self, costume: tuple[int, int]):
         """
         Set costume based on spritemap coordinate.
@@ -89,7 +95,7 @@ class Sprite(ABC):
         else:
             return True
 
-class SpriteGroup:
+class SpriteHandler:
     def __init__(self, sprites: dict[str, Sprite], game: components.GameStateManager):
         self.sprites = sprites
         self.game = game
@@ -103,6 +109,10 @@ class SpriteGroup:
             self.sprites[i].draw()
 
         self.game.statusbar.draw()
+
+    def reset(self):
+        for i in self.sprites:
+            self.sprites[i].reset()
 
 def is_colliding(sprite1: Sprite, sprite2: Sprite) -> bool:
     if (

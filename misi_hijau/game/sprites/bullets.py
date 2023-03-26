@@ -37,6 +37,7 @@ class Bullet(Sprite):
     def draw(self):
         if self.is_sprite_in_viewport():
             pyxel.rect(self.coord.x, self.coord.y, self.w, self.h, self.color)
+    
 
 class Bullets(Sprite):
     def __init__(self, camera: Camera):
@@ -63,4 +64,7 @@ class Bullets(Sprite):
         if len(self.bullets) > 0:
             for bullet in self.bullets:
                 bullet.draw()
+    
+    def reset(self):
+        self.bullets = []
   

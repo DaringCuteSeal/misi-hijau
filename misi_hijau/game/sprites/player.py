@@ -27,12 +27,12 @@ from ..components import (
     PlayerShip,
     Sfx,
     SoundType,
-    Ticker,
     Camera,
     KeyTypes,
     StatusbarItem,
     tile_to_real 
 )
+from ..utils import Ticker
     
 class PlayerState(Enum):
     IDLE = 0
@@ -57,14 +57,13 @@ class Flame(Sprite):
             self.set_costume(self.flames[pyxel.frame_count % 2])
         pyxel.blt(self.coord.x, self.coord.y, self.img, self.u, self.v, self.w, self.h, self.colkey)
 
-
     def update(self):
         self.ticker.update()
 
     def flame_update(self, player_x: float, player_y: float, player_h: int):
         self.coord.x = player_x
         self.coord.y = player_y + player_h
-
+    
 @dataclass
 class Player(Sprite):
     """
@@ -113,9 +112,9 @@ class Player(Sprite):
         self.level_width = tile_to_real(levelmap.level_width)
         self.level_height = tile_to_real(levelmap.level_height)
         self.bullet_color = level.bullet_color
+        self.coord = SpriteCoordinate(self.level_width // 2, tile_to_real(4), self.level_width // 2, self.level_height - tile_to_real(4))
         
         self.statusbar = game.statusbar
-        self.coord = SpriteCoordinate(0, 0, self.level_width // 2, self.level_height - tile_to_real(4))
         self.init_costume(game.levelhandler.curr_level.ship)
         self.ticker = Ticker(3)
         self.camera = game.camera
@@ -197,7 +196,6 @@ class Player(Sprite):
             self.flame.ticker.update()
             self.flame.update()
         
-
     def draw(self):
         self.stars.draw()
         self.flame.draw()
@@ -206,11 +204,13 @@ class Player(Sprite):
 
         pyxel.blt(self.coord.x, self.coord.y, self.img, self.u, self.v, self.w, self.h, self.colkey)
     
-    # Functions for statusbar
-    def test(self) -> str:
-        string = f"{self.accel}"
-        return string
+    def reset(self):
+        self.coord.x_map = self.level_width // 2
+        self.coord.y_map = self.level_height - tile_to_real(4)
+        self.x_vel = 0
+        self.y_vel = 0
 
+    # Functions for statusbar
     def get_speed(self) -> str:
         magnitude = sqrt(self.y_vel * self.y_vel + self.x_vel * self.x_vel)
         magnitude = pyxel.floor(magnitude * 100)

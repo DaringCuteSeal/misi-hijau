@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from game import components
-from game.sprites import Sprite, SpriteGroup, player, bullets, minerals, enemy
+from game.sprites import Sprite, SpriteHandler, player, bullets, enemy
 from res.levels import levels
 import pyxel
 
@@ -67,7 +67,7 @@ class Game():
                 "player": spr_player,
                 "enemies": spr_enemies
             }
-        self.sprites = SpriteGroup(self.sprites_collection, self.game_collection)
+        self.sprites_handler = SpriteHandler(self.sprites_collection, self.game_collection)
 
     def keybinds_setup(self):
         """
@@ -83,12 +83,17 @@ class Game():
                 self.game_collection.keylistener.append(o, objects_with_keybinds[o].keybindings)
             except AttributeError:
                 continue
+        
+        test = {
+            "test": components.KeyFunc(pyxel.KEY_R, lambda: self.sprites_handler.reset(), components.KeyTypes.BTNP)
+        }
+        self.game_collection.keylistener.append("test", test)
 
     def update(self):
         """
         Update game.
         """
-        self.sprites.update()
+        self.sprites_handler.update()
         self.game_collection.keylistener.check()
     
     def draw_game_loop(self):
@@ -97,7 +102,7 @@ class Game():
         """
 
         self.game_collection.camera.draw(self.game_collection.levelhandler.curr_level.levelmap)
-        self.sprites.render()
+        self.sprites_handler.render()
 
 
     

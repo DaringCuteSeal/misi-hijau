@@ -14,7 +14,8 @@
 
 import pyxel
 from enum import Enum
-from ..components import ALPHA_COL, Camera, GameStateManager, Level, Sfx, SoundType, Ticker, tile_to_real
+from ..components import ALPHA_COL, GameStateManager, Sfx, SoundType, tile_to_real
+from ..utils import Ticker
 from . import Sprite, SpriteCoordinate, player, bullets, is_colliding
 
 class EnemyType(Enum):
@@ -39,13 +40,16 @@ class EnemyEntity(Sprite):
     def update(self):
         pass
 
+    def reset(self):
+        pass
+
 class EnemyGrug(EnemyEntity):
     u = 0
     v = 48
     health = 2
 
     def __init__(self, x_map: float, y_map: float, level_height: int, level_width: int):
-        self.coord = SpriteCoordinate()
+        self.coord = SpriteCoordinate(-20, -20, -20, -20)
         self.coord.x_map = x_map
         self.coord.y_map = y_map
         self.level_height = level_height
@@ -126,13 +130,14 @@ class EnemyGroup(Sprite):
                     self.bullets.bullets.remove(bullet)
                     self.soundplayer.play(self.soundbank["explode"])
                     
-
-
-     
     def draw(self):
         for enemy in self.enemies:
             if enemy.is_sprite_in_viewport():
                 enemy.draw()
+    
+    def reset(self):
+        self.enemies = []
+        self.spawn()
 
 #   for enemy in enemies:
 #       for bullet in bullets:
