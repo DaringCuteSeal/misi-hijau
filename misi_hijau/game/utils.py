@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import pyxel
+TILE_SIZE = 8
 
 # Tick handling
 class Ticker:
@@ -45,3 +46,13 @@ class Ticker:
             self.time_since_last_move = 0
             return True
         return False
+
+# Functions
+def tile_to_real(size: int) -> int:
+    """
+    Get real tile size from a tilemap scale.
+    """
+    return size * TILE_SIZE
+
+def round_to_tile(size: int) -> int:
+    return pyxel.ceil(size / TILE_SIZE) * TILE_SIZE

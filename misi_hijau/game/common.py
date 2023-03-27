@@ -23,7 +23,6 @@ from typing import Callable, Optional
 ALPHA_COL = pyxel.COLOR_PURPLE
 WINDOW_WIDTH = 256
 WINDOW_HEIGHT = 256
-TILE_SIZE = 8
 
 # Classes
 class Direction(Enum):
@@ -96,13 +95,5 @@ class StatusbarItem:
     """
     function: Callable[[], str] # unction that returns a string.
     color: int
-
-# Functions
-def tile_to_real(size: int) -> int:
-    """
-    Get real tile size from a tilemap scale.
-    """
-    return size * TILE_SIZE
-
-def round_to_tile(size: int) -> int:
-    return pyxel.ceil(size / TILE_SIZE) * TILE_SIZE
+    x: int = 0
+    y: int = 0

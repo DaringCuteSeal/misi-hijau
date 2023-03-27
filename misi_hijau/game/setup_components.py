@@ -37,13 +37,8 @@ class Game():
         self.game_collection.level_handler.set_lvl(levels[0])
 
         # Set up sprites
-        self.init_sprites()
-
-        # Set up keybindings
-        self.keybinds_setup() 
-
-        # self.debugger = Debugger(self.sprites_collection["player"], self.game_collection) #type: ignore
-
+        sprites_collection = self.create_sprites()
+        self.init_sprites(sprites_collection)
 
     def scene_setup(self):
         """
@@ -51,33 +46,31 @@ class Game():
         """
         pass
 
-    def init_sprites(self):
-        """
-        Initialize game sprites.
-        """
+    def create_sprites(self) -> dict[str, Sprite]:
         # Set up player
         spr_bullets = bullets.Bullets(self.game_collection)
         spr_player = player.Player(self.game_collection, spr_bullets)
-        spr_enemies = enemy.EnemyGroup(enemy.EnemyType.ENEMY_1, self.game_collection, spr_player, spr_bullets)
+        spr_enemies = enemy.EnemyHandler(enemy.EnemyType.ENEMY_1, self.game_collection, spr_player, spr_bullets)
 
-        # plz fix statusbar :) :) :)
-
-        self.sprites_collection: dict[str, Sprite] = {
+        sprites_collection: dict[str, Sprite] = {
                 # Order MATTERS.
                 "bullets": spr_bullets,
                 "player": spr_player,
                 "enemies": spr_enemies
-            }
-        
-        self.game_collection.sprite_handler.append(self.sprites_collection)
+        }
 
-    def keybinds_setup(self):
+        return sprites_collection
+
+
+    def init_sprites(self, sprites_collection: dict[str, Sprite]):
         """
-        Initialize key listener.
+        Initialize game sprites.
         """
+
+        self.game_collection.sprite_handler.append(sprites_collection)
 
         objects_with_keybinds: dict[str, Sprite] = {
-            "player": self.sprites_collection["player"]
+            "player": sprites_collection["player"]
         }
 
         for o in objects_with_keybinds:

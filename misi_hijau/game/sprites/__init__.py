@@ -27,7 +27,6 @@ class SpriteCoordinate:
     x_map: float = 0
     y_map: float = 0
 
-@dataclass
 class Sprite(ABC):
     """
     A sprite object class with some predefined functions to make costume handling easier.
@@ -95,13 +94,12 @@ class Sprite(ABC):
         else:
             return True
 
-
-def is_colliding(sprite1: Sprite, sprite2: Sprite) -> bool:
-    if (
-        sprite1.coord.x + sprite1.w > sprite2.coord.x
-        and sprite2.coord.x + sprite2.w > sprite1.coord.x
-        and sprite1.coord.y + sprite1.h > sprite2.coord.y
-        and sprite2.coord.y + sprite2.h > sprite1.coord.y
-    ):
-        return True
-    return False
+    def is_colliding(self, sprite: 'Sprite') -> bool:
+        if (
+            self.coord.x + self.w > sprite.coord.x
+            and sprite.coord.x + sprite.w > self.coord.x
+            and self.coord.y + self.h > sprite.coord.y
+            and sprite.coord.y + sprite.h > self.coord.y
+        ):
+            return True
+        return False

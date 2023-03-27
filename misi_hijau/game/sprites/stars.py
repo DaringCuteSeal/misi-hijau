@@ -26,8 +26,6 @@ class Stars(Sprite):
     """
     Stars that scrolls in the background.
     """
-    # I won't make a Star class cuz that could be computationally expensive.
-    # The tuple is structured is like (x, y, speed)
     def __init__(self, num_stars: int, game: GameStateManager):
         self.camera = game.camera
         self.stars: list[tuple[float, float, float]] = []
@@ -46,6 +44,22 @@ class Stars(Sprite):
             if y <= 0:
                 y = WINDOW_HEIGHT
             self.stars[i] = (x, y, speed)
+
+    def _recalculate(self):
+
+        if self.coord.x_map < self.speed:
+            self.coord.x_map = self.speed
+        elif self.coord.x_map > self.level_width - self.w:
+            self.coord.x_map = self.level_width - self.w
+        else:
+            self.stars.update()
+
+        if self.coord.y_map > self.level_height - self.h:
+            self.coord.y_map = self.level_height - self.h
+        elif self.coord.y_map < self.speed:
+            self.coord.y_map = self.speed
+        else:
+            self.stars.update()
 
     def draw(self):
         for x, y, speed in self.stars:

@@ -33,9 +33,11 @@ DONE BOI!!! JUST IN TIME <3
 - [x] Organize game initialization
 
 ## Mar 26-30 
+- [ ] Intense refactoring (if possible)
+    Maybe implement an event system.
 - [ ] PERFORMANCE IMPROVEMENTS!
-    - [ ] Reduce the amount of draw calls
-- [ ] Fix the crappy statusbar that broke after my sprites restructuring
+    - [x] Reduce the amount of draw calls
+- [x] Fix the crappy statusbar that broke after my sprites restructuring
 - [ ] Level designs
 
 ## Mar 31-Apr 5

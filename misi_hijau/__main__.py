@@ -28,6 +28,7 @@ class App:
         pyxel.init(WINDOW_WIDTH, WINDOW_HEIGHT, capture_scale=8, title="Misi Hijau")
         pyxel.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), "res/res.pyxres"))
 
+        
         self.game = Game()
 
         # Run Pyxel!
@@ -53,8 +54,6 @@ class App:
         Render (draw) frame to screen.
         """
         self.game.draw_game_loop()
-    
-
 
 if __name__ == "__main__":
     App()

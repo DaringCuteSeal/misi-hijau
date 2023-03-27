@@ -24,11 +24,10 @@ from .common import (
     Sfx, 
     Level, 
     LevelMap, 
-    TILE_SIZE,
-    tile_to_real,
     StatusbarItem
 )
 from game.sprites import Sprite
+from game import utils
 
 # Keyboard handling
 class KeyListener:
@@ -117,7 +116,7 @@ class Camera:
        pyxel.camera()
    
     def draw(self, levelmap: LevelMap):
-        pyxel.bltm(0, 0, 0, self.x + tile_to_real(levelmap.map_x), self.y + tile_to_real(levelmap.map_y), 256, 256)
+        pyxel.bltm(0, 0, 0, self.x + utils.tile_to_real(levelmap.map_x), self.y + utils.tile_to_real(levelmap.map_y), 256, 256)
 
 
 # Statusbar handling
@@ -127,7 +126,7 @@ class Statusbar:
     """
     def __init__(self):
         self.items: list[StatusbarItem] = []
-        self.def_x = TILE_SIZE + 3
+        self.def_x = utils.TILE_SIZE + 3
         self.def_y = 10
         self.def_gap_y = 8
     
@@ -136,30 +135,40 @@ class Statusbar:
         Append (extend) an array of `StatusBarItem` to the statusbar's store.
         """
         self.items.extend(items)
+        self._recalculate()
     
     def add(self, item: StatusbarItem):
         """
         Add a `StatusBarItem` to the statusbar's store.
         """
         self.items.append(item)
+        self._recalculate()
 
     def clear(self):
         """
         Clear the statusbar.
         """
         self.items = []
-    
+
     def draw(self):
         """
         Draw statusbar.
         """
-        last_y = -self.def_gap_y + self.def_y
-        x = self.def_x
         for item in self.items:
-            y = last_y + self.def_gap_y
             string = item.function()
-            pyxel.text(x, y, string, item.color)
+            pyxel.text(item.x, item.y, string, item.color)
+    
+    def _recalculate(self):
+        """
+        Recalculate position for each statusbar item.
+        """
+        self.items[0].y = self.def_y
+        self.items[0].x = self.def_x
+        last_y = -self.def_gap_y + self.def_y
 
+        for item in self.items[1:]:
+            item.x = self.def_x
+            item.y = last_y + self.def_gap_y
 
 # Sound handling
 @dataclass

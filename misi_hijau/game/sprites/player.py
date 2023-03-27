@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from dataclasses import dataclass
 import pyxel
 from math import sqrt # pyxel.sqrt(0) returns denormalized number; we need it to return 0.
 from . import Sprite, SpriteCoordinate, bullets
@@ -27,10 +26,9 @@ from ..common import (
     SoundType,
     KeyTypes,
     StatusbarItem,
-    tile_to_real 
 )
 from ..handler import GameStateManager
-from ..utils import Ticker
+from ..utils import Ticker, tile_to_real
 
 class Flame(Sprite):
     def __init__(self):
@@ -56,7 +54,6 @@ class Flame(Sprite):
         self.coord.x = player_x
         self.coord.y = player_y + player_h
     
-@dataclass
 class Player(Sprite):
     """
     Game player.

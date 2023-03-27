@@ -14,9 +14,9 @@
 
 import pyxel
 from enum import Enum
-from ..common import ALPHA_COL, Sfx, SoundType, tile_to_real
-from ..utils import Ticker
-from . import Sprite, SpriteCoordinate, player, bullets, is_colliding
+from ..common import ALPHA_COL, Sfx, SoundType
+from ..utils import Ticker, tile_to_real
+from . import Sprite, SpriteCoordinate, player, bullets
 from ..handler import GameStateManager
 
 class EnemyType(Enum):
@@ -86,10 +86,11 @@ class EnemySquidge(EnemyEntity):
     def update(self):
         pass
 
-class EnemyGroup(Sprite):
+class EnemyHandler(Sprite):
     def __init__(self, enemy_type: EnemyType, game: GameStateManager, player: player.Player, bullets: bullets.Bullets): # TODO: players collision detection
         self.type = enemy_type
         level = game.level_handler.get_curr()
+        self.player = player
         self.map = level.levelmap.enemies_map
         self.camera = game.camera
         self.soundplayer = game.soundplayer
@@ -124,7 +125,7 @@ class EnemyGroup(Sprite):
             enemy.update()
 
             for bullet in self.bullets.bullets:
-                if is_colliding(bullet, enemy):
+                if bullet.is_colliding(enemy):
                     enemy.is_dead = True
                     self.enemies.remove(enemy)
                     bullet.is_dead = True

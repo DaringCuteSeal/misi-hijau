@@ -35,3 +35,5 @@ class GameStateManager:
     statusbar: Statusbar
     sprite_handler: SpriteHandler
 
+    def restart(self):
+        self.sprite_handler.reset()
