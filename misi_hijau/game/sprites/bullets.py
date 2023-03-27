@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from . import Sprite, SpriteCoordinate
-from ..components import Camera
+from ..handler import GameStateManager
 import pyxel
 
 class Bullet(Sprite):
@@ -25,10 +25,10 @@ class Bullet(Sprite):
     costumes = {}
     soundbank = {}
 
-    def __init__(self, coord: SpriteCoordinate, color: int, cam: Camera):
+    def __init__(self, coord: SpriteCoordinate, color: int, game: GameStateManager):
         self.coord = coord
         self.color = color
-        self.camera = cam
+        self.camera = game.camera
         self.is_dead = False
     
     def update(self):
@@ -40,12 +40,12 @@ class Bullet(Sprite):
     
 
 class Bullets(Sprite):
-    def __init__(self, camera: Camera):
+    def __init__(self, game: GameStateManager):
         self.bullets: list[Bullet] = []
-        self.camera = camera
+        self.game = game
     
     def append(self, x: float, y: float, color: int):
-        bullet = Bullet(SpriteCoordinate(-30, -30, x, y), color, self.camera)
+        bullet = Bullet(SpriteCoordinate(-30, -30, x, y), color, self.game)
         self.bullets.append(bullet)
 
     def update(self):

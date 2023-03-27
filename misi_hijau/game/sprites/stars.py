@@ -14,11 +14,11 @@
 
 from dataclasses import dataclass
 import pyxel
-from ..components import (
+from ..common import (
     WINDOW_HEIGHT,
     WINDOW_WIDTH,
-    GameStateManager,
 )
+from ..handler import GameStateManager
 from . import Sprite
 
 @dataclass

@@ -15,7 +15,7 @@
 # Imports
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
-from .. import components
+from .. import common
 
 # Classes for sprites
 
@@ -42,8 +42,8 @@ class Sprite(ABC):
     colkey: int | None = None
     costume_i: int = 0
     # XXX: maybe these fields can be avoided if we just declare em in __init__()?
-    keybindings: dict[str, components.KeyFunc] = field(default_factory=dict[str, components.KeyFunc])
-    soundbank: dict[str, components.Sfx] = field(default_factory=dict[str, components.Sfx])
+    keybindings: dict[str, common.KeyFunc] = field(default_factory=dict[str, common.KeyFunc])
+    soundbank: dict[str, common.Sfx] = field(default_factory=dict[str, common.Sfx])
     costumes: dict[str, tuple[int, int]] = field(default_factory=dict[str, tuple[int, int]])
 
     @abstractmethod
@@ -86,33 +86,15 @@ class Sprite(ABC):
         """
 
         self.coord.x = self.coord.x_map
-        self.coord.y = self.coord.y_map - cam_y + components.WINDOW_HEIGHT / 2 
+        self.coord.y = self.coord.y_map - cam_y + common.WINDOW_HEIGHT / 2 
     
     def is_sprite_in_viewport(self) -> bool:
 
-        if self.coord.x < -10 or self.coord.x > components.WINDOW_WIDTH or self.coord.y < -10 or self.coord.y > components.WINDOW_HEIGHT:
+        if self.coord.x < -10 or self.coord.x > common.WINDOW_WIDTH or self.coord.y < -10 or self.coord.y > common.WINDOW_HEIGHT:
             return False
         else:
             return True
 
-class SpriteHandler:
-    def __init__(self, sprites: dict[str, Sprite], game: components.GameStateManager):
-        self.sprites = sprites
-        self.game = game
-    
-    def update(self):
-        for i in self.sprites:
-            self.sprites[i].update()
-
-    def render(self):
-        for i in self.sprites:
-            self.sprites[i].draw()
-
-        self.game.statusbar.draw()
-
-    def reset(self):
-        for i in self.sprites:
-            self.sprites[i].reset()
 
 def is_colliding(sprite1: Sprite, sprite2: Sprite) -> bool:
     if (

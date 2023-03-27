@@ -14,33 +14,26 @@
 
 from dataclasses import dataclass
 import pyxel
-from enum import Enum
 from math import sqrt # pyxel.sqrt(0) returns denormalized number; we need it to return 0.
 from . import Sprite, SpriteCoordinate, bullets
 from .stars import Stars
-from ..components import (
+from ..common import (
     ALPHA_COL,
     WINDOW_HEIGHT,
     Direction,
-    GameStateManager,
     KeyFunc,
     PlayerShip,
     Sfx,
     SoundType,
-    Camera,
     KeyTypes,
     StatusbarItem,
     tile_to_real 
 )
+from ..handler import GameStateManager
 from ..utils import Ticker
-    
-class PlayerState(Enum):
-    IDLE = 0
-    MOVING = 1
 
-    
 class Flame(Sprite):
-    def __init__(self, cam: Camera):
+    def __init__(self):
         self.img = 0
         self.u = 32
         self.v = 16
@@ -50,7 +43,6 @@ class Flame(Sprite):
         self.flames = [(32, 16), (32, 24)]
         self.coord = SpriteCoordinate(0, 0, 0, 0)
         self.ticker = Ticker(5)
-        self.camera = cam
     
     def draw(self):
         if self.ticker.get():
@@ -77,7 +69,6 @@ class Player(Sprite):
     w = 16
     h = 16
     colkey = ALPHA_COL
-    state = PlayerState.IDLE
     accel = 0.1
     drag = 0.04
     x_vel = 0
@@ -103,10 +94,10 @@ class Player(Sprite):
         }
 
         self.statusbar_items = [
-            StatusbarItem(self.get_speed, pyxel.COLOR_WHITE)
+            StatusbarItem(self.get_speed, pyxel.COLOR_YELLOW)
         ]
             
-        level = game.levelhandler.get_curr()
+        level = game.level_handler.get_curr()
         self.level_idx = level.idx
         levelmap = level.levelmap # only run ONCE; we don't want to get the level on every tick.
         self.level_width = tile_to_real(levelmap.level_width)
@@ -115,12 +106,13 @@ class Player(Sprite):
         self.coord = SpriteCoordinate(self.level_width // 2, tile_to_real(4), self.level_width // 2, self.level_height - tile_to_real(4))
         
         self.statusbar = game.statusbar
-        self.init_costume(game.levelhandler.curr_level.ship)
+        self.statusbar.append(self.statusbar_items)
+        self.init_costume(game.level_handler.curr_level.ship)
         self.ticker = Ticker(3)
         self.camera = game.camera
         self.soundplayer = game.soundplayer
 
-        self.flame = Flame(self.camera)
+        self.flame = Flame()
         self.stars = Stars(100, game)
         self.bullets = bullets
 

@@ -15,50 +15,22 @@
 
 # Imports
 import pyxel
-from typing import Callable, Optional
-from enum import Enum
+from typing import Callable
 from dataclasses import dataclass
-
-# Enums
-class Direction(Enum):
-    RIGHT = 0
-    LEFT = 1
-    UP = 2
-    DOWN = 3
-
-class SoundType(Enum):
-    AUDIO = 0
-    MUSIC = 1
-
-class PlayerShip(Enum):
-    SHIP1 = 0
-    SHIP2 = 1
-    SHIP3 = 2
-
-# Other Constants
-ALPHA_COL = pyxel.COLOR_PURPLE
-WINDOW_WIDTH = 256
-WINDOW_HEIGHT = 256
-TILE_SIZE = 8
+from .common import (
+    KeyFunc,
+    KeyTypes, 
+    SoundType, 
+    Sfx, 
+    Level, 
+    LevelMap, 
+    TILE_SIZE,
+    tile_to_real,
+    StatusbarItem
+)
+from game.sprites import Sprite
 
 # Keyboard handling
-class KeyTypes(Enum):
-    BTN = 0
-    BTNP = 1
-
-@dataclass
-class KeyFunc:
-    """
-    An object with a key and its associated function.
-    """
-    binding: int
-    func: Callable[[], None]
-    btn_type: KeyTypes = KeyTypes.BTN
-    active: bool = True
-    hold_time: Optional[int] = None
-    repeat_time: Optional[int] = None
-
-
 class KeyListener:
     """
     A Key listener to execute functions. Operates with a dictionary like this:
@@ -114,28 +86,6 @@ class KeyListener:
 
 
 # Level handling
-@dataclass
-class LevelMap:
-    """
-    A level map. All values are in tilemap scale (TILE_SIZE)
-    """
-    map_x: int # Offset x of tilemap
-    map_y: int # Offset y of tilemap
-    level_width: int
-    level_height: int
-    enemies_map: list[tuple[int, int]]
-
-@dataclass
-class Level:
-    """
-    A level.
-    """
-    idx: int
-    levelmap: LevelMap
-    ship: PlayerShip
-    max_minerals: int
-    bullet_color: int
-
 class LevelHandler:
     """
     Handler for levels.
@@ -171,14 +121,6 @@ class Camera:
 
 
 # Statusbar handling
-@dataclass
-class StatusbarItem:
-    """
-    Item to be displayed in the statusbar.
-    """
-    function: Callable[[], str] # unction that returns a string.
-    color: int
-
 class Statusbar:
     """
     Game statusbar which holds an array of items (`StatusBarItem`) to be displayed.
@@ -221,16 +163,6 @@ class Statusbar:
 
 # Sound handling
 @dataclass
-class Sfx():
-    """
-    An SFX entry.
-    """
-    soundtype: SoundType
-    channel: int
-    index: int = 0
-    loop: bool = False
-
-@dataclass
 class SoundPlayer():
     ch: int = 0
 
@@ -244,26 +176,25 @@ class SoundPlayer():
             case SoundType.MUSIC:
                 pyxel.playm(sfx.index, loop=sfx.loop)
 
-
-# Manager of (almost) Everything here
-@dataclass
-class GameStateManager:
+# Sprites handling
+class SpriteHandler:
     """
-    A set of game components.
+    Handler for sprites.
     """
-    soundplayer: SoundPlayer
-    camera: Camera
-    keylistener: KeyListener
-    levelhandler: LevelHandler
-    statusbar: Statusbar
+    def __init__(self):
+        self.sprites: dict[str, Sprite] = {}
+    
+    def append(self, sprites: dict[str, Sprite]):
+        self.sprites.update(sprites)
+    
+    def update(self):
+        for i in self.sprites:
+            self.sprites[i].update()
 
-# Functions
-def tile_to_real(size: int) -> int:
-    """
-    Get real tile size from a tilemap scale.
-    """
-    return size * TILE_SIZE
+    def render(self):
+        for i in self.sprites:
+            self.sprites[i].draw()
 
-def round_to_tile(size: int) -> int:
-    return pyxel.ceil(size / TILE_SIZE) * TILE_SIZE
-
+    def reset(self):
+        for i in self.sprites:
+            self.sprites[i].reset()

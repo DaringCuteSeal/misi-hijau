@@ -14,7 +14,7 @@
 
 import pyxel
 
-from game.components import (
+from game.common import (
     Level,
     LevelMap,
     PlayerShip
