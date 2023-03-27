@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from ..common import Sfx, SoundType
 from . import Sprite, SpriteCoordinate
 from ..handler import GameStateManager
 import pyxel
@@ -43,6 +44,12 @@ class Bullets(Sprite):
     def __init__(self, game: GameStateManager):
         self.bullets: list[Bullet] = []
         self.game = game
+        self.bullet_color = self.game.level_handler.get_curr().bullet_color
+        self.game.event_handler.add_handler("player_shoot_bullets", self.shoot_handler)
+        self.game.event_handler.add_handler("bullets_check", self.bullets_colliding_check_handler)
+        self.soundbank = {
+            "explode": Sfx(SoundType.AUDIO, 0, 11)
+        }
     
     def append(self, x: float, y: float, color: int):
         bullet = Bullet(SpriteCoordinate(-30, -30, x, y), color, self.game)
@@ -68,3 +75,13 @@ class Bullets(Sprite):
     def reset(self):
         self.bullets = []
   
+    def shoot_handler(self, player_x: float, player_y: float):
+        self.append(player_x + 7, player_y - 8, self.bullet_color)
+
+    def bullets_colliding_check_handler(self, enemy_x: float, enemy_y: float, enemy_w: float, enemy_h: float) -> bool:
+        for bullet in self.bullets:
+            if bullet.is_colliding(enemy_x, enemy_y, enemy_w, enemy_h):
+                self.bullets.remove(bullet)
+                self.game.soundplayer.play(self.soundbank["explode"])
+                return True
+        return False

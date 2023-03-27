@@ -14,10 +14,11 @@
 
 import pyxel
 from enum import Enum
-from ..common import ALPHA_COL, Sfx, SoundType
+from ..common import ALPHA_COL
 from ..utils import Ticker, tile_to_real
-from . import Sprite, SpriteCoordinate, player, bullets
+from . import Sprite, SpriteCoordinate
 from ..handler import GameStateManager
+from .. import events
 
 class EnemyType(Enum):
     ENEMY_1 = 0 # Krelth/Grug
@@ -87,22 +88,15 @@ class EnemySquidge(EnemyEntity):
         pass
 
 class EnemyHandler(Sprite):
-    def __init__(self, enemy_type: EnemyType, game: GameStateManager, player: player.Player, bullets: bullets.Bullets): # TODO: players collision detection
+    def __init__(self, enemy_type: EnemyType, game: GameStateManager):
         self.type = enemy_type
-        level = game.level_handler.get_curr()
-        self.player = player
+        self.game = game
+        level = self.game.level_handler.get_curr()
         self.map = level.levelmap.enemies_map
-        self.camera = game.camera
-        self.soundplayer = game.soundplayer
-        self.bullets = bullets
         self.level_height = tile_to_real(level.levelmap.level_height)
         self.level_width = tile_to_real(level.levelmap.level_width)
         self.enemies: list[EnemyEntity] = []
         self.spawn()
-        self.soundbank = {
-            "explode": Sfx(SoundType.AUDIO, 0, 11)
-        }
-
 
     def spawn(self):
         """
@@ -121,16 +115,11 @@ class EnemyHandler(Sprite):
     
     def update(self):
         for enemy in self.enemies:
-            enemy.map_to_view(self.camera.y)
+            enemy.map_to_view(self.game.camera.y)
             enemy.update()
+            if self.game.event_handler.trigger_event(events.BulletsCheck(enemy.coord.x, enemy.coord.y, enemy.w, enemy.h)):
+                self.enemies.remove(enemy)
 
-            for bullet in self.bullets.bullets:
-                if bullet.is_colliding(enemy):
-                    enemy.is_dead = True
-                    self.enemies.remove(enemy)
-                    bullet.is_dead = True
-                    self.bullets.bullets.remove(bullet)
-                    self.soundplayer.play(self.soundbank["explode"])
                     
     def draw(self):
         for enemy in self.enemies:

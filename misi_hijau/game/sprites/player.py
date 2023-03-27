@@ -14,8 +14,7 @@
 
 import pyxel
 from math import sqrt # pyxel.sqrt(0) returns denormalized number; we need it to return 0.
-from . import Sprite, SpriteCoordinate, bullets
-from .stars import Stars
+from . import Sprite, SpriteCoordinate
 from ..common import (
     ALPHA_COL,
     WINDOW_HEIGHT,
@@ -28,6 +27,7 @@ from ..common import (
     StatusbarItem,
 )
 from ..handler import GameStateManager
+from .. import events
 from ..utils import Ticker, tile_to_real
 
 class Flame(Sprite):
@@ -81,7 +81,7 @@ class Player(Sprite):
         "ship_3": (32, 32),
     }
 
-    def __init__(self, game: GameStateManager, bullets: bullets.Bullets):
+    def __init__(self, game: GameStateManager):
         self.keybindings = {
             "player_right": KeyFunc(pyxel.KEY_RIGHT, lambda: self.move_handler(Direction.RIGHT)),
             "player_left": KeyFunc(pyxel.KEY_LEFT, lambda: self.move_handler(Direction.LEFT)),
@@ -94,24 +94,22 @@ class Player(Sprite):
             StatusbarItem(self.get_speed, pyxel.COLOR_YELLOW)
         ]
             
+        self.game = game
+
         level = game.level_handler.get_curr()
         self.level_idx = level.idx
         levelmap = level.levelmap # only run ONCE; we don't want to get the level on every tick.
         self.level_width = tile_to_real(levelmap.level_width)
         self.level_height = tile_to_real(levelmap.level_height)
-        self.bullet_color = level.bullet_color
+
         self.coord = SpriteCoordinate(self.level_width // 2, tile_to_real(4), self.level_width // 2, self.level_height - tile_to_real(4))
         
         self.statusbar = game.statusbar
         self.statusbar.append(self.statusbar_items)
         self.init_costume(game.level_handler.curr_level.ship)
         self.ticker = Ticker(3)
-        self.camera = game.camera
-        self.soundplayer = game.soundplayer
 
         self.flame = Flame()
-        self.stars = Stars(100, game)
-        self.bullets = bullets
 
     def init_costume(self, ship: PlayerShip):
         match ship:
@@ -148,35 +146,37 @@ class Player(Sprite):
         elif self.coord.x_map > self.level_width - self.w:
             self.coord.x_map = self.level_width - self.w
         else:
-            self.stars.update()
+            self.game.event_handler.trigger_event(events.StarsScroll)
+            
 
         if self.coord.y_map > self.level_height - self.h:
             self.coord.y_map = self.level_height - self.h
         elif self.coord.y_map < self.speed:
             self.coord.y_map = self.speed
         else:
-            self.stars.update()
+            self.game.event_handler.trigger_event(events.StarsScroll)
 
     def shoot(self):
-        self.soundplayer.play(self.soundbank["shoot"])
-        self.bullets.append(self.coord.x_map + self.w // 2 - 2, self.coord.y_map - self.h // 2, self.bullet_color)
+        shoot_event = events.PlayerShootBullets(self.coord.x_map, self.coord.y_map)
+        self.game.event_handler.trigger_event(shoot_event)
+        self.game.soundplayer.play(self.soundbank["shoot"])
 
     def cam_update(self):
-        self.camera.y = self.coord.y_map
+        self.game.camera.y = self.coord.y_map
 
-        if self.camera.y > self.level_height - WINDOW_HEIGHT // 2:
-            self.camera.y = self.level_height - WINDOW_HEIGHT // 2
-            self.camera.dir_y = 0
-        elif self.camera.y < WINDOW_HEIGHT // 2:
-            self.camera.y = WINDOW_HEIGHT // 2
-            self.camera.dir_y = 0
+        if self.game.camera.y > self.level_height - WINDOW_HEIGHT // 2:
+            self.game.camera.y = self.level_height - WINDOW_HEIGHT // 2
+            self.game.camera.dir_y = 0
+        elif self.game.camera.y < WINDOW_HEIGHT // 2:
+            self.game.camera.y = WINDOW_HEIGHT // 2
+            self.game.camera.dir_y = 0
         else:
-            self.camera.dir_y = self.y_vel
-            self.camera.dir_x = self.x_vel
+            self.game.camera.dir_y = self.y_vel
+            self.game.camera.dir_x = self.x_vel
         
 
     def update(self):
-        self.map_to_view(self.camera.y)
+        self.map_to_view(self.game.camera.y)
         self.cam_update()
         self.flame.flame_update(self.coord.x, self.coord.y, self.h)
         self.move()
@@ -186,14 +186,11 @@ class Player(Sprite):
             self.flame.update()
         
     def draw(self):
-        self.stars.draw()
         self.flame.draw()
-
-        self.bullets.draw()
 
         pyxel.blt(self.coord.x, self.coord.y, self.img, self.u, self.v, self.w, self.h, self.colkey)
     
-    def reset(self):
+    def player_reset(self):
         self.coord.x_map = self.level_width // 2
         self.coord.y_map = self.level_height - tile_to_real(4)
         self.x_vel = 0

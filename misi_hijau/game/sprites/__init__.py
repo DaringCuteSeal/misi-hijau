@@ -40,7 +40,6 @@ class Sprite(ABC):
     speed: float = 1
     colkey: int | None = None
     costume_i: int = 0
-    # XXX: maybe these fields can be avoided if we just declare em in __init__()?
     keybindings: dict[str, common.KeyFunc] = field(default_factory=dict[str, common.KeyFunc])
     soundbank: dict[str, common.Sfx] = field(default_factory=dict[str, common.Sfx])
     costumes: dict[str, tuple[int, int]] = field(default_factory=dict[str, tuple[int, int]])
@@ -94,12 +93,12 @@ class Sprite(ABC):
         else:
             return True
 
-    def is_colliding(self, sprite: 'Sprite') -> bool:
+    def is_colliding(self, x: float, y: float, w: float, h: float) -> bool:
         if (
-            self.coord.x + self.w > sprite.coord.x
-            and sprite.coord.x + sprite.w > self.coord.x
-            and self.coord.y + self.h > sprite.coord.y
-            and sprite.coord.y + sprite.h > self.coord.y
+            self.coord.x + self.w > x
+            and x + w > self.coord.x
+            and self.coord.y + self.h > y
+            and y + h > self.coord.y
         ):
             return True
         return False

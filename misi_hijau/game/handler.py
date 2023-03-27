@@ -19,7 +19,8 @@ from .components import (
     KeyListener,
     LevelHandler,
     Statusbar,
-    SpriteHandler
+    SpriteHandler,
+    EventHandler,
 )
 
 # Manager of (almost) Everything here
@@ -34,6 +35,7 @@ class GameStateManager:
     level_handler: LevelHandler
     statusbar: Statusbar
     sprite_handler: SpriteHandler
+    event_handler: EventHandler
 
     def restart(self):
         self.sprite_handler.reset()

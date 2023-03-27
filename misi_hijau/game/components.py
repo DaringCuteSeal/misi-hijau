@@ -15,7 +15,7 @@
 
 # Imports
 import pyxel
-from typing import Callable
+from typing import Any, Callable
 from dataclasses import dataclass
 from .common import (
     KeyFunc,
@@ -24,8 +24,9 @@ from .common import (
     Sfx, 
     Level, 
     LevelMap, 
-    StatusbarItem
+    StatusbarItem,
 )
+from game.events import Event
 from game.sprites import Sprite
 from game import utils
 
@@ -33,6 +34,7 @@ from game import utils
 class KeyListener:
     """
     A Key listener to execute functions. Operates with a dictionary like this:
+    ```
     {
         "slot1": {
             "a_function": KeyFunc,
@@ -43,6 +45,7 @@ class KeyListener:
             "other_function": KeyFunc
         }
     }
+    ```
     A function name that is set to "none" will be treated as the function to be run when none of the keys bound are pressed.
     """
 
@@ -207,3 +210,49 @@ class SpriteHandler:
     def reset(self):
         for i in self.sprites:
             self.sprites[i].reset()
+
+
+
+# Event system
+class EventHandler:
+    """
+    Event handling system.
+
+    Operates with a dictionary like this:
+    ```
+    {
+        "event_name": [HandlerFunction1, HandlerFunction2],
+        "other_event_name": [HandlerFunction3]
+    }
+    ```
+
+    Handler function may return a boolean if needed. It will be passed as the result of the `trigger_event` method for the event sender.
+    """
+    def __init__(self):
+        self._handlers: dict[str, list[Callable[..., bool | None]]] = {}
+    
+    def add_handler(self, event_name: str, handler: Callable[..., bool | None]):
+        """
+        Add a handler (subscribe) for a particular event name.
+        """
+        if event_name not in self._handlers:
+            self._handlers[event_name] = []
+        self._handlers[event_name].append(handler)
+    
+    def remove_handler(self, event_name: str, handler: Callable[..., Any]):
+        """
+        Remove a handler (unsubscribe) from an event.
+        """
+        if event_name in self._handlers:
+            self._handlers[event_name].remove(handler)
+    
+    def trigger_event(self, event: Event) -> bool | None:
+        """
+        Trigger an event.
+        """
+        if event.name in self._handlers:
+            for handler in self._handlers[event.name]:
+                if event.data:
+                    return(handler(**event.data))
+                else:
+                    return(handler())

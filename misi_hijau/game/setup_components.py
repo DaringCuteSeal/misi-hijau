@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from game import components
-from game.sprites import Sprite, player, bullets, enemy
+from game.sprites import Sprite, player, bullets, enemy, stars
 from game.handler import GameStateManager
 from res.levels import levels
 import pyxel
@@ -31,7 +31,8 @@ class Game():
         level_handler = components.LevelHandler(levels)
         statusbar = components.Statusbar()
         sprite_handler = components.SpriteHandler()
-        self.game_collection = GameStateManager(soundplayer, camera, keylistener, level_handler, statusbar, sprite_handler)
+        event_handler = components.EventHandler()
+        self.game_collection = GameStateManager(soundplayer, camera, keylistener, level_handler, statusbar, sprite_handler, event_handler)
 
         # Set up level
         self.game_collection.level_handler.set_lvl(levels[0])
@@ -49,11 +50,13 @@ class Game():
     def create_sprites(self) -> dict[str, Sprite]:
         # Set up player
         spr_bullets = bullets.Bullets(self.game_collection)
-        spr_player = player.Player(self.game_collection, spr_bullets)
-        spr_enemies = enemy.EnemyHandler(enemy.EnemyType.ENEMY_1, self.game_collection, spr_player, spr_bullets)
+        spr_player = player.Player(self.game_collection)
+        spr_enemies = enemy.EnemyHandler(enemy.EnemyType.ENEMY_1, self.game_collection)
+        spr_stars = stars.Stars(100, self.game_collection)
 
         sprites_collection: dict[str, Sprite] = {
                 # Order MATTERS.
+                "stars": spr_stars,
                 "bullets": spr_bullets,
                 "player": spr_player,
                 "enemies": spr_enemies
