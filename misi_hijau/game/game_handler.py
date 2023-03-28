@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""
+Game handler which holds game components.
+"""
+
 from dataclasses import dataclass
 from .components import (
     SoundPlayer,

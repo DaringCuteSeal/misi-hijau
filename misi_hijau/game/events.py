@@ -34,7 +34,7 @@ class PlayerShootBullets(Event):
 
 class BulletsCheck(Event):
     name = "bullets_check"
-    def __init__(self, enemy_x: float, enemy_y: float, enemy_w: float, enemy_h: float):
+    def __init__(self, enemy_x: float, enemy_y: float, enemy_w: float, enemy_h: int):
         self.data = {
             "enemy_x": enemy_x,
             "enemy_y": enemy_y,
@@ -43,6 +43,15 @@ class BulletsCheck(Event):
         }
 
 
+class MineralsCheck(Event):
+    name = "minerals_check"
+    def __init__(self, player_x_map: float, player_y_map: float, player_h: int):
+        self.data = {
+            "player_x_map": player_x_map,
+            "player_y_map": player_y_map,
+            "player_h": player_h
+        }
+
 # Events without data being passed
 StarsScroll = Event("stars_scroll", None)
-LevelRestart = "level_restart"
+LevelRestart = Event("level_restart", None)

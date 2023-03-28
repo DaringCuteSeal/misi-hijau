@@ -17,7 +17,7 @@ from enum import Enum
 from ..common import ALPHA_COL
 from ..utils import Ticker, tile_to_real
 from . import Sprite, SpriteCoordinate
-from ..handler import GameStateManager
+from ..game_handler import GameStateManager
 from .. import events
 
 class EnemyType(Enum):
@@ -34,7 +34,6 @@ class EnemyEntity(Sprite):
         self.coord = SpriteCoordinate()
         self.coord.x_map = x_map
         self.coord.y_map = y_map
-        self.is_dead = False
 
     def draw(self):
         pyxel.blt(self.coord.x, self.coord.y, self.img, self.u, self.v, self.w, self.h, ALPHA_COL)

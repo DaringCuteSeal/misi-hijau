@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""
+Game components such as camera, sound player, key listener, etc.
+"""
 
 # Imports
 import pyxel
@@ -167,26 +170,35 @@ class Statusbar:
         """
         self.items[0].y = self.def_y
         self.items[0].x = self.def_x
-        last_y = -self.def_gap_y + self.def_y
+        last_y = self.def_y
 
         for item in self.items[1:]:
+            if item.custom_coords:
+                continue
             item.x = self.def_x
             item.y = last_y + self.def_gap_y
+            last_y = item.y
 
 # Sound handling
 @dataclass
 class SoundPlayer():
-    ch: int = 0
-
+    """
+    A sound player.
+    """
     def play(self, sfx: Sfx):
         """
-        Play a sound from soundbank.
+        Play a sound (Sfx).
         """
         match(sfx.soundtype):
             case SoundType.AUDIO:
-                pyxel.play(self.ch, sfx.index, loop=sfx.loop)
+                pyxel.play(sfx.channel, sfx.idx, loop=sfx.loop)
             case SoundType.MUSIC:
-                pyxel.playm(sfx.index, loop=sfx.loop)
+                pyxel.playm(sfx.idx, loop=sfx.loop)
+    def is_playing(self, sfx: Sfx) -> bool:
+        if pyxel.play_pos(sfx.channel) == None:
+            return False
+        return True
+
 
 # Sprites handling
 class SpriteHandler:
@@ -197,21 +209,28 @@ class SpriteHandler:
         self.sprites: dict[str, Sprite] = {}
     
     def append(self, sprites: dict[str, Sprite]):
+        """
+        Append a dictionary of sprite into this sprite handler.
+        """
         self.sprites.update(sprites)
     
     def update(self):
+        """
+        Update all sprites state.
+        """
         for i in self.sprites:
             self.sprites[i].update()
 
-    def render(self):
+    def draw(self):
+        """
+        Draw all sprites.
+        """
         for i in self.sprites:
             self.sprites[i].draw()
 
     def reset(self):
         for i in self.sprites:
             self.sprites[i].reset()
-
-
 
 # Event system
 class EventHandler:
@@ -233,7 +252,7 @@ class EventHandler:
     
     def add_handler(self, event_name: str, handler: Callable[..., bool | None]):
         """
-        Add a handler (subscribe) for a particular event name.
+        Add a handler (subscribe) for an event.
         """
         if event_name not in self._handlers:
             self._handlers[event_name] = []
@@ -253,6 +272,6 @@ class EventHandler:
         if event.name in self._handlers:
             for handler in self._handlers[event.name]:
                 if event.data:
-                    return(handler(**event.data))
+                    return(handler(**event.data)) # pass data from Event to handler function
                 else:
                     return(handler())

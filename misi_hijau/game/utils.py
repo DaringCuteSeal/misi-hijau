@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""
+Common utilities.
+"""
 import pyxel
 TILE_SIZE = 8
 
@@ -50,9 +53,16 @@ class Ticker:
 # Functions
 def tile_to_real(size: int) -> int:
     """
-    Get real tile size from a tilemap scale.
+    Get real size in pixel from a tilemap size.
     """
     return size * TILE_SIZE
 
-def round_to_tile(size: int) -> int:
+def real_to_tile(size: float) -> int:
+    """
+    Get tilemap size from real pixel size.
+    """
+    size = size // TILE_SIZE
+    return pyxel.floor(size)
+
+def round_to_tile(size: float) -> int:
     return pyxel.ceil(size / TILE_SIZE) * TILE_SIZE

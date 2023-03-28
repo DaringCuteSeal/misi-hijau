@@ -20,17 +20,20 @@ from ..common import (
     WINDOW_HEIGHT,
     Direction,
     KeyFunc,
-    PlayerShip,
+    PlayerShipType,
     Sfx,
     SoundType,
     KeyTypes,
     StatusbarItem,
 )
-from ..handler import GameStateManager
+from ..game_handler import GameStateManager
 from .. import events
 from ..utils import Ticker, tile_to_real
 
 class Flame(Sprite):
+    """
+    A flame that's controlled by the player.
+    """
     def __init__(self):
         self.img = 0
         self.u = 32
@@ -57,8 +60,6 @@ class Flame(Sprite):
 class Player(Sprite):
     """
     Game player.
-    Controls background stars, flame, and bullets.
-    Stars are located in stars.py, while flame and bullets are combined in player.py (this file).
     """
     img = 0
     u = 32
@@ -72,7 +73,7 @@ class Player(Sprite):
     y_vel = 0
 
     soundbank = {
-        "shoot": Sfx(SoundType.AUDIO, 0, 10),
+        "shoot": Sfx(SoundType.AUDIO, 3, 10),
     }
 
     costumes = {
@@ -87,18 +88,17 @@ class Player(Sprite):
             "player_left": KeyFunc(pyxel.KEY_LEFT, lambda: self.move_handler(Direction.LEFT)),
             "player_up": KeyFunc(pyxel.KEY_UP, lambda: self.move_handler(Direction.UP)),
             "player_down": KeyFunc(pyxel.KEY_DOWN, lambda: self.move_handler(Direction.DOWN)),
-            "player_shoot": KeyFunc(pyxel.KEY_SPACE, lambda: self.shoot(), KeyTypes.BTNP, hold_time=10, repeat_time=10),
+            "player_shoot": KeyFunc(pyxel.KEY_SPACE, lambda: self.shoot_handler(), KeyTypes.BTNP, hold_time=10, repeat_time=10),
         }
 
         self.statusbar_items = [
-            StatusbarItem(self.get_speed, pyxel.COLOR_YELLOW)
+            StatusbarItem(self.get_speed, pyxel.COLOR_YELLOW),
         ]
             
         self.game = game
 
-        level = game.level_handler.get_curr()
-        self.level_idx = level.idx
-        levelmap = level.levelmap # only run ONCE; we don't want to get the level on every tick.
+        self.level = game.level_handler.get_curr()
+        levelmap = self.level.levelmap # only run ONCE; we don't want to get the level on every tick.
         self.level_width = tile_to_real(levelmap.level_width)
         self.level_height = tile_to_real(levelmap.level_height)
 
@@ -106,21 +106,22 @@ class Player(Sprite):
         
         self.statusbar = game.statusbar
         self.statusbar.append(self.statusbar_items)
-        self.init_costume(game.level_handler.curr_level.ship)
+        self.init_costume(game.level_handler.curr_level.ship_type)
         self.ticker = Ticker(3)
 
         self.flame = Flame()
 
-    def init_costume(self, ship: PlayerShip):
-        match ship:
-            case PlayerShip.SHIP1:
+    def init_costume(self, ship_type: PlayerShipType):
+        match ship_type:
+            case PlayerShipType.SHIP1:
                 self.set_costume(self.costumes["ship_1"])
-            case PlayerShip.SHIP2:
+            case PlayerShipType.SHIP2:
                 self.set_costume(self.costumes["ship_2"])
-            case PlayerShip.SHIP3:
+            case PlayerShipType.SHIP3:
                 self.set_costume(self.costumes["ship_3"])
 
     def move_handler(self, direction: Direction):
+
         match direction:
             case Direction.UP:
                 self.y_vel -= self.accel
@@ -136,6 +137,8 @@ class Player(Sprite):
                 self.coord.x_map -= self.accel
 
     def move(self):
+        self.game.event_handler.trigger_event(events.MineralsCheck(self.coord.x_map, self.coord.y_map, self.h))
+
         self.coord.x_map += self.x_vel
         self.coord.y_map += self.y_vel
         self.x_vel -= self.drag * self.x_vel
@@ -156,7 +159,7 @@ class Player(Sprite):
         else:
             self.game.event_handler.trigger_event(events.StarsScroll)
 
-    def shoot(self):
+    def shoot_handler(self):
         shoot_event = events.PlayerShootBullets(self.coord.x_map, self.coord.y_map)
         self.game.event_handler.trigger_event(shoot_event)
         self.game.soundplayer.play(self.soundbank["shoot"])
@@ -181,7 +184,7 @@ class Player(Sprite):
         self.flame.flame_update(self.coord.x, self.coord.y, self.h)
         self.move()
 
-        if not self.level_idx == 3:
+        if not self.level.idx == 3:
             self.flame.ticker.update()
             self.flame.update()
         
@@ -202,4 +205,3 @@ class Player(Sprite):
         magnitude = pyxel.floor(magnitude * 100)
         string = f"Speed: {magnitude} km/h"
         return string
-

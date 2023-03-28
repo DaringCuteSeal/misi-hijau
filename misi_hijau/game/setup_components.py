@@ -13,8 +13,8 @@
 # limitations under the License.
 
 from game import components
-from game.sprites import Sprite, player, bullets, enemy, stars
-from game.handler import GameStateManager
+from game.sprites import Sprite, SpriteHandler, player, bullets, enemy, stars, minerals
+from game.game_handler import GameStateManager
 from res.levels import levels
 import pyxel
 
@@ -40,6 +40,7 @@ class Game():
         # Set up sprites
         sprites_collection = self.create_sprites()
         self.init_sprites(sprites_collection)
+        # self.debugger = Debugger(self.game_collection.sprite_handler.sprites["player"], self.game_collection)
 
     def scene_setup(self):
         """
@@ -53,13 +54,15 @@ class Game():
         spr_player = player.Player(self.game_collection)
         spr_enemies = enemy.EnemyHandler(enemy.EnemyType.ENEMY_1, self.game_collection)
         spr_stars = stars.Stars(100, self.game_collection)
+        spr_minerals = minerals.MineralHandler(self.game_collection)
 
         sprites_collection: dict[str, Sprite] = {
                 # Order MATTERS.
                 "stars": spr_stars,
                 "bullets": spr_bullets,
                 "player": spr_player,
-                "enemies": spr_enemies
+                "enemies": spr_enemies,
+                "minerals": spr_minerals
         }
 
         return sprites_collection
@@ -95,7 +98,7 @@ class Game():
         """
 
         self.game_collection.camera.draw(self.game_collection.level_handler.curr_level.levelmap)
-        self.game_collection.sprite_handler.render()
+        self.game_collection.sprite_handler.draw()
         self.game_collection.statusbar.draw()
 
 
@@ -114,9 +117,15 @@ class Debugger:
         game.statusbar.add(components.StatusbarItem(self.draw, pyxel.COLOR_WHITE))
     
     def draw(self) -> str:
-        return f"""
-player x: {self.player.coord.x}, player y: {self.player.coord.y}
-player x_map: {self.player.coord.x_map}, player y_map: {self.player.coord.y_map}
-cam x: {self.cam.x}, cam y: {self.cam.y}
-player x_vel: {self.player.x_vel}, y_vel: {self.player.y_vel}
+#         return f"""
+# player x: {self.player.coord.x}, player y: {self.player.coord.y}
+# player x_map: {self.player.coord.x_map}, player y_map: {self.player.coord.y_map}
+# cam x: {self.cam.x}, cam y: {self.cam.y}
+# player x_vel: {self.player.x_vel}, y_vel: {self.player.y_vel}
+# """
+         return f"""
+ player x: {pyxel.ceil(self.player.coord.x)}, player y: {pyxel.ceil(self.player.coord.y)}
+ player x_map: {pyxel.ceil(self.player.coord.x_map)}, player y_map: {pyxel.ceil(self.player.coord.y_map)}
+ cam x: {pyxel.ceil(self.cam.x)}, cam y: {pyxel.ceil(self.cam.y)}
+ player x_vel: {pyxel.ceil(self.player.x_vel)}, y_vel: {pyxel.ceil(self.player.y_vel)}
 """

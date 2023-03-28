@@ -18,7 +18,8 @@ from ..common import (
     WINDOW_HEIGHT,
     WINDOW_WIDTH,
 )
-from ..handler import GameStateManager
+from ..game_handler import GameStateManager
+from .. import events
 from . import Sprite
 
 @dataclass
@@ -27,7 +28,7 @@ class Stars(Sprite):
     Stars that scrolls in the background.
     """
     def __init__(self, num_stars: int, game: GameStateManager):
-        game.event_handler.add_handler("stars_scroll", self.update)
+        game.event_handler.add_handler(events.StarsScroll.name, self.update)
         self.camera = game.camera
         self.stars: list[tuple[float, float, float]] = []
         for i in range(0, num_stars): # type: ignore

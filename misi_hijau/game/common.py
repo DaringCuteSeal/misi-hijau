@@ -17,7 +17,9 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Callable, Optional
 
-# Common classes and functions for many files including utilities
+"""
+Common classes and functions for many files including utilities.
+"""
 
 # Constants
 ALPHA_COL = pyxel.COLOR_PURPLE
@@ -35,10 +37,15 @@ class SoundType(Enum):
     AUDIO = 0
     MUSIC = 1
 
-class PlayerShip(Enum):
+class PlayerShipType(Enum):
     SHIP1 = 0
     SHIP2 = 1
     SHIP3 = 2
+
+class MineralType(Enum):
+    MINERAL_1 = 0
+    MINERAL_2 = 1
+    MINERAL_3 = 2
 
 class KeyTypes(Enum):
     BTN = 0
@@ -63,7 +70,7 @@ class Sfx():
     """
     soundtype: SoundType
     channel: int
-    index: int = 0
+    idx: int = 0
     loop: bool = False
 
 @dataclass
@@ -76,6 +83,15 @@ class LevelMap:
     level_width: int
     level_height: int
     enemies_map: list[tuple[int, int]]
+    powerups_map: list[tuple[int, int]] | None
+
+@dataclass
+class LevelProgress:
+    minerals: int
+    player_health: int
+
+    def increment_minerals(self, value: int):
+        self.minerals += value
 
 @dataclass
 class Level:
@@ -84,16 +100,19 @@ class Level:
     """
     idx: int
     levelmap: LevelMap
-    ship: PlayerShip
+    ship_type: PlayerShipType
+    mineral_type: MineralType
     max_minerals: int
     bullet_color: int
+    progress: LevelProgress
 
 @dataclass
 class StatusbarItem:
     """
     Item to be displayed in the statusbar.
     """
-    function: Callable[[], str] # unction that returns a string.
+    function: Callable[[], str] # function that returns a string.
     color: int
+    custom_coords: bool = False
     x: int = 0
     y: int = 0

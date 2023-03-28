@@ -27,6 +27,9 @@ class SpriteCoordinate:
     x_map: float = 0
     y_map: float = 0
 
+class SpriteHandler(ABC):
+    pass
+
 class Sprite(ABC):
     """
     A sprite object class with some predefined functions to make costume handling easier.

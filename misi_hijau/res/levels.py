@@ -12,25 +12,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""
+Level storing.
+"""
+
 import pyxel
 
 from game.common import (
     Level,
     LevelMap,
-    PlayerShip
+    PlayerShipType,
+    LevelProgress,
+    MineralType
 )
 
-enemies_map: list[tuple[int, int]] = [
-    (1, 53), (3, 53), (5, 53), (7, 53), (9, 53), (11, 53),
-    (13, 53), (15, 53), (17, 53), (19, 53), (21, 53),
-    (23, 53), (25, 53), (27, 53), (29, 53)
+enemies_map_1: list[tuple[int, int]] = [
+    (1, 50), (3, 50), (5, 50), (7, 50), (9, 50), (11, 50),
+    (13, 50), (15, 50), (17, 50), (19, 50), (21, 50),
+    (23, 50), (25, 50), (27, 50), (29, 50)
 ]
-map_1 = LevelMap(0, 0, 32, 72, enemies_map)
-map_2 = LevelMap(40, 0, 32, 104, enemies_map)
-map_3 = LevelMap(0, 0, 32, 72, enemies_map)
+map_1 = LevelMap(0, 0, 32, 72, enemies_map_1, powerups_map=None)
+
+enemies_map_2: list[tuple[int, int]] = [
+    
+]
+map_2 = LevelMap(40, 0, 32, 104, enemies_map_2, None)
+map_3 = LevelMap(0, 0, 32, 72, enemies_map_2, None)
 
 levels: list[Level] = [
-    Level(1, map_1, PlayerShip.SHIP1, 15, pyxel.COLOR_LIME),
-    Level(2, map_2, PlayerShip.SHIP2, 15, pyxel.COLOR_CYAN),
-    Level(3, map_3, PlayerShip.SHIP3, 15, pyxel.COLOR_GRAY) # note: ship does not have extra flame
+    Level(1, map_1, PlayerShipType.SHIP1, MineralType.MINERAL_1, 14, pyxel.COLOR_LIME, LevelProgress(0, 3)),
+    Level(2, map_2, PlayerShipType.SHIP2, MineralType.MINERAL_2, 15, pyxel.COLOR_CYAN, LevelProgress(0, 4)),
+    Level(3, map_3, PlayerShipType.SHIP3, MineralType.MINERAL_3, 15, pyxel.COLOR_GRAY, LevelProgress(0, 5)) # note: ship does not have extra flame
 ]
