@@ -27,9 +27,6 @@ class SpriteCoordinate:
     x_map: float = 0
     y_map: float = 0
 
-class SpriteHandler(ABC):
-    pass
-
 class Sprite(ABC):
     """
     A sprite object class with some predefined functions to make costume handling easier.
@@ -59,14 +56,9 @@ class Sprite(ABC):
         Update sprite state.
         """
 
-    def reset(self):
-        """
-        Function to be run when level restarts.
-        """
-
     def set_costume(self, costume: tuple[int, int]):
         """
-        Set costume based on spritemap coordinate.
+        Set costume based on spritesheet coordinate.
         """
         self.u = costume[0]
         self.v = costume[1]
@@ -97,11 +89,9 @@ class Sprite(ABC):
             return True
 
     def is_colliding(self, x: float, y: float, w: float, h: float) -> bool:
-        if (
+        return (
             self.coord.x + self.w > x
             and x + w > self.coord.x
             and self.coord.y + self.h > y
             and y + h > self.coord.y
-        ):
-            return True
-        return False
+        )

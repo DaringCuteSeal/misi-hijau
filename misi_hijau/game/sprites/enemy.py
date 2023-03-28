@@ -116,16 +116,21 @@ class EnemyHandler(Sprite):
         for enemy in self.enemies:
             enemy.map_to_view(self.game.camera.y)
             enemy.update()
+
+            # XXX try checking collision on individual sprite update instead (without the EnemiesHandler)
+            # also maybe this can mean the enemy will only need to trigger one event and then the player can also have a handler
             if self.game.event_handler.trigger_event(events.BulletsCheck(enemy.coord.x, enemy.coord.y, enemy.w, enemy.h)):
                 self.enemies.remove(enemy)
-
+            
+            if self.game.event_handler.trigger_event(events.PlayerCollidingEnemy(enemy.coord.x, enemy.coord.y, enemy.w, enemy.h)):
+                self.reset_handler()
                     
     def draw(self):
         for enemy in self.enemies:
             if enemy.is_sprite_in_viewport():
                 enemy.draw()
     
-    def reset(self):
+    def reset_handler(self):
         self.enemies = []
         self.spawn()
 

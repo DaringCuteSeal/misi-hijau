@@ -22,7 +22,6 @@ from game.common import (
     Level,
     LevelMap,
     PlayerShipType,
-    LevelProgress,
     MineralType
 )
 
@@ -40,7 +39,7 @@ map_2 = LevelMap(40, 0, 32, 104, enemies_map_2, None)
 map_3 = LevelMap(0, 0, 32, 72, enemies_map_2, None)
 
 levels: list[Level] = [
-    Level(1, map_1, PlayerShipType.SHIP1, MineralType.MINERAL_1, 14, pyxel.COLOR_LIME, LevelProgress(0, 3)),
-    Level(2, map_2, PlayerShipType.SHIP2, MineralType.MINERAL_2, 15, pyxel.COLOR_CYAN, LevelProgress(0, 4)),
-    Level(3, map_3, PlayerShipType.SHIP3, MineralType.MINERAL_3, 15, pyxel.COLOR_GRAY, LevelProgress(0, 5)) # note: ship does not have extra flame
+    Level(1, map_1, PlayerShipType.SHIP1, MineralType.MINERAL_1, pyxel.COLOR_LIME, 14, 3),
+    Level(2, map_2, PlayerShipType.SHIP2, MineralType.MINERAL_2, pyxel.COLOR_CYAN, 15, 4),
+    Level(3, map_2, PlayerShipType.SHIP3, MineralType.MINERAL_3, pyxel.COLOR_GRAY, 15, 5) # ship doesn't have flame
 ]

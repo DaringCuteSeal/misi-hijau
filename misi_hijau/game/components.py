@@ -20,6 +20,7 @@ Game components such as camera, sound player, key listener, etc.
 import pyxel
 from typing import Any, Callable
 from dataclasses import dataclass
+
 from .common import (
     KeyFunc,
     KeyTypes, 
@@ -31,6 +32,7 @@ from .common import (
 )
 from game.events import Event
 from game.sprites import Sprite
+from game.ui import UIComponent
 from game import utils
 
 # Keyboard handling
@@ -73,9 +75,9 @@ class KeyListener:
         """
         Loop through key listeners and run function if key is pressed.
         """
-        for slot in self.checks:
+        for slot in self.checks.values():
             no_key_pressed = True
-            for key in self.checks[slot].values():
+            for key in slot.values():
                 if key.active:
                     match(key.btn_type):
                         case KeyTypes.BTN:
@@ -86,8 +88,8 @@ class KeyListener:
                             if pyxel.btnp(key.binding, hold=key.hold_time, repeat=key.repeat_time):
                                 key.func()
                                 no_key_pressed = False
-            if no_key_pressed and self.checks[slot].get("none") and self.checks[slot]["none"].active:
-                self.checks[slot]["none"].func()
+            if no_key_pressed and slot.get("none") and slot["none"].active:
+                slot["none"].func()
 
 
 # Level handling
@@ -104,6 +106,7 @@ class LevelHandler:
 
     def get_curr(self) -> Level:
         return self.curr_level
+    
 
 # Camera handling
 @dataclass
@@ -122,8 +125,7 @@ class Camera:
        pyxel.camera()
    
     def draw(self, levelmap: LevelMap):
-        pyxel.bltm(0, 0, 0, self.x + utils.tile_to_real(levelmap.map_x), self.y + utils.tile_to_real(levelmap.map_y), 256, 256)
-
+        pyxel.bltm(0, 0, 0, self.x + utils.tile_to_real(levelmap.map_x), self.y + utils.tile_to_real(levelmap.map_y), 256, 256, pyxel.COLOR_BLACK)
 
 # Statusbar handling
 class Statusbar:
@@ -199,6 +201,17 @@ class SoundPlayer():
             return False
         return True
 
+# UI Components handling
+class UIHandler():
+    def __init__(self):
+        self.ui_components: dict[str, UIComponent] = {}
+    
+    def append(self, ui_components: dict[str, UIComponent]):
+        self.ui_components.update(ui_components)
+    
+    def draw(self):
+        for component in self.ui_components.values():
+            component.draw()
 
 # Sprites handling
 class SpriteHandler:
@@ -218,19 +231,16 @@ class SpriteHandler:
         """
         Update all sprites state.
         """
-        for i in self.sprites:
-            self.sprites[i].update()
+        for sprite in self.sprites.values():
+            sprite.update()
 
     def draw(self):
         """
         Draw all sprites.
         """
-        for i in self.sprites:
-            self.sprites[i].draw()
+        for sprite in self.sprites.values():
+            sprite.draw()
 
-    def reset(self):
-        for i in self.sprites:
-            self.sprites[i].reset()
 
 # Event system
 class EventHandler:
@@ -247,6 +257,8 @@ class EventHandler:
 
     Handler function may return a boolean if needed. It will be passed as the result of the `trigger_event` method for the event sender.
     """
+    
+    # i hate python function type checking =)
     def __init__(self):
         self._handlers: dict[str, list[Callable[..., bool | None]]] = {}
     
@@ -270,8 +282,20 @@ class EventHandler:
         Trigger an event.
         """
         if event.name in self._handlers:
+            results: list[bool | None] = []
             for handler in self._handlers[event.name]:
                 if event.data:
-                    return(handler(**event.data)) # pass data from Event to handler function
+                    results.append(handler(**event.data)) # pass data from Event to handler function as a dict
                 else:
-                    return(handler())
+                    results.append(handler())
+
+            # The value return is either "succeeded" or "failed", so if
+            # there's a handler function that returned False, this
+            # event trigger result should be False, and so on.
+
+            if any(result is False for result in results):
+                return False
+            elif any(result is not None and result is not True for result in results):
+                return None
+            else:
+                return True

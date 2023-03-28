@@ -12,36 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-Game handler which holds game components.
-"""
-
 from dataclasses import dataclass
-from .components import (
-    SoundPlayer,
-    Camera,
-    KeyListener,
-    LevelHandler,
-    Statusbar,
-    SpriteHandler,
-    EventHandler,
-    UIHandler,
+import pyxel
+from ..common import (
+    WINDOW_HEIGHT,
+    WINDOW_WIDTH,
 )
+from ..game_handler import GameStateManager
+from .. import events
+from . import UIComponent
 
-# Manager of (almost) Everything here
-@dataclass
-class GameStateManager:
-    """
-    A set of game components.
-    """
-    soundplayer: SoundPlayer
-    camera: Camera
-    keylistener: KeyListener
-    level_handler: LevelHandler
-    statusbar: Statusbar
-    sprite_handler: SpriteHandler
-    event_handler: EventHandler
-    ui_handler: UIHandler
-
-    def restart(self):
-        self.sprite_handler.reset()
+class HealthBar(UIComponent):
+    def __init__(self):

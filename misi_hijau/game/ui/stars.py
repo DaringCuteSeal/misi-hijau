@@ -20,10 +20,10 @@ from ..common import (
 )
 from ..game_handler import GameStateManager
 from .. import events
-from . import Sprite
+from . import UIComponent
 
 @dataclass
-class Stars(Sprite):
+class Stars(UIComponent):
     """
     Stars that scrolls in the background.
     """

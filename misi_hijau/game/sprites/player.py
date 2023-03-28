@@ -97,15 +97,19 @@ class Player(Sprite):
             
         self.game = game
 
-        self.level = game.level_handler.get_curr()
+        self.level = self.game.level_handler.get_curr()
         levelmap = self.level.levelmap # only run ONCE; we don't want to get the level on every tick.
         self.level_width = tile_to_real(levelmap.level_width)
         self.level_height = tile_to_real(levelmap.level_height)
 
+        self.health = self.level.max_health
         self.coord = SpriteCoordinate(self.level_width // 2, tile_to_real(4), self.level_width // 2, self.level_height - tile_to_real(4))
         
         self.statusbar = game.statusbar
         self.statusbar.append(self.statusbar_items)
+
+        self.game.event_handler.add_handler(events.PlayerCollidingEnemy.name, self.is_colliding_with_enemy)
+
         self.init_costume(game.level_handler.curr_level.ship_type)
         self.ticker = Ticker(3)
 
@@ -159,10 +163,6 @@ class Player(Sprite):
         else:
             self.game.event_handler.trigger_event(events.StarsScroll)
 
-    def shoot_handler(self):
-        shoot_event = events.PlayerShootBullets(self.coord.x_map, self.coord.y_map)
-        self.game.event_handler.trigger_event(shoot_event)
-        self.game.soundplayer.play(self.soundbank["shoot"])
 
     def cam_update(self):
         self.game.camera.y = self.coord.y_map
@@ -177,7 +177,6 @@ class Player(Sprite):
             self.game.camera.dir_y = self.y_vel
             self.game.camera.dir_x = self.x_vel
         
-
     def update(self):
         self.map_to_view(self.game.camera.y)
         self.cam_update()
@@ -193,7 +192,21 @@ class Player(Sprite):
 
         pyxel.blt(self.coord.x, self.coord.y, self.img, self.u, self.v, self.w, self.h, self.colkey)
     
-    def player_reset(self):
+    # Event handler functions
+    def shoot_handler(self):
+        self.game.event_handler.trigger_event(events.PlayerShootBullets(self.coord.x_map, self.coord.y_map))
+        self.game.soundplayer.play(self.soundbank["shoot"])
+    
+    def is_colliding_with_enemy(self, enemy_x: float, enemy_y: float, enemy_w: int, enemy_h: int) -> bool:
+        if self.is_colliding(enemy_x, enemy_y, enemy_w, enemy_h):
+            self.health -= 1
+            if self.health == 0:
+                self.reset_handler() # we need to call this directly because else our health will be ~ crippled ~
+                self.game.event_handler.trigger_event(events.LevelRestart)
+            return True
+        return False
+
+    def reset_handler(self):
         self.coord.x_map = self.level_width // 2
         self.coord.y_map = self.level_height - tile_to_real(4)
         self.x_vel = 0

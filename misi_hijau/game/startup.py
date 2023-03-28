@@ -12,11 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from game import components
-from game.sprites import Sprite, SpriteHandler, player, bullets, enemy, stars, minerals
-from game.game_handler import GameStateManager
-from res.levels import levels
 import pyxel
+
+from game.common import WINDOW_HEIGHT, WINDOW_WIDTH
+
+from game.sprites import Sprite, player, bullets, enemy, minerals
+from game.ui import UIComponent, stars
+
+from game import components
+from game.game_handler import GameStateManager
+
+from res.levels import levels
 
 class Game():
     def __init__(self):
@@ -32,14 +38,21 @@ class Game():
         statusbar = components.Statusbar()
         sprite_handler = components.SpriteHandler()
         event_handler = components.EventHandler()
-        self.game_collection = GameStateManager(soundplayer, camera, keylistener, level_handler, statusbar, sprite_handler, event_handler)
+        ui_handler = components.UIHandler()
+        self.game_collection = GameStateManager(soundplayer, camera, keylistener, level_handler, statusbar, sprite_handler, event_handler, ui_handler)
 
         # Set up level
         self.game_collection.level_handler.set_lvl(levels[0])
+        
+        # Set up game UI components
+        ui_components = self.create_ui_components()
+        self.init_ui_components(ui_components)
 
         # Set up sprites
         sprites_collection = self.create_sprites()
         self.init_sprites(sprites_collection)
+
+        # Debugging
         # self.debugger = Debugger(self.game_collection.sprite_handler.sprites["player"], self.game_collection)
 
     def scene_setup(self):
@@ -48,25 +61,34 @@ class Game():
         """
         pass
 
+    def create_ui_components(self) -> dict[str, UIComponent]:
+        # We separate stars because it needs to be rendered before anything else
+        self.ui_stars = stars.Stars(100, self.game_collection)
+
+        ui_components: dict[str, UIComponent] = {
+        }
+        
+        return ui_components
+
+    def init_ui_components(self, ui_components: dict[str, UIComponent]):
+        self.game_collection.ui_handler.append(ui_components)
+
     def create_sprites(self) -> dict[str, Sprite]:
         # Set up player
         spr_bullets = bullets.Bullets(self.game_collection)
         spr_player = player.Player(self.game_collection)
         spr_enemies = enemy.EnemyHandler(enemy.EnemyType.ENEMY_1, self.game_collection)
-        spr_stars = stars.Stars(100, self.game_collection)
         spr_minerals = minerals.MineralHandler(self.game_collection)
 
         sprites_collection: dict[str, Sprite] = {
-                # Order MATTERS.
-                "stars": spr_stars,
+                # Order matters (the layering)
                 "bullets": spr_bullets,
-                "player": spr_player,
                 "enemies": spr_enemies,
+                "player": spr_player,
                 "minerals": spr_minerals
         }
 
         return sprites_collection
-
 
     def init_sprites(self, sprites_collection: dict[str, Sprite]):
         """
@@ -87,20 +109,32 @@ class Game():
         
     def update(self):
         """
-        Update game.
+        Update game state.
         """
         self.game_collection.sprite_handler.update()
+        self.ui_stars.update()
         self.game_collection.keylistener.check()
     
     def draw_game_loop(self):
         """
-        Draw game.
+        Draw game scene.
         """
 
+        # Draw the black background to prevent ghosting effect
+        pyxel.bltm(0, 0, 0, 800, 800, WINDOW_WIDTH, WINDOW_HEIGHT)
+        self.ui_stars.draw()
+
+        # Draw all the game stuff on top of the black background
         self.game_collection.camera.draw(self.game_collection.level_handler.curr_level.levelmap)
+
+        # And the sprites
         self.game_collection.sprite_handler.draw()
+
+        # Statusbar
         self.game_collection.statusbar.draw()
 
+        # And the rest of the game UI components
+        self.game_collection.ui_handler.draw()
 
     
     ##########################################################

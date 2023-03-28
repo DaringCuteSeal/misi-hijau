@@ -27,7 +27,7 @@ class MineralHandler(Sprite):
     }
 
     soundbank = {
-        "mineral_increment": Sfx(SoundType.AUDIO, 3, 12)
+        "mineral_increment": Sfx(SoundType.AUDIO, 2, 12)
     }
 
     def __init__(self, game: GameStateManager):
@@ -35,6 +35,7 @@ class MineralHandler(Sprite):
         self.game.event_handler.add_handler(events.MineralsCheck.name, self.player_collision_check_handler)
         self.game.statusbar.add(StatusbarItem(self.get_minerals_count, pyxel.COLOR_WHITE))
 
+        self.collected_minerals = 0
         self.level = self.game.level_handler.get_curr()
         mineral_type = self.level.mineral_type
         match mineral_type:
@@ -53,15 +54,18 @@ class MineralHandler(Sprite):
 
     def player_collision_check_handler(self, player_x_map: float, player_y_map: float, player_h: int) -> bool:
         # +1 tile here to count the centered player coordinate.
-        x = real_to_tile(player_x_map) + 1
-        y = real_to_tile(player_y_map) + 17 # the coordinate system is offset by 16 tiles because of the player's system
+        x = real_to_tile(player_x_map) + self.level.levelmap.map_x + 1
+
+        # The coord system is offset by 16 tiles because of the player's coord determination system
+        y = real_to_tile(player_y_map) + self.level.levelmap.map_y + 17 
+
         tilemap = pyxel.tilemap(0).pget(x, y)
         if tilemap == (self.mineral_costume):
             self.game.soundplayer.play(self.soundbank["mineral_increment"])
-            self.level.progress.increment_minerals(1)
+            self.collected_minerals += 1
             pyxel.tilemap(0).pset(x, y, (0, 0))
             return True
         return False
     
     def get_minerals_count(self) -> str:
-        return f"Minerals collected: {self.level.progress.minerals:>2} / {self.level.max_minerals}"
+        return f"Minerals collected: {self.collected_minerals:>2} / {self.level.max_minerals}"

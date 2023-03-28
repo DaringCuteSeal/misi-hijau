@@ -42,6 +42,17 @@ class BulletsCheck(Event):
             "enemy_h": enemy_h
         }
 
+class PlayerCollidingEnemy(Event):
+    name = "is_player_colliding_enemy"
+    def __init__(self, enemy_x: float, enemy_y: float, enemy_w: float, enemy_h: int):
+        self.data = {
+            "enemy_x": enemy_x,
+            "enemy_y": enemy_y,
+            "enemy_w": enemy_w,
+            "enemy_h": enemy_h
+        }
+
+
 
 class MineralsCheck(Event):
     name = "minerals_check"

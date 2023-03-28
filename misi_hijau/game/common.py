@@ -85,33 +85,25 @@ class LevelMap:
     enemies_map: list[tuple[int, int]]
     powerups_map: list[tuple[int, int]] | None
 
-@dataclass
-class LevelProgress:
-    minerals: int
-    player_health: int
-
-    def increment_minerals(self, value: int):
-        self.minerals += value
-
-@dataclass
 class Level:
     """
     A level.
     """
-    idx: int
-    levelmap: LevelMap
-    ship_type: PlayerShipType
-    mineral_type: MineralType
-    max_minerals: int
-    bullet_color: int
-    progress: LevelProgress
+    def __init__(self, idx: int, levelmap: LevelMap, ship_type: PlayerShipType, mineral_type: MineralType, bullet_color: int, max_minerals: int, max_health: int):
+        self.idx = idx
+        self.levelmap = levelmap
+        self.ship_type = ship_type
+        self.mineral_type = mineral_type
+        self.bullet_color = bullet_color
+        self.max_minerals = max_minerals
+        self.max_health = max_health
 
 @dataclass
 class StatusbarItem:
     """
     Item to be displayed in the statusbar.
     """
-    function: Callable[[], str] # function that returns a string.
+    function: Callable[[], str] # function that returns a string
     color: int
     custom_coords: bool = False
     x: int = 0
