@@ -14,13 +14,13 @@
 
 import pyxel
 
-from game.common import WINDOW_HEIGHT, WINDOW_WIDTH
+from game.common import WINDOW_HEIGHT, WINDOW_WIDTH, Level
 
 from game.sprites import Sprite, player, bullets, enemy, minerals
-from game.ui import UIComponent, stars
+from game.ui import UIComponent, stars, healthbar
 
 from game import components
-from game.game_handler import GameStateManager
+from game.game_handler import GameComponents, GameHandler
 
 from res.levels import levels
 
@@ -34,22 +34,25 @@ class Game():
         camera = components.Camera()
         soundplayer = components.SoundPlayer()
         keylistener = components.KeyListener()
-        level_handler = components.LevelHandler(levels)
         statusbar = components.Statusbar()
         sprite_handler = components.SpriteHandler()
         event_handler = components.EventHandler()
         ui_handler = components.UIHandler()
-        self.game_collection = GameStateManager(soundplayer, camera, keylistener, level_handler, statusbar, sprite_handler, event_handler, ui_handler)
+        game_collection = GameComponents(soundplayer, camera, keylistener, statusbar, sprite_handler, event_handler, ui_handler)
+
+        # Set up the main game handler
+        level_handler = components.LevelHandler(levels)
+        self.game_handler = GameHandler(level_handler, game_collection)
+        self.game_handler.levelhandler.set_lvl_by_idx(1)
 
         # Set up level
-        self.game_collection.level_handler.set_lvl(levels[0])
         
         # Set up game UI components
         ui_components = self.create_ui_components()
         self.init_ui_components(ui_components)
 
         # Set up sprites
-        sprites_collection = self.create_sprites()
+        sprites_collection = self.create_sprites(self.game_handler.levelhandler.get_curr_lvl())
         self.init_sprites(sprites_collection)
 
         # Debugging
@@ -63,22 +66,23 @@ class Game():
 
     def create_ui_components(self) -> dict[str, UIComponent]:
         # We separate stars because it needs to be rendered before anything else
-        self.ui_stars = stars.Stars(100, self.game_collection)
+        self.ui_stars = stars.Stars(100, self.game_handler.game_components)
 
         ui_components: dict[str, UIComponent] = {
+            "healthbar": healthbar.HealthBar(self.game_handler.game_components, self.game_handler.levelhandler.curr_level.max_health)
         }
         
         return ui_components
 
     def init_ui_components(self, ui_components: dict[str, UIComponent]):
-        self.game_collection.ui_handler.append(ui_components)
+        self.game_handler.game_components.ui_handler.append(ui_components)
 
-    def create_sprites(self) -> dict[str, Sprite]:
+    def create_sprites(self, level: Level) -> dict[str, Sprite]:
         # Set up player
-        spr_bullets = bullets.Bullets(self.game_collection)
-        spr_player = player.Player(self.game_collection)
-        spr_enemies = enemy.EnemyHandler(enemy.EnemyType.ENEMY_1, self.game_collection)
-        spr_minerals = minerals.MineralHandler(self.game_collection)
+        spr_bullets = bullets.Bullets(self.game_handler.game_components, level.bullet_color)
+        spr_player = player.Player(level, self.game_handler.game_components, level.max_health)
+        spr_enemies = enemy.EnemyHandler(level, enemy.EnemyType.ENEMY_1, self.game_handler.game_components)
+        spr_minerals = minerals.MineralHandler(level, self.game_handler.game_components)
 
         sprites_collection: dict[str, Sprite] = {
                 # Order matters (the layering)
@@ -95,7 +99,7 @@ class Game():
         Initialize game sprites.
         """
 
-        self.game_collection.sprite_handler.append(sprites_collection)
+        self.game_handler.game_components.sprite_handler.append(sprites_collection)
 
         objects_with_keybinds: dict[str, Sprite] = {
             "player": sprites_collection["player"]
@@ -103,7 +107,7 @@ class Game():
 
         for o in objects_with_keybinds:
             try:
-                self.game_collection.keylistener.append(o, objects_with_keybinds[o].keybindings)
+                self.game_handler.game_components.keylistener.append(o, objects_with_keybinds[o].keybindings)
             except AttributeError:
                 continue
         
@@ -111,9 +115,9 @@ class Game():
         """
         Update game state.
         """
-        self.game_collection.sprite_handler.update()
+        self.game_handler.game_components.sprite_handler.update()
         self.ui_stars.update()
-        self.game_collection.keylistener.check()
+        self.game_handler.game_components.keylistener.check()
     
     def draw_game_loop(self):
         """
@@ -125,16 +129,16 @@ class Game():
         self.ui_stars.draw()
 
         # Draw all the game stuff on top of the black background
-        self.game_collection.camera.draw(self.game_collection.level_handler.curr_level.levelmap)
+        self.game_handler.game_components.camera.draw(self.game_handler.levelhandler.curr_level.levelmap)
 
         # And the sprites
-        self.game_collection.sprite_handler.draw()
+        self.game_handler.game_components.sprite_handler.draw()
 
         # Statusbar
-        self.game_collection.statusbar.draw()
+        self.game_handler.game_components.statusbar.draw()
 
         # And the rest of the game UI components
-        self.game_collection.ui_handler.draw()
+        self.game_handler.game_components.ui_handler.draw()
 
     
     ##########################################################
@@ -143,9 +147,10 @@ class Game():
 
 
 
+
 # Debugging
 class Debugger:
-    def __init__(self, player: player.Player, game: GameStateManager):
+    def __init__(self, player: player.Player, game: GameComponents):
         self.player = player
         self.cam = game.camera
         game.statusbar.add(components.StatusbarItem(self.draw, pyxel.COLOR_WHITE))

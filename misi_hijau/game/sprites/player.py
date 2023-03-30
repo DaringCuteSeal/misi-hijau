@@ -25,8 +25,9 @@ from ..common import (
     SoundType,
     KeyTypes,
     StatusbarItem,
+    Level
 )
-from ..game_handler import GameStateManager
+from ..game_handler import GameComponents
 from .. import events
 from ..utils import Ticker, tile_to_real
 
@@ -34,6 +35,9 @@ class Flame(Sprite):
     """
     A flame that's controlled by the player.
     """
+    # The flame here is tightly coupled with the player but
+    # this shouldn't be a problem as I kinda assume the player
+    # and the flame is one single entity, just with 2 components
     def __init__(self):
         self.img = 0
         self.u = 32
@@ -51,6 +55,7 @@ class Flame(Sprite):
         pyxel.blt(self.coord.x, self.coord.y, self.img, self.u, self.v, self.w, self.h, self.colkey)
 
     def update(self):
+        self.hit_this_frame = False
         self.ticker.update()
 
     def flame_update(self, player_x: float, player_y: float, player_h: int):
@@ -71,6 +76,7 @@ class Player(Sprite):
     drag = 0.04
     x_vel = 0
     y_vel = 0
+    hit_this_frame: bool = False
 
     soundbank = {
         "shoot": Sfx(SoundType.AUDIO, 3, 10),
@@ -82,7 +88,7 @@ class Player(Sprite):
         "ship_3": (32, 32),
     }
 
-    def __init__(self, game: GameStateManager):
+    def __init__(self, level: Level, game: GameComponents, health: int):
         self.keybindings = {
             "player_right": KeyFunc(pyxel.KEY_RIGHT, lambda: self.move_handler(Direction.RIGHT)),
             "player_left": KeyFunc(pyxel.KEY_LEFT, lambda: self.move_handler(Direction.LEFT)),
@@ -97,12 +103,12 @@ class Player(Sprite):
             
         self.game = game
 
-        self.level = self.game.level_handler.get_curr()
+        self.level = level
         levelmap = self.level.levelmap # only run ONCE; we don't want to get the level on every tick.
         self.level_width = tile_to_real(levelmap.level_width)
         self.level_height = tile_to_real(levelmap.level_height)
 
-        self.health = self.level.max_health
+        self.health = health
         self.coord = SpriteCoordinate(self.level_width // 2, tile_to_real(4), self.level_width // 2, self.level_height - tile_to_real(4))
         
         self.statusbar = game.statusbar
@@ -110,7 +116,7 @@ class Player(Sprite):
 
         self.game.event_handler.add_handler(events.PlayerCollidingEnemy.name, self.is_colliding_with_enemy)
 
-        self.init_costume(game.level_handler.curr_level.ship_type)
+        self.init_costume(level.ship_type)
         self.ticker = Ticker(3)
 
         self.flame = Flame()
@@ -189,7 +195,6 @@ class Player(Sprite):
         
     def draw(self):
         self.flame.draw()
-
         pyxel.blt(self.coord.x, self.coord.y, self.img, self.u, self.v, self.w, self.h, self.colkey)
     
     # Event handler functions
@@ -199,8 +204,9 @@ class Player(Sprite):
     
     def is_colliding_with_enemy(self, enemy_x: float, enemy_y: float, enemy_w: int, enemy_h: int) -> bool:
         if self.is_colliding(enemy_x, enemy_y, enemy_w, enemy_h):
+            self.hit_this_frame = True
             self.health -= 1
-            if self.health == 0:
+            if self.health == 0 and self.hit_this_frame:
                 self.reset_handler() # we need to call this directly because else our health will be ~ crippled ~
                 self.game.event_handler.trigger_event(events.LevelRestart)
             return True

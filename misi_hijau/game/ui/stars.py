@@ -18,7 +18,7 @@ from ..common import (
     WINDOW_HEIGHT,
     WINDOW_WIDTH,
 )
-from ..game_handler import GameStateManager
+from ..game_handler import GameComponents
 from .. import events
 from . import UIComponent
 
@@ -27,7 +27,7 @@ class Stars(UIComponent):
     """
     Stars that scrolls in the background.
     """
-    def __init__(self, num_stars: int, game: GameStateManager):
+    def __init__(self, num_stars: int, game: GameComponents):
         game.event_handler.add_handler(events.StarsScroll.name, self.update)
         self.camera = game.camera
         self.stars: list[tuple[float, float, float]] = []
@@ -47,6 +47,6 @@ class Stars(UIComponent):
                 y = WINDOW_HEIGHT
             self.stars[i] = (x, y, speed)
 
-    def draw(self):
+    def _draw(self):
         for x, y, speed in self.stars:
             pyxel.pset(x, y, pyxel.COLOR_CYAN if speed < 3 else pyxel.COLOR_NAVY)

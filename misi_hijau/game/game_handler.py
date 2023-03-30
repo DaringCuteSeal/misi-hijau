@@ -28,20 +28,24 @@ from .components import (
     UIHandler,
 )
 
-# Manager of (almost) Everything here
 @dataclass
-class GameStateManager:
+class GameComponents:
     """
     A set of game components.
     """
     soundplayer: SoundPlayer
     camera: Camera
     keylistener: KeyListener
-    level_handler: LevelHandler
     statusbar: Statusbar
     sprite_handler: SpriteHandler
     event_handler: EventHandler
     ui_handler: UIHandler
 
-    def restart(self):
-        self.sprite_handler.reset()
+# Manager of (almost) Everything here
+@dataclass
+class GameHandler:
+    """
+    Main game handler so sprites can't mess with the leveling system.
+    """
+    levelhandler: LevelHandler
+    game_components: GameComponents

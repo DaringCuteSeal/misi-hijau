@@ -34,15 +34,24 @@ class UIComponent(ABC):
     v: int = 0
     w: int = 8
     h: int = 8
+    active: bool = True
     keybindings: dict[str, common.KeyFunc] = field(default_factory=dict[str, common.KeyFunc])
     soundbank: dict[str, common.Sfx] = field(default_factory=dict[str, common.Sfx])
     costumes: dict[str, tuple[int, int]] = field(default_factory=dict[str, tuple[int, int]])
 
     @abstractmethod
+    def _draw(self):
+        """
+        The actual draw method that needs to have an implementation.
+        Will only be called if UI is active.
+        """
+    
     def draw(self):
         """
         Draw (render) UI component.
         """
+        if self.active:
+            self._draw()
 
     def set_costume(self, costume: tuple[int, int]):
         """

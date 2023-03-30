@@ -99,13 +99,23 @@ class LevelHandler:
     """
     def __init__(self, levels: list[Level]):
         self.levels = levels
-        self.curr_level = levels[0]
+        self.curr_level: Level = levels[0]
     
-    def set_lvl(self, level: Level):
-        self.curr_level = level
+    def set_lvl_by_idx(self, idx: int):
+        level = self._find_level_by_idx(idx) 
+        if level:
+            self.curr_level = level
 
-    def get_curr(self) -> Level:
+    def get_curr_lvl(self) -> Level:
         return self.curr_level
+
+    def get_curr_lvl_idx(self) -> int:
+        return self.curr_level.idx
+
+    def _find_level_by_idx(self, idx: int) -> Level | None:
+        for level in self.levels:
+            if level.idx == idx:
+                return level
     
 
 # Camera handling
@@ -134,7 +144,7 @@ class Statusbar:
     """
     def __init__(self):
         self.items: list[StatusbarItem] = []
-        self.def_x = utils.TILE_SIZE + 3
+        self.def_x = pyxel.TILE_SIZE + 3
         self.def_y = 10
         self.def_gap_y = 8
     

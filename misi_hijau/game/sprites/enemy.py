@@ -14,10 +14,10 @@
 
 import pyxel
 from enum import Enum
-from ..common import ALPHA_COL
+from ..common import ALPHA_COL, Level
 from ..utils import Ticker, tile_to_real
 from . import Sprite, SpriteCoordinate
-from ..game_handler import GameStateManager
+from ..game_handler import GameComponents
 from .. import events
 
 class EnemyType(Enum):
@@ -87,10 +87,10 @@ class EnemySquidge(EnemyEntity):
         pass
 
 class EnemyHandler(Sprite):
-    def __init__(self, enemy_type: EnemyType, game: GameStateManager):
+    def __init__(self, level: Level, enemy_type: EnemyType, game: GameComponents):
         self.type = enemy_type
         self.game = game
-        level = self.game.level_handler.get_curr()
+        level = level
         self.map = level.levelmap.enemies_map
         self.level_height = tile_to_real(level.levelmap.level_height)
         self.level_width = tile_to_real(level.levelmap.level_width)

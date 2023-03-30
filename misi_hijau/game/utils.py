@@ -16,7 +16,6 @@
 Common utilities.
 """
 import pyxel
-TILE_SIZE = 8
 
 # Tick handling
 class Ticker:
@@ -55,14 +54,14 @@ def tile_to_real(size: int) -> int:
     """
     Get real size in pixel from a tilemap size.
     """
-    return size * TILE_SIZE
+    return size * pyxel.TILE_SIZE
 
 def real_to_tile(size: float) -> int:
     """
     Get tilemap size from real pixel size.
     """
-    size = size // TILE_SIZE
+    size = size // pyxel.TILE_SIZE
     return pyxel.floor(size)
 
 def round_to_tile(size: float) -> int:
-    return pyxel.ceil(size / TILE_SIZE) * TILE_SIZE
+    return pyxel.ceil(size / pyxel.TILE_SIZE) * pyxel.TILE_SIZE

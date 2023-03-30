@@ -13,9 +13,9 @@
 # limitations under the License.
 
 from . import Sprite
-from ..game_handler import GameStateManager
+from ..game_handler import GameComponents
 from .. import events
-from ..common import MineralType, Sfx, SoundType, StatusbarItem
+from ..common import MineralType, Sfx, SoundType, StatusbarItem, Level
 from ..utils import real_to_tile
 import pyxel
 
@@ -30,13 +30,13 @@ class MineralHandler(Sprite):
         "mineral_increment": Sfx(SoundType.AUDIO, 2, 12)
     }
 
-    def __init__(self, game: GameStateManager):
+    def __init__(self, level: Level, game: GameComponents):
         self.game = game
         self.game.event_handler.add_handler(events.MineralsCheck.name, self.player_collision_check_handler)
         self.game.statusbar.add(StatusbarItem(self.get_minerals_count, pyxel.COLOR_WHITE))
 
         self.collected_minerals = 0
-        self.level = self.game.level_handler.get_curr()
+        self.level = level
         mineral_type = self.level.mineral_type
         match mineral_type:
             case MineralType.MINERAL_1:

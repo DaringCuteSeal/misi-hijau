@@ -52,8 +52,6 @@ class PlayerCollidingEnemy(Event):
             "enemy_h": enemy_h
         }
 
-
-
 class MineralsCheck(Event):
     name = "minerals_check"
     def __init__(self, player_x_map: float, player_y_map: float, player_h: int):
@@ -61,6 +59,13 @@ class MineralsCheck(Event):
             "player_x_map": player_x_map,
             "player_y_map": player_y_map,
             "player_h": player_h
+        }
+
+class PlayerHealthChange(Event):
+    name = "player_health_change"
+    def __init__(self, value: int):
+        self.data = {
+            "change": value
         }
 
 # Events without data being passed

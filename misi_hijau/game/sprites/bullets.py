@@ -14,7 +14,7 @@
 
 from ..common import Sfx, SoundType
 from . import Sprite, SpriteCoordinate
-from ..game_handler import GameStateManager
+from ..game_handler import GameComponents
 from .. import events
 import pyxel
 
@@ -27,7 +27,7 @@ class Bullet(Sprite):
     costumes = {}
     soundbank = {}
 
-    def __init__(self, coord: SpriteCoordinate, color: int, game: GameStateManager):
+    def __init__(self, coord: SpriteCoordinate, color: int, game: GameComponents):
         self.coord = coord
         self.color = color
         self.camera = game.camera
@@ -42,10 +42,10 @@ class Bullet(Sprite):
     
 
 class Bullets(Sprite):
-    def __init__(self, game: GameStateManager):
+    def __init__(self, game: GameComponents, bullet_color: int):
         self.bullets: list[Bullet] = []
         self.game = game
-        self.bullet_color = self.game.level_handler.get_curr().bullet_color
+        self.bullet_color = bullet_color
         self.game.event_handler.add_handler(events.PlayerShootBullets.name, self.shoot_handler)
         self.game.event_handler.add_handler(events.BulletsCheck.name, self.bullets_colliding_check_handler)
         self.soundbank = {
