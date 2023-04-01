@@ -97,14 +97,17 @@ class Level:
         self.bullet_color = bullet_color
         self.max_minerals = max_minerals
         self.max_health = max_health
+        self.enemies_count = len(self.levelmap.enemies_map)
 
 @dataclass
 class StatusbarItem:
     """
     Item to be displayed in the statusbar.
     """
+    idx: int
     function: Callable[[], str] # function that returns a string
     color: int
+    update_interval: float = 1
     custom_coords: bool = False
     x: int = 0
     y: int = 0

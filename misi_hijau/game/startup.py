@@ -18,6 +18,7 @@ from game.common import WINDOW_HEIGHT, WINDOW_WIDTH, Level
 
 from game.sprites import Sprite, player, bullets, enemy, minerals
 from game.ui import UIComponent, stars, healthbar
+from game import events
 
 from game import components
 from game.game_handler import GameComponents, GameHandler
@@ -38,15 +39,13 @@ class Game():
         sprite_handler = components.SpriteHandler()
         event_handler = components.EventHandler()
         ui_handler = components.UIHandler()
-        game_collection = GameComponents(soundplayer, camera, keylistener, statusbar, sprite_handler, event_handler, ui_handler)
+        game_components = GameComponents(soundplayer, camera, keylistener, statusbar, sprite_handler, event_handler, ui_handler)
 
         # Set up the main game handler
         level_handler = components.LevelHandler(levels)
-        self.game_handler = GameHandler(level_handler, game_collection)
+        self.game_handler = GameHandler(level_handler, game_components)
         self.game_handler.levelhandler.set_lvl_by_idx(1)
 
-        # Set up level
-        
         # Set up game UI components
         ui_components = self.create_ui_components()
         self.init_ui_components(ui_components)
@@ -54,6 +53,10 @@ class Game():
         # Set up sprites
         sprites_collection = self.create_sprites(self.game_handler.levelhandler.get_curr_lvl())
         self.init_sprites(sprites_collection)
+
+        # Add event handler
+        self.update_statusbar()
+        self.game_handler.game_components.event_handler.add_handler(events.UpdateStatusbar.name, self.update_statusbar)
 
         # Debugging
         # self.debugger = Debugger(self.game_collection.sprite_handler.sprites["player"], self.game_collection)
@@ -79,7 +82,7 @@ class Game():
 
     def create_sprites(self, level: Level) -> dict[str, Sprite]:
         # Set up player
-        spr_bullets = bullets.Bullets(self.game_handler.game_components, level.bullet_color)
+        spr_bullets = bullets.Bullets(level, self.game_handler.game_components, level.bullet_color)
         spr_player = player.Player(level, self.game_handler.game_components, level.max_health)
         spr_enemies = enemy.EnemyHandler(level, enemy.EnemyType.ENEMY_1, self.game_handler.game_components)
         spr_minerals = minerals.MineralHandler(level, self.game_handler.game_components)
@@ -123,7 +126,6 @@ class Game():
         """
         Draw game scene.
         """
-
         # Draw the black background to prevent ghosting effect
         pyxel.bltm(0, 0, 0, 800, 800, WINDOW_WIDTH, WINDOW_HEIGHT)
         self.ui_stars.draw()
@@ -131,16 +133,20 @@ class Game():
         # Draw all the game stuff on top of the black background
         self.game_handler.game_components.camera.draw(self.game_handler.levelhandler.curr_level.levelmap)
 
-        # And the sprites
+        # Sprites
         self.game_handler.game_components.sprite_handler.draw()
+
+        # Game UI components
+        self.game_handler.game_components.ui_handler.draw()
 
         # Statusbar
         self.game_handler.game_components.statusbar.draw()
-
-        # And the rest of the game UI components
-        self.game_handler.game_components.ui_handler.draw()
-
     
+    def update_statusbar(self):
+        self.game_handler.game_components.statusbar.update()
+
+
+
     ##########################################################
     # All functions defined below are only used for TESTING. #
     ##########################################################
@@ -153,7 +159,7 @@ class Debugger:
     def __init__(self, player: player.Player, game: GameComponents):
         self.player = player
         self.cam = game.camera
-        game.statusbar.add(components.StatusbarItem(self.draw, pyxel.COLOR_WHITE))
+        game.statusbar.add(components.StatusbarItem(100, self.draw, pyxel.COLOR_WHITE))
     
     def draw(self) -> str:
 #         return f"""

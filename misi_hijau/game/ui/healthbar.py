@@ -44,8 +44,8 @@ class HealthBar(UIComponent):
                 pyxel.blt(x, self.coord.y, 0, self.costume[0], self.costume[1], self.w, self.h, ALPHA_COL)
                 x_prev = x
 
-    def change_health_count(self, value: int):
-        self.health_count += value
+    def change_health_count(self, change_value: int):
+        self.health_count += change_value
         self._recalculate
 
     def _recalculate(self):

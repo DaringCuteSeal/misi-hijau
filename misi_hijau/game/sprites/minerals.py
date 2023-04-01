@@ -31,9 +31,10 @@ class MineralHandler(Sprite):
     }
 
     def __init__(self, level: Level, game: GameComponents):
+        self.original_tilemap = pyxel.tilemap(0)
         self.game = game
         self.game.event_handler.add_handler(events.MineralsCheck.name, self.player_collision_check_handler)
-        self.game.statusbar.add(StatusbarItem(self.get_minerals_count, pyxel.COLOR_WHITE))
+        self.game.statusbar.add(StatusbarItem(1, self.get_minerals_count, pyxel.COLOR_WHITE))
 
         self.collected_minerals = 0
         self.level = level
@@ -67,5 +68,6 @@ class MineralHandler(Sprite):
             return True
         return False
     
+    # Functions for statusbar
     def get_minerals_count(self) -> str:
         return f"Minerals collected: {self.collected_minerals:>2} / {self.level.max_minerals}"

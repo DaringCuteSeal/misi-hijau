@@ -144,6 +144,7 @@ class Statusbar:
     """
     def __init__(self):
         self.items: list[StatusbarItem] = []
+        self.strings: list[str] = []
         self.def_x = pyxel.TILE_SIZE + 3
         self.def_y = 10
         self.def_gap_y = 8
@@ -168,18 +169,25 @@ class Statusbar:
         """
         self.items = []
 
+    def update(self):
+        """
+        Update statusbar strings (call all functions used to get the string).
+        """
+        self.strings = [item.function() for item in self.items]
+
     def draw(self):
         """
         Draw statusbar.
         """
-        for item in self.items:
-            string = item.function()
+        for i, item in enumerate(self.items):
+            string = self.strings[i]
             pyxel.text(item.x, item.y, string, item.color)
     
     def _recalculate(self):
         """
         Recalculate position for each statusbar item.
         """
+        self.items = sorted(self.items, key=lambda x: x.idx)
         self.items[0].y = self.def_y
         self.items[0].x = self.def_x
         last_y = self.def_y

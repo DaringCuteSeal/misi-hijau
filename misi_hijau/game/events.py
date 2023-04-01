@@ -18,7 +18,7 @@ from typing import Optional, Any
 @dataclass
 class Event:
     """
-    An event. May include an optional dictionary that will be passed as an argument to the handler function.
+    An event. May include an optional dictionary that will be passed as an argument to the handler function and a trigger 
     """
     name: str
     data: Optional[dict[str, Any]]
@@ -65,9 +65,11 @@ class PlayerHealthChange(Event):
     name = "player_health_change"
     def __init__(self, value: int):
         self.data = {
-            "change": value
+            "change_value": value
         }
 
 # Events without data being passed
 StarsScroll = Event("stars_scroll", None)
 LevelRestart = Event("level_restart", None)
+UpdateHealthbar = Event("update_healthbar", None)
+UpdateStatusbar = Event("update_statusbar", None)

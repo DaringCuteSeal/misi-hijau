@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ..common import Sfx, SoundType
+from ..common import Level, Sfx, SoundType, StatusbarItem
 from . import Sprite, SpriteCoordinate
 from ..game_handler import GameComponents
 from .. import events
@@ -42,10 +42,14 @@ class Bullet(Sprite):
     
 
 class Bullets(Sprite):
-    def __init__(self, game: GameComponents, bullet_color: int):
+    def __init__(self, level: Level, game: GameComponents, bullet_color: int):
         self.bullets: list[Bullet] = []
+        self.max_enemies_count = level.enemies_count
         self.game = game
         self.bullet_color = bullet_color
+        self.enemies_hit_count = 0
+        self.game.statusbar.add(StatusbarItem(2, self.get_enemy_count, pyxel.COLOR_WHITE, 2))
+        self.game.event_handler.add_handler(events.LevelRestart.name, self.reset_handler)
         self.game.event_handler.add_handler(events.PlayerShootBullets.name, self.shoot_handler)
         self.game.event_handler.add_handler(events.BulletsCheck.name, self.bullets_colliding_check_handler)
         self.soundbank = {
@@ -73,8 +77,9 @@ class Bullets(Sprite):
             for bullet in self.bullets:
                 bullet.draw()
     
-    def reset(self):
+    def reset_handler(self):
         self.bullets = []
+        self.enemies_hit_count = 0
   
     def shoot_handler(self, player_x: float, player_y: float):
         self.append(player_x + 7, player_y - 8, self.bullet_color)
@@ -85,5 +90,12 @@ class Bullets(Sprite):
                 if bullet.is_colliding(enemy_x, enemy_y, enemy_w, enemy_h):
                     self.bullets.remove(bullet)
                     self.game.soundplayer.play(self.soundbank["explode"])
+                    self.game.event_handler.trigger_event(events.UpdateStatusbar)
+                    self.enemies_hit_count += 1
                     return True
         return False
+    
+    # Functions for statusbar
+
+    def get_enemy_count(self) -> str:
+        return f"Aliens eliminated: {self.enemies_hit_count} / {self.max_enemies_count}"
