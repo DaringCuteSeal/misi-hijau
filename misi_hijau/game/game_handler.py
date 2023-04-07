@@ -22,7 +22,7 @@ from .components import (
     Camera,
     KeyListener,
     LevelHandler,
-    Statusbar,
+    GameStatusbar,
     SpriteHandler,
     EventHandler,
     UIHandler,
@@ -36,7 +36,7 @@ class GameComponents:
     soundplayer: SoundPlayer
     camera: Camera
     keylistener: KeyListener
-    statusbar: Statusbar
+    statusbar: GameStatusbar
     sprite_handler: SpriteHandler
     event_handler: EventHandler
     ui_handler: UIHandler

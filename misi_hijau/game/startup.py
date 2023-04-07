@@ -35,7 +35,7 @@ class Game():
         camera = components.Camera()
         soundplayer = components.SoundPlayer()
         keylistener = components.KeyListener()
-        statusbar = components.Statusbar()
+        statusbar = components.GameStatusbar()
         sprite_handler = components.SpriteHandler()
         event_handler = components.EventHandler()
         ui_handler = components.UIHandler()
@@ -44,7 +44,7 @@ class Game():
         # Set up the main game handler
         level_handler = components.LevelHandler(levels)
         self.game_handler = GameHandler(level_handler, game_components)
-        self.game_handler.levelhandler.set_lvl_by_idx(1)
+        self.game_handler.levelhandler.set_lvl_by_idx(2)
 
         # Set up game UI components
         ui_components = self.create_ui_components()
@@ -58,14 +58,15 @@ class Game():
         self.update_statusbar()
         self.game_handler.game_components.event_handler.add_handler(events.UpdateStatusbar.name, self.update_statusbar)
 
+        self.level_scene_setup()
         # Debugging
         # self.debugger = Debugger(self.game_collection.sprite_handler.sprites["player"], self.game_collection)
 
-    def scene_setup(self):
+    def level_scene_setup(self):
         """
-        Scene initialization.
+        Level scene initialization.
         """
-        pass
+        self.spr_minerals.spawn()
 
     def create_ui_components(self) -> dict[str, UIComponent]:
         # We separate stars because it needs to be rendered before anything else
@@ -82,17 +83,18 @@ class Game():
 
     def create_sprites(self, level: Level) -> dict[str, Sprite]:
         # Set up player
-        spr_bullets = bullets.Bullets(level, self.game_handler.game_components, level.bullet_color)
-        spr_player = player.Player(level, self.game_handler.game_components, level.max_health)
-        spr_enemies = enemy.EnemyHandler(level, enemy.EnemyType.ENEMY_1, self.game_handler.game_components)
-        spr_minerals = minerals.MineralHandler(level, self.game_handler.game_components)
+        # XXX currently the "temporary" sprites are global, def not good
+        self.spr_bullets = bullets.Bullets(level, self.game_handler.game_components, level.bullet_color)
+        self.spr_player = player.Player(level, self.game_handler.game_components, level.max_health)
+        self.spr_enemies = enemy.EnemyHandler(level, enemy.EnemyType.ENEMY_1, self.game_handler.game_components)
+        self.spr_minerals = minerals.MineralHandler(level, self.game_handler.game_components)
 
         sprites_collection: dict[str, Sprite] = {
                 # Order matters (the layering)
-                "bullets": spr_bullets,
-                "enemies": spr_enemies,
-                "player": spr_player,
-                "minerals": spr_minerals
+                "bullets": self.spr_bullets,
+                "enemies": self.spr_enemies,
+                "player": self.spr_player,
+                "minerals": self.spr_minerals
         }
 
         return sprites_collection
@@ -144,8 +146,6 @@ class Game():
     
     def update_statusbar(self):
         self.game_handler.game_components.statusbar.update()
-
-
 
     ##########################################################
     # All functions defined below are only used for TESTING. #

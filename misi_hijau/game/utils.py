@@ -64,4 +64,20 @@ def real_to_tile(size: float) -> int:
     return pyxel.floor(size)
 
 def round_to_tile(size: float) -> int:
+    """
+    Round a number to closest multiple of TILE_SIZE.
+    """
     return pyxel.ceil(size / pyxel.TILE_SIZE) * pyxel.TILE_SIZE
+
+def generate_random_map_matrix(num_tiles: int, map_w: int, map_h: int, map_x: int, map_y: int) -> list[tuple[int, int]]:
+    """
+    Generate a random map matrix: an array containing tuples of coordinates. `w` and `h` is in tilemap scale.
+    """
+    map_matrix: list[tuple[int, int]] = []
+    while len(map_matrix) < num_tiles:
+        # The extra 1 offset is needed so the player can *actually* collect the item. Also is just a nice padding.
+        x = pyxel.rndi(pyxel.TILE_SIZE + 1, map_w - 1) + map_x
+        y = pyxel.rndi(16 + 1, map_h - 1) + map_y # the map is offset by 16 tiles
+        if (x, y) not in map_matrix:
+            map_matrix.append((x, y))
+    return map_matrix

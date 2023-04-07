@@ -25,6 +25,7 @@ Common classes and functions for many files including utilities.
 ALPHA_COL = pyxel.COLOR_PURPLE
 WINDOW_WIDTH = 256
 WINDOW_HEIGHT = 256
+BLANK_GRID = (0, 0)
 
 # Classes
 class Direction(Enum):
@@ -83,7 +84,7 @@ class LevelMap:
     level_width: int
     level_height: int
     enemies_map: list[tuple[int, int]]
-    powerups_map: list[tuple[int, int]] | None
+    powerups_map: list[tuple[int, int]]
 
 class Level:
     """

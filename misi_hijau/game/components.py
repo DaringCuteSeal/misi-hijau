@@ -138,7 +138,7 @@ class Camera:
         pyxel.bltm(0, 0, 0, self.x + utils.tile_to_real(levelmap.map_x), self.y + utils.tile_to_real(levelmap.map_y), 256, 256, pyxel.COLOR_BLACK)
 
 # Statusbar handling
-class Statusbar:
+class GameStatusbar:
     """
     Game statusbar which holds an array of items (`StatusBarItem`) to be displayed.
     """
