@@ -80,11 +80,12 @@ class BulletsHandler(Sprite):
     def shoot_handler(self, player_x: float, player_y: float):
         self.append_bullet(player_x + 7, player_y - 8, self.bullet_color)
 
-    def bullets_colliding_check_handler(self, enemy_x: float, enemy_y: float, enemy_w: float, enemy_h: float) -> bool:
+    def bullets_colliding_check_handler(self, enemy_x: float, enemy_y: float, enemy_w: int, enemy_h: int) -> bool:
         if len(self.bullets) > 0: # Only check collision if there are actually bullets to check for.
             for bullet in self.bullets:
                 if bullet.is_colliding(enemy_x, enemy_y, enemy_w, enemy_h):
                     self.bullets.remove(bullet)
+                    self.game.event_handler.trigger_event(events.AppendBlastEffect(enemy_x, enemy_y, enemy_w, enemy_h))
                     self.game.soundplayer.play(self.soundbank["explode"])
                     self.game.event_handler.trigger_event(events.UpdateStatusbar)
                     return True

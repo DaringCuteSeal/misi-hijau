@@ -54,6 +54,8 @@ we can do it!!!!!
 - [ ] Slideshows in base.py
 - [ ] Add coherent storyline
 
+MINOR ISSUES
+- [ ] Blast animation not updating correctly when there multiple blasts at a time
 
 ## Apr 10-13
 - [ ] Work on video

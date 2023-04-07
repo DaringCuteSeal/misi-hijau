@@ -15,14 +15,13 @@
 """
 Level storing.
 """
-
 import pyxel
-
 from game.common import (
     Level,
     LevelMap,
     PlayerShipType,
-    MineralType
+    MineralType,
+    EnemyType
 )
 
 
@@ -39,8 +38,6 @@ map_2_width = 32
 map_2_height = 104
 map_2_x = 40
 map_2_y = 0
-enemies_map_2: list[tuple[int, int]] = [
-]
 
 map_2 = LevelMap(map_2_x, map_2_y, map_2_width, map_2_height, [])
 
@@ -49,7 +46,7 @@ map_3 = LevelMap(0, 0, 32, 72, [])
 
 # Create list of levels
 levels: list[Level] = [
-    Level(1, map_1, PlayerShipType.SHIP1, MineralType.MINERAL_1, pyxel.COLOR_LIME, 14, 3),
-    Level(2, map_2, PlayerShipType.SHIP2, MineralType.MINERAL_2, pyxel.COLOR_CYAN, 20, 4),
-    Level(3, map_2, PlayerShipType.SHIP3, MineralType.MINERAL_3, pyxel.COLOR_GRAY, 35, 5) # ship doesn't have flame
+    Level(1, map_1, PlayerShipType.SHIP1, EnemyType.ENEMY_1, MineralType.MINERAL_1, pyxel.COLOR_LIME, 14, 3),
+    Level(2, map_2, PlayerShipType.SHIP2, EnemyType.ENEMY_2, MineralType.MINERAL_2, pyxel.COLOR_CYAN, 20, 4),
+    Level(3, map_2, PlayerShipType.SHIP3, EnemyType.ENEMY_3, MineralType.MINERAL_3, pyxel.COLOR_GRAY, 35, 5) # ship doesn't have flame
 ]

@@ -13,20 +13,13 @@
 # limitations under the License.
 
 import pyxel
-from enum import Enum
-from ..common import ALPHA_COL, Level, BLANK_UV, MAP_Y_OFFSET_TILES, StatusbarItem
+from ..common import ALPHA_COL, Level, BLANK_UV, MAP_Y_OFFSET_TILES, StatusbarItem, EnemyType
 from ..utils import Ticker, tile_to_real
 from . import Sprite, SpriteCoordinate
 from ..game_handler import GameComponents
 from .. import events
 
 ENEMY_SPAWNER_UV = (7, 1)
-
-class EnemyType(Enum):
-    ENEMY_1 = 0 # Krelth/Grug
-    ENEMY_2 = 1 # Naxor/Phong
-    ENEMY_3 = 2 # Octyca/Squidge
-
 class EnemyEntity(Sprite):
     keybindings = {}
     soundbank = {}
@@ -57,19 +50,16 @@ class EnemyGrug(EnemyEntity):
         self.coord.y_map = y_map
         self.level_height = tile_to_real(level.levelmap.level_height)
         self.level_width = tile_to_real(level.levelmap.level_width)
-        self.ticker = Ticker(8)
 
     def update(self):
-        self.ticker.update()
-        if self.ticker.get():
-            self.coord.x_map += pyxel.rndf(-2, 2)
-            self.coord.y_map += pyxel.rndf(-2, 2)
-            if self.coord.x_map > self.level_width: 
-                self.coord.x_map = self.level_width - 2
-            if self.coord.x_map < 0:
-                self.coord.x_map = 0
-            if self.coord.y_map > self.level_height:
-                self.coord.y_map = self.level_height
+        self.coord.x_map += pyxel.rndf(-2, 2)
+        self.coord.y_map += pyxel.rndf(-2, 2)
+        if self.coord.x_map > self.level_width: 
+            self.coord.x_map = self.level_width - 2
+        if self.coord.x_map < 0:
+            self.coord.x_map = 0
+        if self.coord.y_map > self.level_height:
+            self.coord.y_map = self.level_height
 
     
 class EnemyPhong(EnemyEntity):
@@ -90,16 +80,18 @@ class EnemySquidge(EnemyEntity):
 
 class EnemyHandler(Sprite):
     def __init__(self, level: Level, enemy_type: EnemyType, game: GameComponents):
+        self.enemies_ticker = Ticker(8)
         self.enemies_coordinates_list: list[tuple[int, int]] = []
         self.enemy_type = enemy_type
         self.game = game
         self.level = level
         self.levelmap = level.levelmap
+        self.enemies_eliminated = 0
         self.enemies: list[EnemyEntity] = []
-        self.enemies_coordinates_list = self.get_enemies_matrix()
+        self.enemies_coordinates_list = self.generate_enemies_matrix()
         self.game.statusbar.add(StatusbarItem(2, self.get_enemy_count, pyxel.COLOR_WHITE, 2))
 
-    def get_enemies_matrix(self) -> list[tuple[int, int]]:
+    def generate_enemies_matrix(self) -> list[tuple[int, int]]:
         """
         Get a list of enemy coordinates.
         It works by checking each tile in the map and compares it to the current enemy type's UV coordinates.
@@ -111,6 +103,7 @@ class EnemyHandler(Sprite):
                 tile_type = tilemap.pget(x, y)
                 if tile_type == ENEMY_SPAWNER_UV:
                     enemies_matrix.append((x, y))
+        self.enemies_length = len(enemies_matrix)
         return enemies_matrix
 
     def spawn(self):
@@ -129,8 +122,8 @@ class EnemyHandler(Sprite):
     
     def _append_enemy(self, enemy_type: EnemyType, x: int, y: int):
 
-        x = tile_to_real(x)
-        y = tile_to_real(y - MAP_Y_OFFSET_TILES)
+        x = tile_to_real(x - self.levelmap.map_x)
+        y = tile_to_real(y - MAP_Y_OFFSET_TILES - self.levelmap.map_y)
         match enemy_type:
             case EnemyType.ENEMY_1:
                 enemy = EnemyGrug(x, y, self.level)
@@ -141,17 +134,24 @@ class EnemyHandler(Sprite):
         self.enemies.append(enemy)
 
     def update(self):
+        self.enemies_ticker.update()
+
         for enemy in self.enemies:
             enemy.map_to_view(self.game.camera.y)
-            enemy.update()
-
             # XXX try checking collision on individual sprite update instead (without the EnemiesHandler)
             # also maybe this can mean the enemy will only need to trigger one event and then the player can also have a handler
             if self.game.event_handler.trigger_event(events.BulletsCheck(enemy.coord.x, enemy.coord.y, enemy.w, enemy.h)):
                 self.enemies.remove(enemy)
+                self.enemies_eliminated += 1
             
             if self.game.event_handler.trigger_event(events.PlayerCollidingEnemy(enemy.coord.x, enemy.coord.y, enemy.w, enemy.h)):
                 self.reset_handler()
+
+        # XXX fire the events (a.k.a check collision) from bullets instead so we don't need 2 loops.
+        if self.enemies_ticker.get():
+            for enemy in self.enemies:
+                enemy.update()
+
                     
     def draw(self):
         for enemy in self.enemies:
@@ -160,10 +160,11 @@ class EnemyHandler(Sprite):
     
     def reset_handler(self):
         self.enemies = []
+        self.enemies_eliminated = 0
         self.spawn()
 
     def get_enemy_count(self) -> str:
-        return ""
+        return f"Aliens eliminated: {self.enemies_eliminated:>2} / {self.enemies_length}"
 #   for enemy in enemies:
 #       for bullet in bullets:
 #           if (

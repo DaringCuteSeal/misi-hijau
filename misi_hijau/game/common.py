@@ -49,6 +49,12 @@ class MineralType(Enum):
     MINERAL_2 = 1
     MINERAL_3 = 2
 
+
+class EnemyType(Enum):
+    ENEMY_1 = 0 # Krelth/Grug
+    ENEMY_2 = 1 # Naxor/Phong
+    ENEMY_3 = 2 # Octyca/Squidge
+
 class PowerUpType(Enum):
     HEALTH = 0
     SHIELD = 1
@@ -95,10 +101,11 @@ class Level:
     """
     A level.
     """
-    def __init__(self, idx: int, levelmap: LevelMap, ship_type: PlayerShipType, mineral_type: MineralType, bullet_color: int, max_minerals: int, max_health: int):
+    def __init__(self, idx: int, levelmap: LevelMap, ship_type: PlayerShipType, enemy_type: EnemyType, mineral_type: MineralType, bullet_color: int, max_minerals: int, max_health: int):
         self.idx = idx
         self.levelmap = levelmap
         self.ship_type = ship_type
+        self.enemy_type = enemy_type
         self.mineral_type = mineral_type
         self.bullet_color = bullet_color
         self.max_minerals = max_minerals

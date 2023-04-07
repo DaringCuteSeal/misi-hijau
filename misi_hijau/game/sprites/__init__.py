@@ -29,17 +29,16 @@ class SpriteCoordinate:
 
 class Sprite(ABC):
     """
-    A sprite object class with some predefined functions to make costume handling easier.
+    A sprite object class.
     """
-    coord: SpriteCoordinate
     img: int = 0
     u: int = 0
     v: int = 0
     w: int = 8
     h: int = 8
     speed: float = 1
+    coord: SpriteCoordinate = SpriteCoordinate(-20, -20, -20, -20)
     colkey: int | None = None
-    costume_i: int = 0
     keybindings: dict[str, common.KeyFunc] = field(default_factory=dict[str, common.KeyFunc])
     soundbank: dict[str, common.Sfx] = field(default_factory=dict[str, common.Sfx])
     costumes: dict[str, tuple[int, int]] = field(default_factory=dict[str, tuple[int, int]])
@@ -62,15 +61,6 @@ class Sprite(ABC):
         """
         self.u = costume[0]
         self.v = costume[1]
-
-    def costume_toggle(self, costume_1: tuple[int, int], costume_2: tuple[int, int]):
-        """
-        Set costume based on current alternating costume index.
-        """
-        if self.costume_i:
-            self.costume = costume_1
-        else:
-            self.costume = costume_2
 
     def map_to_view(self, cam_y: float):
         """

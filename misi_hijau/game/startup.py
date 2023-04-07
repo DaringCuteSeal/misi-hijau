@@ -16,7 +16,7 @@ import pyxel
 
 from game.common import WINDOW_HEIGHT, WINDOW_WIDTH, Level
 
-from game.sprites import Sprite, player, bullets, enemy, minerals
+from game.sprites import Sprite, player, bullets, enemy, minerals, blasts
 from game.ui import UIComponent, stars, healthbar
 from game import events
 
@@ -89,15 +89,17 @@ class Game():
         # a dependency cycle.
         self.spr_bullets = bullets.BulletsHandler(level, self.game_handler.game_components, level.bullet_color)
         self.spr_player = player.Player(level, self.game_handler.game_components, level.max_health)
-        self.spr_enemies = enemy.EnemyHandler(level, enemy.EnemyType.ENEMY_1, self.game_handler.game_components)
+        self.spr_enemies = enemy.EnemyHandler(level, level.enemy_type, self.game_handler.game_components)
         self.spr_minerals = minerals.MineralHandler(level, self.game_handler.game_components)
+        self.spr_blasts = blasts.BlastsHandler(self.game_handler.game_components)
 
         sprites_collection: dict[str, Sprite] = {
                 # Order matters (the layering)
                 "bullets": self.spr_bullets,
                 "enemies": self.spr_enemies,
                 "player": self.spr_player,
-                "minerals": self.spr_minerals
+                "minerals": self.spr_minerals,
+                "blasts": self.spr_blasts
         }
 
         return sprites_collection
@@ -132,7 +134,7 @@ class Game():
         Draw game scene.
         """
         # Draw the black background to prevent ghosting effect
-        pyxel.bltm(0, 0, 0, 800, 800, WINDOW_WIDTH, WINDOW_HEIGHT)
+        pyxel.bltm(0, 0, 0, 1000, 1000, WINDOW_WIDTH, WINDOW_HEIGHT)
         self.ui_stars.draw()
 
         # Draw all the game stuff on top of the black background

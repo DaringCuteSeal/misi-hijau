@@ -237,7 +237,7 @@ class Player(Sprite):
             self.flame.update()
         else:
             self.ship3_costume_ticker.update()
-            if self.ship3_costume_ticker.get():
+            if self.ship3_costume_ticker.get() and not self.has_been_hit:
                 self.ship3_costume_idx = not self.ship3_costume_idx
                 self.ship3_costume_set()
 

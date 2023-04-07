@@ -68,8 +68,19 @@ class PlayerHealthChange(Event):
             "change_value": value
         }
 
+class AppendBlastEffect(Event):
+    name = "append_blast_effect"
+    def __init__(self, x: float, y: float, object_w: int, object_h: int):
+        self.data = {
+            "x": x,
+            "y": y,
+            "object_w": object_w,
+            "object_h": object_h
+        }
+
 # Events without data being passed
 StarsScroll = Event("stars_scroll", None)
 LevelRestart = Event("level_restart", None)
+LevelNext = Event("level_next", None)
 UpdateHealthbar = Event("update_healthbar", None)
 UpdateStatusbar = Event("update_statusbar", None)
