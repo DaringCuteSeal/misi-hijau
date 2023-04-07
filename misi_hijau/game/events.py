@@ -36,8 +36,8 @@ class BulletsCheck(Event):
     name = "bullets_check"
     def __init__(self, enemy_x: float, enemy_y: float, enemy_w: float, enemy_h: int):
         self.data = {
-            "enemy_x": enemy_x,
-            "enemy_y": enemy_y,
+            "enemy_x_map": enemy_x,
+            "enemy_y_map": enemy_y,
             "enemy_w": enemy_w,
             "enemy_h": enemy_h
         }

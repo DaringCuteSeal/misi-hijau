@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ..common import Level, Sfx, SoundType
+from ..common import Level, Sfx, SoundType, WINDOW_HEIGHT
 from . import Sprite, SpriteCoordinate
 from ..game_handler import GameComponents
 from .. import events
@@ -80,12 +80,19 @@ class BulletsHandler(Sprite):
     def shoot_handler(self, player_x: float, player_y: float):
         self.append_bullet(player_x + 7, player_y - 8, self.bullet_color)
 
-    def bullets_colliding_check_handler(self, enemy_x: float, enemy_y: float, enemy_w: int, enemy_h: int) -> bool:
+    def bullets_colliding_check_handler(self, enemy_x_map: float, enemy_y_map: float, enemy_w: int, enemy_h: int) -> bool:
         if len(self.bullets) > 0: # Only check collision if there are actually bullets to check for.
             for bullet in self.bullets:
-                if bullet.is_colliding(enemy_x, enemy_y, enemy_w, enemy_h):
+
+                # Calculate the viewport coordinates because we always use viewport coords for
+                # collision detection...
+                # XXX kinda clunky, make the collision detection use map coords directly if needed.
+                x = enemy_x_map
+                y = enemy_y_map - self.game.camera.y + WINDOW_HEIGHT // 2 
+
+                if bullet.is_colliding(x, y, enemy_w, enemy_h):
                     self.bullets.remove(bullet)
-                    self.game.event_handler.trigger_event(events.AppendBlastEffect(enemy_x, enemy_y, enemy_w, enemy_h))
+                    self.game.event_handler.trigger_event(events.AppendBlastEffect(enemy_x_map, enemy_y_map, enemy_w, enemy_h))
                     self.game.soundplayer.play(self.soundbank["explode"])
                     self.game.event_handler.trigger_event(events.UpdateStatusbar)
                     return True

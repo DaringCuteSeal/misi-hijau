@@ -49,7 +49,6 @@ class MineralType(Enum):
     MINERAL_2 = 1
     MINERAL_3 = 2
 
-
 class EnemyType(Enum):
     ENEMY_1 = 0 # Krelth/Grug
     ENEMY_2 = 1 # Naxor/Phong
@@ -87,6 +86,14 @@ class Sfx():
     loop: bool = False
 
 @dataclass
+class PowerUp:
+    powerup_type: PowerUpType
+    x: int
+    y: int
+    w = 8
+    h = 8
+
+@dataclass
 class LevelMap:
     """
     A level map. All values are in tilemap scale (pyxel.TILE_SIZE)
@@ -95,7 +102,7 @@ class LevelMap:
     map_y: int # Offset y of tilemap
     level_width: int
     level_height: int
-    powerups_map: list[tuple[int, int]]
+    powerups_map: list[PowerUp]
 
 class Level:
     """

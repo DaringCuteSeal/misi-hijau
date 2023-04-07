@@ -16,7 +16,7 @@ import pyxel
 
 from game.common import WINDOW_HEIGHT, WINDOW_WIDTH, Level
 
-from game.sprites import Sprite, player, bullets, enemy, minerals, blasts
+from game.sprites import Sprite, player, bullets, enemy, minerals, blasts, powerups
 from game.ui import UIComponent, stars, healthbar
 from game import events
 
@@ -67,6 +67,7 @@ class Game():
         self.init_sprites(sprites_collection)
         self.spr_minerals.spawn()
         self.spr_enemies.spawn()
+        self.spr_powerups.spawn()
         self.game_handler.game_components.statusbar.update() # Update statusbar so it has strings to actually draw for the first time
 
     def create_ui_components(self) -> dict[str, UIComponent]:
@@ -91,6 +92,7 @@ class Game():
         self.spr_player = player.Player(level, self.game_handler.game_components, level.max_health)
         self.spr_enemies = enemy.EnemyHandler(level, level.enemy_type, self.game_handler.game_components)
         self.spr_minerals = minerals.MineralHandler(level, self.game_handler.game_components)
+        self.spr_powerups = powerups.PowerUpHandler(level, self.game_handler.game_components)
         self.spr_blasts = blasts.BlastsHandler(self.game_handler.game_components)
 
         sprites_collection: dict[str, Sprite] = {
@@ -99,7 +101,8 @@ class Game():
                 "enemies": self.spr_enemies,
                 "player": self.spr_player,
                 "minerals": self.spr_minerals,
-                "blasts": self.spr_blasts
+                "blasts": self.spr_blasts,
+                "powerups": self.spr_powerups
         }
 
         return sprites_collection
@@ -134,7 +137,7 @@ class Game():
         Draw game scene.
         """
         # Draw the black background to prevent ghosting effect
-        pyxel.bltm(0, 0, 0, 1000, 1000, WINDOW_WIDTH, WINDOW_HEIGHT)
+        pyxel.bltm(0, 0, 1, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
         self.ui_stars.draw()
 
         # Draw all the game stuff on top of the black background
@@ -155,9 +158,6 @@ class Game():
     ##########################################################
     # All functions defined below are only used for TESTING. #
     ##########################################################
-
-
-
 
 # Debugging
 class Debugger:

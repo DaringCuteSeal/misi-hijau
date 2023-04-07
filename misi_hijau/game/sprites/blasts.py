@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Imports
 import pyxel
 from . import Sprite
 from game.utils import Ticker
@@ -32,8 +33,8 @@ class Blast(Sprite):
     def __init__(self, x: float, y: float):
         self.blast_stage: int = 1
         self.set_costume(self.costumes["blast_1"])
-        self.coord.x = x
-        self.coord.y = y
+        self.coord.x_map = x
+        self.coord.y_map = y
         self.ticker = Ticker(5)
     
     def update(self):
@@ -50,6 +51,8 @@ class Blast(Sprite):
         self.set_costume(self.costumes["blast_3"]) if self.blast_stage == 4 else None
 
 class BlastsHandler(Sprite):
+    # FIXME: For now, the blasts don't follow the camera.
+    # This can be implemented by allowing the event trigger to pass the alien's map coordinates instead.
     def __init__(self, game: GameComponents):
         self.game = game
         self.game.event_handler.add_handler(events.AppendBlastEffect.name, self.append_blast)
@@ -62,6 +65,7 @@ class BlastsHandler(Sprite):
     def update(self):
         for blast in self.blasts:
             blast.update()
+            blast.map_to_view(self.game.camera.y)
             if blast.blast_stage == 5:
                 self.blasts.remove(blast)
 

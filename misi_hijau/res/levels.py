@@ -15,13 +15,15 @@
 """
 Level storing.
 """
+from game.sprites.powerups import PowerUp
 import pyxel
 from game.common import (
-    Level,
     LevelMap,
-    PlayerShipType,
+    Level,
     MineralType,
-    EnemyType
+    EnemyType,
+    PowerUpType,
+    PlayerShipType
 )
 
 
@@ -30,7 +32,6 @@ map_1_width = 32
 map_1_height = 72
 map_1_x = 0
 map_1_y = 0
-
 map_1 = LevelMap(map_1_x, map_1_y, map_1_width, map_1_height, [])
 
 # MAP 2
@@ -38,8 +39,11 @@ map_2_width = 32
 map_2_height = 104
 map_2_x = 40
 map_2_y = 0
-
-map_2 = LevelMap(map_2_x, map_2_y, map_2_width, map_2_height, [])
+map_2_powerups_map = [
+    PowerUp(PowerUpType.HEALTH, 58, 30),
+    PowerUp(PowerUpType.SPEED_BOOST, 56, 74)
+]
+map_2 = LevelMap(map_2_x, map_2_y, map_2_width, map_2_height, map_2_powerups_map)
 
 # MAP 3
 map_3 = LevelMap(0, 0, 32, 72, [])

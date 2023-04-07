@@ -81,19 +81,19 @@ class EnemySquidge(EnemyEntity):
 class EnemyHandler(Sprite):
     def __init__(self, level: Level, enemy_type: EnemyType, game: GameComponents):
         self.enemies_ticker = Ticker(8)
-        self.enemies_coordinates_list: list[tuple[int, int]] = []
+        self.enemy_coordinates_list: list[tuple[int, int]] = []
         self.enemy_type = enemy_type
         self.game = game
         self.level = level
         self.levelmap = level.levelmap
         self.enemies_eliminated = 0
         self.enemies: list[EnemyEntity] = []
-        self.enemies_coordinates_list = self.generate_enemies_matrix()
+        self.enemy_coordinates_list = self._generate_enemies_matrix()
         self.game.statusbar.add(StatusbarItem(2, self.get_enemy_count, pyxel.COLOR_WHITE, 2))
 
-    def generate_enemies_matrix(self) -> list[tuple[int, int]]:
+    def _generate_enemies_matrix(self) -> list[tuple[int, int]]:
         """
-        Get a list of enemy coordinates.
+        Get an array of enemy coordinates.
         It works by checking each tile in the map and compares it to the current enemy type's UV coordinates.
         """
         enemies_matrix: list[tuple[int, int]] = []
@@ -111,14 +111,14 @@ class EnemyHandler(Sprite):
         Spawn all enemies based on the the tilemap. 
         """
         self.clear_enemies_spawnpoints()
-        [self._append_enemy(self.enemy_type, x, y) for x, y in self.enemies_coordinates_list]
+        [self._append_enemy(self.enemy_type, x, y) for x, y in self.enemy_coordinates_list]
             
     def clear_enemies_spawnpoints(self):
         """
         Reset all spawn points. Turns all spawn point tiles to blank tiles.
         """
         tilemap = pyxel.tilemap(0)
-        [tilemap.pset(x, y, BLANK_UV) for x, y in self.enemies_coordinates_list]
+        [tilemap.pset(x, y, BLANK_UV) for x, y in self.enemy_coordinates_list]
     
     def _append_enemy(self, enemy_type: EnemyType, x: int, y: int):
 
@@ -140,12 +140,13 @@ class EnemyHandler(Sprite):
             enemy.map_to_view(self.game.camera.y)
             # XXX try checking collision on individual sprite update instead (without the EnemiesHandler)
             # also maybe this can mean the enemy will only need to trigger one event and then the player can also have a handler
-            if self.game.event_handler.trigger_event(events.BulletsCheck(enemy.coord.x, enemy.coord.y, enemy.w, enemy.h)):
-                self.enemies.remove(enemy)
-                self.enemies_eliminated += 1
-            
-            if self.game.event_handler.trigger_event(events.PlayerCollidingEnemy(enemy.coord.x, enemy.coord.y, enemy.w, enemy.h)):
-                self.reset_handler()
+            if enemy.is_sprite_in_viewport():
+                if self.game.event_handler.trigger_event(events.BulletsCheck(enemy.coord.x_map, enemy.coord.y_map, enemy.w, enemy.h)):
+                    self.enemies.remove(enemy)
+                    self.enemies_eliminated += 1
+                
+                if self.game.event_handler.trigger_event(events.PlayerCollidingEnemy(enemy.coord.x, enemy.coord.y, enemy.w, enemy.h)):
+                    self.reset_handler()
 
         # XXX fire the events (a.k.a check collision) from bullets instead so we don't need 2 loops.
         if self.enemies_ticker.get():

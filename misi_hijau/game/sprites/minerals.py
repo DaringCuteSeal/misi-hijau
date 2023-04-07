@@ -20,7 +20,6 @@ from ..utils import real_to_tile
 import pyxel
 
 class MineralHandler(Sprite):
-    minerals_grid = []
 
     costumes = {
         "mineral_1": (1, 2),
@@ -33,6 +32,7 @@ class MineralHandler(Sprite):
     }
 
     def __init__(self, level: Level, game: GameComponents):
+        self.mineral_coordinates_list: list[tuple[int, int]] = []
         self.game = game
         self.game.event_handler.add_handler(events.MineralsCheck.name, self.player_collision_check_handler)
         self.game.event_handler.add_handler(events.LevelRestart.name, self.reset_handler)
@@ -60,12 +60,12 @@ class MineralHandler(Sprite):
         Spawn the minerals in random coordinates, the max minerals count is set by the level's `max_minerals` attribute.
         """
         self._clean_grid()
-        self.minerals_grid = self._generate_random_map_matrix(self.level.max_minerals, self.level.levelmap.level_width, self.level.levelmap.level_height, self.level.levelmap.map_x, self.level.levelmap.map_y)
-        for x, y in self.minerals_grid:
+        self.mineral_coordinates_list = self._generate_random_map_matrix(self.level.max_minerals, self.level.levelmap.level_width, self.level.levelmap.level_height, self.level.levelmap.map_x, self.level.levelmap.map_y)
+        for x, y in self.mineral_coordinates_list:
             pyxel.tilemap(0).pset(x, y, self.mineral_costume)
     
     def _clean_grid(self):
-        for x, y in self.minerals_grid:
+        for x, y in self.mineral_coordinates_list:
             pyxel.tilemap(0).pset(x, y,BLANK_UV) 
 
 
