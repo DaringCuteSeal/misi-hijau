@@ -44,16 +44,16 @@ DONE BOI!!! JUST IN TIME <3
 
 we can do it!!!!!
 
-## Apr 1-5
+## Apr 1-10
 - [ ] Power-ups
 - [ ] Statusbar logic fix
 - [ ] Text engine
-- [ ] Handle minerals (how to revert the changed tilemaps?)
-- [ ] Reimplement minerals
+- [x] Handle minerals (how to revert the changed tilemaps?)
+- [x] Reimplement minerals
 
-## Apr 6-10
 - [ ] Slideshows in base.py
 - [ ] Add coherent storyline
+
 
 ## Apr 10-13
 - [ ] Work on video

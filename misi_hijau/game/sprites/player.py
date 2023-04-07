@@ -91,7 +91,8 @@ class Player(Sprite):
     costumes = {
         "ship_1": (32, 0),
         "ship_2": (48, 16),
-        "ship_3": (32, 32),
+        "ship_3_1": (32, 32),
+        "ship_3_2": (48, 32),
 
         # Costumes when player have been hurt by an alien
         "blink_ship_1": (0, 64),
@@ -134,7 +135,11 @@ class Player(Sprite):
         self.blinking_ticker = Ticker(10)
         self.speed_statusbar_ticker = Ticker(10)
 
-        self.flame = Flame()
+        if not self.level.idx == 3:
+            self.flame = Flame()
+        else:
+            self.ship3_costume_ticker = Ticker(5)
+            self.ship3_costume_idx = False
 
     def init_costume(self, ship_type: PlayerShipType):
         match ship_type:
@@ -143,7 +148,7 @@ class Player(Sprite):
             case PlayerShipType.SHIP2:
                 self.set_costume(self.costumes["ship_2"])
             case PlayerShipType.SHIP3:
-                self.set_costume(self.costumes["ship_3"])
+                self.set_costume(self.costumes["ship_3_1"])
     
     def switch_to_blink_costume(self, ship_type: PlayerShipType):
         match ship_type:
@@ -154,8 +159,13 @@ class Player(Sprite):
             case PlayerShipType.SHIP3:
                 self.set_costume(self.costumes["blink_ship_3"])
 
-    def move_handler(self, direction: Direction):
+    def ship3_costume_set(self):
+        if self.ship3_costume_idx:
+            self.set_costume(self.costumes["ship_3_1"])
+        else:
+            self.set_costume(self.costumes["ship_3_2"])
 
+    def move_handler(self, direction: Direction):
         match direction:
             case Direction.UP:
                 self.y_vel -= self.accel
@@ -210,14 +220,28 @@ class Player(Sprite):
     def update(self):
         self.map_to_view(self.game.camera.y)
         self.cam_update()
-        self.flame.flame_update(self.coord.x, self.coord.y, self.h)
         self.speed_statusbar_ticker.update()
 
         self.move()
 
-        if self.speed_statusbar_ticker.get():
-            self.game.event_handler.trigger_event(events.UpdateStatusbar)
+        self.update_speed_statusbar()
 
+        self.update_if_has_been_hit()
+
+        self.flame_update()
+
+    def flame_update(self):
+        if not self.level.idx == 3:
+            self.flame.flame_update(self.coord.x, self.coord.y, self.h)
+            self.flame.ticker.update()
+            self.flame.update()
+        else:
+            self.ship3_costume_ticker.update()
+            if self.ship3_costume_ticker.get():
+                self.ship3_costume_idx = not self.ship3_costume_idx
+                self.ship3_costume_set()
+
+    def update_if_has_been_hit(self):
         if self.has_been_hit:
             if self.blinking_ticker.get():
                 self.hit_blink_count += 1
@@ -225,9 +249,9 @@ class Player(Sprite):
             self.draw_if_hit()
             self.blinking_ticker.update()
 
-        if not self.level.idx == 3:
-            self.flame.ticker.update()
-            self.flame.update()
+    def update_speed_statusbar(self):
+        if self.speed_statusbar_ticker.get():
+            self.game.event_handler.trigger_event(events.UpdateStatusbar)
         
         
     def draw_if_hit(self):
@@ -243,7 +267,8 @@ class Player(Sprite):
             self.init_costume(self.ship_type)
 
     def draw(self):
-        self.flame.draw()
+        if not self.level.idx == 3:
+            self.flame.draw()
         pyxel.blt(self.coord.x, self.coord.y, self.img, self.u, self.v, self.w, self.h, self.colkey)
 
     

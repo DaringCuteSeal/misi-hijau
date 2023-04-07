@@ -25,7 +25,8 @@ Common classes and functions for many files including utilities.
 ALPHA_COL = pyxel.COLOR_PURPLE
 WINDOW_WIDTH = 256
 WINDOW_HEIGHT = 256
-BLANK_GRID = (0, 0)
+BLANK_UV = (0, 0)
+MAP_Y_OFFSET_TILES = WINDOW_HEIGHT // 2 // pyxel.TILE_SIZE # the map y coordinate is offset by half the screen size because of how the player movement is handled.
 
 # Classes
 class Direction(Enum):
@@ -47,6 +48,11 @@ class MineralType(Enum):
     MINERAL_1 = 0
     MINERAL_2 = 1
     MINERAL_3 = 2
+
+class PowerUpType(Enum):
+    HEALTH = 0
+    SHIELD = 1
+    SPEED_BOOST = 2
 
 class KeyTypes(Enum):
     BTN = 0
@@ -77,13 +83,12 @@ class Sfx():
 @dataclass
 class LevelMap:
     """
-    A level map. All values are in tilemap scale (TILE_SIZE)
+    A level map. All values are in tilemap scale (pyxel.TILE_SIZE)
     """
     map_x: int # Offset x of tilemap
     map_y: int # Offset y of tilemap
     level_width: int
     level_height: int
-    enemies_map: list[tuple[int, int]]
     powerups_map: list[tuple[int, int]]
 
 class Level:
@@ -98,7 +103,6 @@ class Level:
         self.bullet_color = bullet_color
         self.max_minerals = max_minerals
         self.max_health = max_health
-        self.enemies_count = len(self.levelmap.enemies_map)
 
 @dataclass
 class StatusbarItem:

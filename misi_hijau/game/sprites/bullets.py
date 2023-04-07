@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ..common import Level, Sfx, SoundType, StatusbarItem
+from ..common import Level, Sfx, SoundType
 from . import Sprite, SpriteCoordinate
 from ..game_handler import GameComponents
 from .. import events
@@ -41,14 +41,11 @@ class Bullet(Sprite):
             pyxel.rect(self.coord.x, self.coord.y, self.w, self.h, self.color)
     
 
-class Bullets(Sprite):
+class BulletsHandler(Sprite):
     def __init__(self, level: Level, game: GameComponents, bullet_color: int):
         self.bullets: list[Bullet] = []
-        self.max_enemies_count = level.enemies_count
         self.game = game
         self.bullet_color = bullet_color
-        self.enemies_hit_count = 0
-        self.game.statusbar.add(StatusbarItem(2, self.get_enemy_count, pyxel.COLOR_WHITE, 2))
         self.game.event_handler.add_handler(events.LevelRestart.name, self.reset_handler)
         self.game.event_handler.add_handler(events.PlayerShootBullets.name, self.shoot_handler)
         self.game.event_handler.add_handler(events.BulletsCheck.name, self.bullets_colliding_check_handler)
@@ -56,7 +53,7 @@ class Bullets(Sprite):
             "explode": Sfx(SoundType.AUDIO, 2, 11)
         }
     
-    def append(self, x: float, y: float, color: int):
+    def append_bullet(self, x: float, y: float, color: int):
         bullet = Bullet(SpriteCoordinate(-30, -30, x, y), color, self.game)
         self.bullets.append(bullet)
 
@@ -79,10 +76,9 @@ class Bullets(Sprite):
     
     def reset_handler(self):
         self.bullets = []
-        self.enemies_hit_count = 0
   
     def shoot_handler(self, player_x: float, player_y: float):
-        self.append(player_x + 7, player_y - 8, self.bullet_color)
+        self.append_bullet(player_x + 7, player_y - 8, self.bullet_color)
 
     def bullets_colliding_check_handler(self, enemy_x: float, enemy_y: float, enemy_w: float, enemy_h: float) -> bool:
         if len(self.bullets) > 0: # Only check collision if there are actually bullets to check for.
@@ -91,11 +87,7 @@ class Bullets(Sprite):
                     self.bullets.remove(bullet)
                     self.game.soundplayer.play(self.soundbank["explode"])
                     self.game.event_handler.trigger_event(events.UpdateStatusbar)
-                    self.enemies_hit_count += 1
                     return True
         return False
     
     # Functions for statusbar
-
-    def get_enemy_count(self) -> str:
-        return f"Aliens eliminated: {self.enemies_hit_count} / {self.max_enemies_count}"

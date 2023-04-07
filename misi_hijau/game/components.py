@@ -35,8 +35,10 @@ from game.sprites import Sprite
 from game.ui import UIComponent
 from game import utils
 
+
 # Keyboard handling
 class KeyListener:
+    # The dictionary inside the slots are useful and more human-readable; I won't deprecate the "overkill" dict inside dict.
     """
     A Key listener to execute functions. Operates with a dictionary like this:
     ```
@@ -142,6 +144,9 @@ class GameStatusbar:
     """
     Game statusbar which holds an array of items (`StatusBarItem`) to be displayed.
     """
+    # The statusbar is being drawn constantly but not updated constantly.
+    # The `update` method calls all function and stores it in an array of strings, which will be drawn
+    # with the `draw` method.
     def __init__(self):
         self.items: list[StatusbarItem] = []
         self.strings: list[str] = []
@@ -169,6 +174,7 @@ class GameStatusbar:
         """
         self.items = []
 
+    # XXX maybe a way to only update a particular statusbar item is useful.
     def update(self):
         """
         Update statusbar strings (call all functions used to get the string).
@@ -179,10 +185,11 @@ class GameStatusbar:
         """
         Draw statusbar.
         """
-        for i, item in enumerate(self.items):
-            string = self.strings[i]
-            pyxel.text(item.x, item.y, string, item.color)
-    
+        if len(self.strings) > 0:
+            for i, item in enumerate(self.items):
+                string = self.strings[i]
+                pyxel.text(item.x, item.y, string, item.color)
+        
     def _recalculate(self):
         """
         Recalculate position for each statusbar item.
@@ -258,6 +265,12 @@ class SpriteHandler:
         """
         for sprite in self.sprites.values():
             sprite.draw()
+    
+    def destroy_all(self):
+        """
+        Delete all sprites.
+        """
+        self.sprites = {}
 
 
 # Event system

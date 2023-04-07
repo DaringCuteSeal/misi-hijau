@@ -14,11 +14,13 @@
 
 import pyxel
 from enum import Enum
-from ..common import ALPHA_COL, Level
+from ..common import ALPHA_COL, Level, BLANK_UV, MAP_Y_OFFSET_TILES, StatusbarItem
 from ..utils import Ticker, tile_to_real
 from . import Sprite, SpriteCoordinate
 from ..game_handler import GameComponents
 from .. import events
+
+ENEMY_SPAWNER_UV = (7, 1)
 
 class EnemyType(Enum):
     ENEMY_1 = 0 # Krelth/Grug
@@ -49,12 +51,12 @@ class EnemyGrug(EnemyEntity):
     v = 48
     health = 2
 
-    def __init__(self, x_map: float, y_map: float, level_height: int, level_width: int):
+    def __init__(self, x_map: float, y_map: float, level: Level):
         self.coord = SpriteCoordinate(-20, -20, -20, -20)
         self.coord.x_map = x_map
         self.coord.y_map = y_map
-        self.level_height = level_height
-        self.level_width = level_width
+        self.level_height = tile_to_real(level.levelmap.level_height)
+        self.level_width = tile_to_real(level.levelmap.level_width)
         self.ticker = Ticker(8)
 
     def update(self):
@@ -62,7 +64,7 @@ class EnemyGrug(EnemyEntity):
         if self.ticker.get():
             self.coord.x_map += pyxel.rndf(-2, 2)
             self.coord.y_map += pyxel.rndf(-2, 2)
-            if self.coord.x_map > self.level_width:
+            if self.coord.x_map > self.level_width: 
                 self.coord.x_map = self.level_width - 2
             if self.coord.x_map < 0:
                 self.coord.x_map = 0
@@ -88,30 +90,56 @@ class EnemySquidge(EnemyEntity):
 
 class EnemyHandler(Sprite):
     def __init__(self, level: Level, enemy_type: EnemyType, game: GameComponents):
-        self.type = enemy_type
+        self.enemies_coordinates_list: list[tuple[int, int]] = []
+        self.enemy_type = enemy_type
         self.game = game
-        level = level
-        self.map = level.levelmap.enemies_map
-        self.level_height = tile_to_real(level.levelmap.level_height)
-        self.level_width = tile_to_real(level.levelmap.level_width)
+        self.level = level
+        self.levelmap = level.levelmap
         self.enemies: list[EnemyEntity] = []
-        self.spawn()
+        self.enemies_coordinates_list = self.get_enemies_matrix()
+        self.game.statusbar.add(StatusbarItem(2, self.get_enemy_count, pyxel.COLOR_WHITE, 2))
+
+    def get_enemies_matrix(self) -> list[tuple[int, int]]:
+        """
+        Get a list of enemy coordinates.
+        It works by checking each tile in the map and compares it to the current enemy type's UV coordinates.
+        """
+        enemies_matrix: list[tuple[int, int]] = []
+        tilemap = pyxel.tilemap(0)
+        for y in range(self.levelmap.map_y + MAP_Y_OFFSET_TILES, self.levelmap.map_y + MAP_Y_OFFSET_TILES +  self.levelmap.level_height):
+            for x in range(self.levelmap.map_x, self.levelmap.map_x + self.levelmap.level_width):
+                tile_type = tilemap.pget(x, y)
+                if tile_type == ENEMY_SPAWNER_UV:
+                    enemies_matrix.append((x, y))
+        return enemies_matrix
 
     def spawn(self):
         """
-        Spawn all enemies based on the enemy map.
+        Spawn all enemies based on the the tilemap. 
         """
-        for x, y in self.map:
-            x = tile_to_real(x)
-            y = tile_to_real(y)
-            match self.type:
-                case EnemyType.ENEMY_1:
-                    self.enemies.append(EnemyGrug(x, y, self.level_height, self.level_width))
-                case EnemyType.ENEMY_2:
-                    self.enemies.append(EnemyPhong(x, y))
-                case EnemyType.ENEMY_3:
-                    self.enemies.append(EnemySquidge(x, y))
+        self.clear_enemies_spawnpoints()
+        [self._append_enemy(self.enemy_type, x, y) for x, y in self.enemies_coordinates_list]
+            
+    def clear_enemies_spawnpoints(self):
+        """
+        Reset all spawn points. Turns all spawn point tiles to blank tiles.
+        """
+        tilemap = pyxel.tilemap(0)
+        [tilemap.pset(x, y, BLANK_UV) for x, y in self.enemies_coordinates_list]
     
+    def _append_enemy(self, enemy_type: EnemyType, x: int, y: int):
+
+        x = tile_to_real(x)
+        y = tile_to_real(y - MAP_Y_OFFSET_TILES)
+        match enemy_type:
+            case EnemyType.ENEMY_1:
+                enemy = EnemyGrug(x, y, self.level)
+            case EnemyType.ENEMY_2:
+                enemy = EnemyPhong(x, y)
+            case EnemyType.ENEMY_3:
+                enemy = EnemySquidge(x, y)
+        self.enemies.append(enemy)
+
     def update(self):
         for enemy in self.enemies:
             enemy.map_to_view(self.game.camera.y)
@@ -134,6 +162,8 @@ class EnemyHandler(Sprite):
         self.enemies = []
         self.spawn()
 
+    def get_enemy_count(self) -> str:
+        return ""
 #   for enemy in enemies:
 #       for bullet in bullets:
 #           if (

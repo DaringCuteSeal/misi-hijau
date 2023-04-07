@@ -44,29 +44,30 @@ class Game():
         # Set up the main game handler
         level_handler = components.LevelHandler(levels)
         self.game_handler = GameHandler(level_handler, game_components)
-        self.game_handler.levelhandler.set_lvl_by_idx(2)
+        self.game_handler.levelhandler.set_lvl_by_idx(1)
 
         # Set up game UI components
         ui_components = self.create_ui_components()
         self.init_ui_components(ui_components)
 
-        # Set up sprites
-        sprites_collection = self.create_sprites(self.game_handler.levelhandler.get_curr_lvl())
-        self.init_sprites(sprites_collection)
+        # Set up scene for the first time
+        self.level_scene_setup()
 
         # Add event handler
-        self.update_statusbar()
         self.game_handler.game_components.event_handler.add_handler(events.UpdateStatusbar.name, self.update_statusbar)
 
-        self.level_scene_setup()
         # Debugging
-        # self.debugger = Debugger(self.game_collection.sprite_handler.sprites["player"], self.game_collection)
+        # self.debugger = Debugger(self.spr_player, self.game_handler.game_components)
 
     def level_scene_setup(self):
         """
-        Level scene initialization.
+        Level scene initialization. Run ONCE in each level.
         """
+        sprites_collection = self.create_sprites(self.game_handler.levelhandler.get_curr_lvl())
+        self.init_sprites(sprites_collection)
         self.spr_minerals.spawn()
+        self.spr_enemies.spawn()
+        self.game_handler.game_components.statusbar.update() # Update statusbar so it has strings to actually draw for the first time
 
     def create_ui_components(self) -> dict[str, UIComponent]:
         # We separate stars because it needs to be rendered before anything else
@@ -83,8 +84,10 @@ class Game():
 
     def create_sprites(self, level: Level) -> dict[str, Sprite]:
         # Set up player
-        # XXX currently the "temporary" sprites are global, def not good
-        self.spr_bullets = bullets.Bullets(level, self.game_handler.game_components, level.bullet_color)
+        # FIXME currently the "temporary" sprites are global. Defintely not good, but it allows
+        # the game (this class) to access each individual sprites in a safe way without causing
+        # a dependency cycle.
+        self.spr_bullets = bullets.BulletsHandler(level, self.game_handler.game_components, level.bullet_color)
         self.spr_player = player.Player(level, self.game_handler.game_components, level.max_health)
         self.spr_enemies = enemy.EnemyHandler(level, enemy.EnemyType.ENEMY_1, self.game_handler.game_components)
         self.spr_minerals = minerals.MineralHandler(level, self.game_handler.game_components)
@@ -159,7 +162,7 @@ class Debugger:
     def __init__(self, player: player.Player, game: GameComponents):
         self.player = player
         self.cam = game.camera
-        game.statusbar.add(components.StatusbarItem(100, self.draw, pyxel.COLOR_WHITE))
+        game.statusbar.add(components.StatusbarItem(1000, self.draw, pyxel.COLOR_WHITE, 1))
     
     def draw(self) -> str:
 #         return f"""

@@ -40,7 +40,7 @@ class App:
         Setup initial scene.
         Anything that initializes the program and only run once should be put on game.__init__ instead.
         """
-        self.game.scene_setup()
+        pass
 
     def update(self):
         """
