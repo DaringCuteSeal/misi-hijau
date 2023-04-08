@@ -252,6 +252,12 @@ class SpriteHandler:
         """
         self.sprites.update(sprites)
     
+    def replace(self, sprites: dict[str, Sprite]):
+        """
+        Replace all current sprites with new sprites collection.
+        """
+        self.sprites = sprites
+
     def update(self):
         """
         Update all sprites state.

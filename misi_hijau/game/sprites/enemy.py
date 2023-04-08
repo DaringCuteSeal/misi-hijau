@@ -67,8 +67,22 @@ class EnemyPhong(EnemyEntity):
     v = 48
     health = 4
 
+    def __init__(self, x_map: float, y_map: float, level: Level):
+        self.coord = SpriteCoordinate(-20, -20, -20, -20)
+        self.coord.x_map = x_map
+        self.coord.y_map = y_map
+        self.level_height = tile_to_real(level.levelmap.level_height)
+        self.level_width = tile_to_real(level.levelmap.level_width)
+
     def update(self):
-        pass
+        self.coord.x_map += pyxel.rndf(-2, 2)
+        self.coord.y_map += pyxel.rndf(-2, 2)
+        if self.coord.x_map > self.level_width: 
+            self.coord.x_map = self.level_width - 2
+        if self.coord.x_map < 0:
+            self.coord.x_map = 0
+        if self.coord.y_map > self.level_height:
+            self.coord.y_map = self.level_height
 
 class EnemySquidge(EnemyEntity):
     u = 0
@@ -96,6 +110,7 @@ class EnemyHandler(Sprite):
         Get an array of enemy coordinates.
         It works by checking each tile in the map and compares it to the current enemy type's UV coordinates.
         """
+        # The coordinates in this list are the _actual_ coordinates on the entire tilemap, not the game map coordinates.
         enemies_matrix: list[tuple[int, int]] = []
         tilemap = pyxel.tilemap(0)
         for y in range(self.levelmap.map_y + MAP_Y_OFFSET_TILES, self.levelmap.map_y + MAP_Y_OFFSET_TILES +  self.levelmap.level_height):
@@ -111,7 +126,7 @@ class EnemyHandler(Sprite):
         Spawn all enemies based on the the tilemap. 
         """
         self.clear_enemies_spawnpoints()
-        [self._append_enemy(self.enemy_type, x, y) for x, y in self.enemy_coordinates_list]
+        [self._append_enemy(self.enemy_type, x + pyxel.rndf(-1, 1), y + pyxel.rndi(-1, 1)) for x, y in self.enemy_coordinates_list]
             
     def clear_enemies_spawnpoints(self):
         """
@@ -128,7 +143,7 @@ class EnemyHandler(Sprite):
             case EnemyType.ENEMY_1:
                 enemy = EnemyGrug(x, y, self.level)
             case EnemyType.ENEMY_2:
-                enemy = EnemyPhong(x, y)
+                enemy = EnemyPhong(x, y, self.level)
             case EnemyType.ENEMY_3:
                 enemy = EnemySquidge(x, y)
         self.enemies.append(enemy)
@@ -140,10 +155,14 @@ class EnemyHandler(Sprite):
             enemy.map_to_view(self.game.camera.y)
             # XXX try checking collision on individual sprite update instead (without the EnemiesHandler)
             # also maybe this can mean the enemy will only need to trigger one event and then the player can also have a handler
-            if enemy.is_sprite_in_viewport():
+            if enemy.is_sprite_in_viewport() and not self.level.enemies_all_eliminated:
                 if self.game.event_handler.trigger_event(events.BulletsCheck(enemy.coord.x_map, enemy.coord.y_map, enemy.w, enemy.h)):
                     self.enemies.remove(enemy)
                     self.enemies_eliminated += 1
+
+                    if self.enemies_eliminated == self.enemies_length:
+                        self.level.enemies_all_eliminated = True
+                        self.game.event_handler.trigger_event(events.CheckLevelComplete)
                 
                 if self.game.event_handler.trigger_event(events.PlayerCollidingEnemy(enemy.coord.x, enemy.coord.y, enemy.w, enemy.h)):
                     self.reset_handler()
@@ -165,7 +184,7 @@ class EnemyHandler(Sprite):
         self.spawn()
 
     def get_enemy_count(self) -> str:
-        return f"Aliens eliminated: {self.enemies_eliminated:>2} / {self.enemies_length}"
+        return f"Alien lenyap: {self.enemies_eliminated:>2} / {self.enemies_length}"
 #   for enemy in enemies:
 #       for bullet in bullets:
 #           if (

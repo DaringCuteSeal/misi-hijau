@@ -12,14 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from . import Sprite
+from . import TilemapBasedSprite
 from ..game_handler import GameComponents
 from .. import events
 from ..common import MineralType, Sfx, SoundType, StatusbarItem, Level, BLANK_UV, MAP_Y_OFFSET_TILES
-from ..utils import real_to_tile
 import pyxel
 
-class MineralHandler(Sprite):
+class MineralHandler(TilemapBasedSprite):
 
     costumes = {
         "mineral_1": (1, 2),
@@ -34,7 +33,7 @@ class MineralHandler(Sprite):
     def __init__(self, level: Level, game: GameComponents):
         self.mineral_coordinates_list: list[tuple[int, int]] = []
         self.game = game
-        self.game.event_handler.add_handler(events.MineralsCheck.name, self.player_collision_check_handler)
+        self.game.event_handler.add_handler(events.TilemapPlayerCheck.name, self.player_collision_check_handler)
         self.game.event_handler.add_handler(events.LevelRestart.name, self.reset_handler)
         self.game.statusbar.add(StatusbarItem(1, self.get_minerals_count, pyxel.COLOR_WHITE))
 
@@ -49,12 +48,6 @@ class MineralHandler(Sprite):
             case MineralType.MINERAL_3:
                 self.mineral_costume = self.costumes["mineral_3"]
     
-    def draw(self):
-        pass
-
-    def update(self):
-        pass
-
     def spawn(self):
         """
         Spawn the minerals in random coordinates, the max minerals count is set by the level's `max_minerals` attribute.
@@ -66,8 +59,7 @@ class MineralHandler(Sprite):
     
     def _clean_grid(self):
         for x, y in self.mineral_coordinates_list:
-            pyxel.tilemap(0).pset(x, y,BLANK_UV) 
-
+            pyxel.tilemap(0).pset(x, y, BLANK_UV) 
 
     def _generate_random_map_matrix(self, num_tiles: int, map_w: int, map_h: int, map_x: int, map_y: int) -> list[tuple[int, int]]:
         """
@@ -75,9 +67,9 @@ class MineralHandler(Sprite):
         """
         map_matrix: list[tuple[int, int]] = []
         while len(map_matrix) < num_tiles:
-            # The extra 1 offset is needed so the player can *actually* collect the item. Also is just a nice padding.
-            x = pyxel.rndi(pyxel.TILE_SIZE + 1, map_w - 1) + map_x
-            y = pyxel.rndi(MAP_Y_OFFSET_TILES + 1, map_h - 1) + map_y # the map is offset by 16 tiles
+            # The extra 3 offset is needed so the player can *actually* collect the item. Also is just a nice padding.
+            x = pyxel.rndi(pyxel.TILE_SIZE + 3, map_w - 3) + map_x
+            y = pyxel.rndi(MAP_Y_OFFSET_TILES + 3, map_h - 3) + map_y # the map is offset by 16 tiles
             if (x, y) not in map_matrix:
                 map_matrix.append((x, y))
         return map_matrix
@@ -86,21 +78,19 @@ class MineralHandler(Sprite):
         self.collected_minerals = 0
         self.spawn()
 
-    def player_collision_check_handler(self, player_x_map: float, player_y_map: float, player_h: int) -> bool:
-        # +1 tile here to center the player coordinate.
-
-        x = real_to_tile(player_x_map) + self.level.levelmap.map_x + 1
-        y = real_to_tile(player_y_map) + self.level.levelmap.map_y + 1 + MAP_Y_OFFSET_TILES
-
-        tilemap = pyxel.tilemap(0).pget(x, y)
-        if tilemap == (self.mineral_costume):
+    def player_collision_check_handler(self, uv: tuple[int, int], tile_x: int, tile_y: int) -> bool:
+        if uv == (self.mineral_costume):
             self.collected_minerals += 1
+            if self.collected_minerals == self.level.max_minerals:
+                self.level.minerals_all_collected = True
+                self.game.event_handler.trigger_event(events.CheckLevelComplete)
+
             self.game.event_handler.trigger_event(events.UpdateStatusbar)
             self.game.soundplayer.play(self.soundbank["mineral_increment"])
-            pyxel.tilemap(0).pset(x, y, BLANK_UV)
+            pyxel.tilemap(0).pset(tile_x, tile_y, BLANK_UV)
             return True
         return False
     
     # Functions for statusbar
     def get_minerals_count(self) -> str:
-        return f"Minerals collected: {self.collected_minerals:>2} / {self.level.max_minerals}"
+        return f"Mineral terkumpulkan: {self.collected_minerals:>2} / {self.level.max_minerals}"

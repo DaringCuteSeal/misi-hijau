@@ -16,7 +16,7 @@ import pyxel
 
 from game.common import WINDOW_HEIGHT, WINDOW_WIDTH, Level
 
-from game.sprites import Sprite, player, bullets, enemy, minerals, blasts, powerups
+from game.sprites import Sprite, player, bullets, enemy, minerals, blasts, powerups, flag
 from game.ui import UIComponent, stars, healthbar
 from game import events
 
@@ -50,11 +50,11 @@ class Game():
         ui_components = self.create_ui_components()
         self.init_ui_components(ui_components)
 
-        # Set up scene for the first time
         self.level_scene_setup()
 
         # Add event handler
         self.game_handler.game_components.event_handler.add_handler(events.UpdateStatusbar.name, self.update_statusbar)
+        self.game_handler.game_components.event_handler.add_handler(events.LevelNext.name, self.level_next)
 
         # Debugging
         # self.debugger = Debugger(self.spr_player, self.game_handler.game_components)
@@ -63,7 +63,11 @@ class Game():
         """
         Level scene initialization. Run ONCE in each level.
         """
-        sprites_collection = self.create_sprites(self.game_handler.levelhandler.get_curr_lvl())
+        level = self.game_handler.levelhandler.get_curr_lvl()
+
+        self.game_handler.game_components.statusbar.clear()
+        sprites_collection = self.create_game_sprites(level)
+
         self.init_sprites(sprites_collection)
         self.spr_minerals.spawn()
         self.spr_enemies.spawn()
@@ -83,7 +87,7 @@ class Game():
     def init_ui_components(self, ui_components: dict[str, UIComponent]):
         self.game_handler.game_components.ui_handler.append(ui_components)
 
-    def create_sprites(self, level: Level) -> dict[str, Sprite]:
+    def create_game_sprites(self, level: Level) -> dict[str, Sprite]:
         # Set up player
         # FIXME currently the "temporary" sprites are global. Defintely not good, but it allows
         # the game (this class) to access each individual sprites in a safe way without causing
@@ -94,15 +98,14 @@ class Game():
         self.spr_minerals = minerals.MineralHandler(level, self.game_handler.game_components)
         self.spr_powerups = powerups.PowerUpHandler(level, self.game_handler.game_components)
         self.spr_blasts = blasts.BlastsHandler(self.game_handler.game_components)
+        self.spr_flags = flag.LevelFlag(level, self.game_handler.game_components)
 
         sprites_collection: dict[str, Sprite] = {
                 # Order matters (the layering)
                 "bullets": self.spr_bullets,
                 "enemies": self.spr_enemies,
                 "player": self.spr_player,
-                "minerals": self.spr_minerals,
                 "blasts": self.spr_blasts,
-                "powerups": self.spr_powerups
         }
 
         return sprites_collection
@@ -112,7 +115,7 @@ class Game():
         Initialize game sprites.
         """
 
-        self.game_handler.game_components.sprite_handler.append(sprites_collection)
+        self.game_handler.game_components.sprite_handler.replace(sprites_collection)
 
         objects_with_keybinds: dict[str, Sprite] = {
             "player": sprites_collection["player"]
@@ -152,8 +155,17 @@ class Game():
         # Statusbar
         self.game_handler.game_components.statusbar.draw()
     
+    ##################
+    # Event handlers #
+    ##################
+
     def update_statusbar(self):
         self.game_handler.game_components.statusbar.update()
+    
+    def level_next(self):
+        curr_level = self.game_handler.levelhandler.get_curr_lvl_idx()
+        self.game_handler.levelhandler.set_lvl_by_idx(curr_level + 1)
+        self.level_scene_setup()
 
     ##########################################################
     # All functions defined below are only used for TESTING. #

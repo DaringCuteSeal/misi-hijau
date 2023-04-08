@@ -12,13 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""
+Definition for events.
+"""
+
 from dataclasses import dataclass
 from typing import Optional, Any
 
 @dataclass
 class Event:
     """
-    An event. May include an optional dictionary that will be passed as an argument to the handler function and a trigger 
+    An event. May include an optional dictionary that will be passed as argument(s) to the handler function when triggered.
     """
     name: str
     data: Optional[dict[str, Any]]
@@ -78,9 +82,22 @@ class AppendBlastEffect(Event):
             "object_h": object_h
         }
 
+class TilemapPlayerCheck(Event):
+    name = "tilemap_player_check"
+    def __init__(self, uv: tuple[int, int], tile_x: int, tile_y: int):
+        self.data = {
+            "uv": uv,
+            "tile_x": tile_x,
+            "tile_y": tile_y
+        }
+
 # Events without data being passed
-StarsScroll = Event("stars_scroll", None)
-LevelRestart = Event("level_restart", None)
-LevelNext = Event("level_next", None)
+CheckLevelComplete = Event("check_level_complete", None)
+
 UpdateHealthbar = Event("update_healthbar", None)
 UpdateStatusbar = Event("update_statusbar", None)
+
+StarsScroll = Event("stars_scroll", None)
+
+LevelRestart = Event("level_restart", None)
+LevelNext = Event("level_next", None)

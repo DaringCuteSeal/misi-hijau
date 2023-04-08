@@ -17,6 +17,8 @@ from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 from .. import common
 
+# XXX idea: sprite could automatically subscribe to events and we only need to specify an array of events.
+
 # Classes for sprites
 
 @dataclass
@@ -36,7 +38,6 @@ class Sprite(ABC):
     v: int = 0
     w: int = 8
     h: int = 8
-    speed: float = 1
     coord: SpriteCoordinate = SpriteCoordinate(-20, -20, -20, -20)
     colkey: int | None = None
     keybindings: dict[str, common.KeyFunc] = field(default_factory=dict[str, common.KeyFunc])
@@ -64,7 +65,7 @@ class Sprite(ABC):
 
     def map_to_view(self, cam_y: float):
         """
-        Get position of object in viewport based on its position on the map and assign it to the viewport x and y (`self.coord.x` and `self.coord.y`). Returns True if sprite is within camera boundary; else returns False.
+        Get position of object in viewport based on its position on the map and assign it to the viewport x and y (`self.coord.x` and `self.coord.y`).
         Note: the x isn't required as argument because we only scroll in y direction.
         """
 
@@ -72,16 +73,36 @@ class Sprite(ABC):
         self.coord.y = self.coord.y_map - cam_y + common.WINDOW_HEIGHT / 2 
     
     def is_sprite_in_viewport(self) -> bool:
-
+        """
+        Returns `True` if sprite is within the camera boundary, else `False`.
+        """
         if self.coord.x < -10 or self.coord.x > common.WINDOW_WIDTH or self.coord.y < -10 or self.coord.y > common.WINDOW_HEIGHT:
             return False
         else:
             return True
 
     def is_colliding(self, x: float, y: float, w: float, h: float) -> bool:
+        """
+        Returns `True` if sprite is colliding with another sprite with attributes specified by argument `x`, `y`, `w`, and `h`.
+        """
         return (
             self.coord.x + self.w > x
             and x + w > self.coord.x
             and self.coord.y + self.h > y
             and y + h > self.coord.y
         )
+
+class TilemapBasedSprite(ABC):
+    """
+    A tilemap-based sprite object class. These sprites are event-driven meaning they don't need to implement update nor draw methods.
+    """
+    img: int = 0
+    u: int = 0
+    v: int = 0
+    w: int = 8
+    h: int = 8
+    coord: SpriteCoordinate = SpriteCoordinate(-20, -20, -20, -20)
+    colkey: int | None = None
+    keybindings: dict[str, common.KeyFunc] = field(default_factory=dict[str, common.KeyFunc])
+    soundbank: dict[str, common.Sfx] = field(default_factory=dict[str, common.Sfx])
+    costumes: dict[str, tuple[int, int]] = field(default_factory=dict[str, tuple[int, int]])

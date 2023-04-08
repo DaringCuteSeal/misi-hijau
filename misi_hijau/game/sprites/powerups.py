@@ -14,12 +14,12 @@
 
 # Imports
 import pyxel
-from game.sprites import Sprite
+from game.sprites import TilemapBasedSprite
 from game.common import PowerUpType, PowerUp, Level
 from game.game_handler import GameComponents
 from game.utils import tile_to_real
 
-class PowerUpHandler(Sprite):
+class PowerUpHandler(TilemapBasedSprite):
     costumes: dict[str, tuple[int, int]] = {
             "health": (16, 48),
             "shield": (24, 48),
@@ -49,9 +49,3 @@ class PowerUpHandler(Sprite):
             x = powerup.x + tile_to_real(self.levelmap.level_width)
             y = powerup.y + tile_to_real(self.levelmap.level_height)
             tilemap.pset(x, y, self.get_powerup_uv_from_type(powerup.powerup_type))
-    
-    def update(self):
-        pass
-
-    def draw(self):
-        pass

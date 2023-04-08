@@ -25,11 +25,12 @@ from ..common import (
     SoundType,
     KeyTypes,
     StatusbarItem,
-    Level
+    Level,
+    MAP_Y_OFFSET_TILES
 )
 from ..game_handler import GameComponents
 from .. import events
-from ..utils import Ticker, tile_to_real
+from ..utils import Ticker, tile_to_real, real_to_tile
 
 class Flame(Sprite):
     """
@@ -72,6 +73,7 @@ class Player(Sprite):
     w = 16
     h = 16
     colkey = ALPHA_COL
+    speed = 1
     accel = 0.1
     drag = 0.04
     x_vel = 0
@@ -166,6 +168,7 @@ class Player(Sprite):
             self.set_costume(self.costumes["ship_3_2"])
 
     def move_handler(self, direction: Direction):
+
         match direction:
             case Direction.UP:
                 self.y_vel -= self.accel
@@ -180,8 +183,20 @@ class Player(Sprite):
                 self.x_vel -= self.accel
                 self.coord.x_map -= self.accel
 
+    def player_tilemap_checker(self):
+        """
+        Get the current tilemap U,V and then fire events based on the tilemap (`minerals_check` or `check_level_complete`).
+        """
+
+        # ↓ These tiles are the _actual_ tile coordinates from the entire tilemap (not the map coordinates!).
+        tile_x = real_to_tile(self.coord.x_map) + self.level.levelmap.map_x + 1
+        tile_y = real_to_tile(self.coord.y_map) + self.level.levelmap.map_y + 1 + MAP_Y_OFFSET_TILES
+
+        tilemap = pyxel.tilemap(0).pget(tile_x, tile_y)
+        self.game.event_handler.trigger_event(events.TilemapPlayerCheck(tilemap, tile_x, tile_y))
+
     def move(self):
-        self.game.event_handler.trigger_event(events.MineralsCheck(self.coord.x_map, self.coord.y_map, self.h))
+        self.player_tilemap_checker()
 
         self.coord.x_map += self.x_vel
         self.coord.y_map += self.y_vel
@@ -195,7 +210,6 @@ class Player(Sprite):
         else:
             self.game.event_handler.trigger_event(events.StarsScroll)
             
-
         if self.coord.y_map > self.level_height - self.h:
             self.coord.y_map = self.level_height - self.h
         elif self.coord.y_map < self.speed:
@@ -252,10 +266,8 @@ class Player(Sprite):
     def update_speed_statusbar(self):
         if self.speed_statusbar_ticker.get():
             self.game.event_handler.trigger_event(events.UpdateStatusbar)
-        
-        
-    def draw_if_hit(self):
 
+    def draw_if_hit(self):
         if self.hit_blink_idx:
             self.switch_to_blink_costume(self.ship_type)
         else:
@@ -299,7 +311,7 @@ class Player(Sprite):
 
     # Functions for statusbar
     def get_speed(self) -> str:
-        magnitude = sqrt(self.y_vel * self.y_vel + self.x_vel * self.x_vel)
+        magnitude = sqrt(self.y_vel * self.y_vel + self.x_vel * self.x_vel) #ilovepythagoras
         magnitude = pyxel.floor(magnitude * 100)
         string = f"Speed: {magnitude} km/h"
         return string

@@ -118,6 +118,10 @@ class Level:
         self.max_minerals = max_minerals
         self.max_health = max_health
 
+        self.minerals_all_collected = False
+        self.enemies_all_eliminated = False
+
+
 @dataclass
 class StatusbarItem:
     """
