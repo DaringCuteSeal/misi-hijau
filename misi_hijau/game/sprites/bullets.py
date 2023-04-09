@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ..common import Level, Sfx, SoundType, WINDOW_HEIGHT
-from . import Sprite, SpriteCoordinate
-from ..game_handler import GameComponents
+from ..common import Sfx, SoundType, WINDOW_HEIGHT
+from . import Sprite, SpriteCoordinate, SpriteHandler
+from ..game_handler import GameHandler
 from .. import events
 import pyxel
 
@@ -27,39 +27,42 @@ class Bullet(Sprite):
     costumes = {}
     soundbank = {}
 
-    def __init__(self, coord: SpriteCoordinate, color: int, game: GameComponents):
+    def __init__(self, coord: SpriteCoordinate, color: int):
         self.coord = coord
         self.color = color
-        self.camera = game.camera
         self.is_dead = False
     
     def update(self):
-        self.map_to_view(self.camera.y)
+        pass
 
     def draw(self):
         if self.is_sprite_in_viewport():
             pyxel.rect(self.coord.x, self.coord.y, self.w, self.h, self.color)
     
 
-class BulletsHandler(Sprite):
-    def __init__(self, level: Level, game: GameComponents, bullet_color: int):
+class BulletsHandler(SpriteHandler):
+    def __init__(self, game_handler: GameHandler):
         self.bullets: list[Bullet] = []
-        self.game = game
-        self.bullet_color = bullet_color
-        self.game.event_handler.add_handler(events.LevelRestart.name, self.reset_handler)
-        self.game.event_handler.add_handler(events.PlayerShootBullets.name, self.shoot_handler)
-        self.game.event_handler.add_handler(events.BulletsCheck.name, self.bullets_colliding_check_handler)
+        self.game_handler = game_handler
+        self.game_handler.game_components.event_handler.add_handler(events.PlayerShootBullets.name, self.shoot_handler)
+        self.game_handler.game_components.event_handler.add_handler(events.BulletsCheck.name, self.bullets_colliding_check_handler)
         self.soundbank = {
             "explode": Sfx(SoundType.AUDIO, 2, 11)
         }
+        self.setup()
     
+    def setup(self):
+        level = self.game_handler.levelhandler.get_curr_lvl()
+        self.bullet_color = level.bullet_color
+
     def append_bullet(self, x: float, y: float, color: int):
-        bullet = Bullet(SpriteCoordinate(-30, -30, x, y), color, self.game)
+        bullet = Bullet(SpriteCoordinate(-30, -30, x, y), color)
         self.bullets.append(bullet)
 
     def update(self):
         if len(self.bullets) > 0:
             for bullet in self.bullets:
+                bullet.map_to_view(self.game_handler.game_components.camera.y)
                 bullet.coord.y_map -= bullet.speed
                 bullet.update()
                 if bullet.coord.y_map < 0 or bullet.coord.y + bullet.h - 1 < 0:
@@ -74,9 +77,6 @@ class BulletsHandler(Sprite):
             for bullet in self.bullets:
                 bullet.draw()
     
-    def reset_handler(self):
-        self.bullets = []
-  
     def shoot_handler(self, player_x: float, player_y: float):
         self.append_bullet(player_x + 7, player_y - 8, self.bullet_color)
 
@@ -88,14 +88,21 @@ class BulletsHandler(Sprite):
                 # collision detection...
                 # XXX kinda clunky, make the collision detection use map coords directly if needed.
                 x = enemy_x_map
-                y = enemy_y_map - self.game.camera.y + WINDOW_HEIGHT // 2 
+                y = enemy_y_map - self.game_handler.game_components.camera.y + WINDOW_HEIGHT // 2
 
                 if bullet.is_colliding(x, y, enemy_w, enemy_h):
+
                     self.bullets.remove(bullet)
-                    self.game.event_handler.trigger_event(events.AppendBlastEffect(enemy_x_map, enemy_y_map, enemy_w, enemy_h))
-                    self.game.soundplayer.play(self.soundbank["explode"])
-                    self.game.event_handler.trigger_event(events.UpdateStatusbar)
+                    self.game_handler.game_components.event_handler.trigger_event(events.AppendBlastEffect(enemy_x_map, enemy_y_map, enemy_w, enemy_h))
+                    self.game_handler.game_components.soundplayer.play(self.soundbank["explode"])
+                    self.game_handler.game_components.event_handler.trigger_event(events.UpdateStatusbar)
                     return True
         return False
+    
+    def restart_level(self):
+        self.bullets = []
+    
+    def init_level(self):
+        self.setup()
     
     # Functions for statusbar

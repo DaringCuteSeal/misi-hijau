@@ -18,7 +18,7 @@ from ..common import (
     ALPHA_COL
 )
 from ..utils import tile_to_real
-from ..game_handler import GameComponents
+from ..game_handler import GameHandler
 from .. import events
 from . import UIComponent, UIComponentCoordinate
 
@@ -30,13 +30,16 @@ class HealthBar(UIComponent):
     edge_gap = 4
     coord = UIComponentCoordinate(0, 0)
 
-    def __init__(self, game: GameComponents, health_count: int):
-        self.game = game
-        self.game.event_handler.add_handler(events.PlayerHealthChange.name, self.change_health_count)
-        self.health_count = health_count
-        self._recalculate()
+    def __init__(self, game_handler: GameHandler):
+        self.game_handler = game_handler
+        self.game_handler.game_components.event_handler.add_handler(events.PlayerHealthChange.name, self.change_health_count)
+        self.setup()
     
-    def _draw(self):
+    def setup(self):
+        self.health_count = self.game_handler.levelhandler.get_curr_lvl().max_health
+        self._recalculate()
+
+    def draw(self):
         if self.health_count > 0:
             x_prev = self.coord.x
             for i in range(0, self.health_count): # type: ignore
@@ -51,3 +54,9 @@ class HealthBar(UIComponent):
     def _recalculate(self):
         self.coord.x = WINDOW_WIDTH - pyxel.TILE_SIZE - self.health_count * self.def_gap_x - tile_to_real(self.health_count) - self.edge_gap
         self.coord.y = self.def_gap_x + self.edge_gap
+
+    def init_level(self):
+        self.setup()
+    
+    def restart_level(self):
+        self.setup()

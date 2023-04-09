@@ -13,22 +13,31 @@
 # limitations under the License.
 
 from . import TilemapBasedSprite
-from game.game_handler import GameComponents
-from game.common import Level
+from game.game_handler import GameHandler
 import game.events as events
 
 FLAG_UV = (2, 7)
 
 class LevelFlag(TilemapBasedSprite):
-    def __init__(self, level: Level, game: GameComponents):
-       self.level = level
-       self.game = game 
-       self.game.event_handler.add_handler(events.TilemapPlayerCheck.name, self.player_level_completed_check)
+    def __init__(self, game_handler: GameHandler):
+       self.game_handler = game_handler
+       self.level = self.game_handler.levelhandler.get_curr_lvl()
+       self.game_handler.game_components.event_handler.add_handler(events.TilemapPlayerCheck.name, self.player_level_completed_check)
     
+    def setup(self):
+        self.level.minerals_all_collected = False
+        self.level.enemies_all_eliminated = False
+
     def _is_level_complete(self) -> bool:
         return self.level.minerals_all_collected and self.level.enemies_all_eliminated
+
+    def init_level(self):
+        self.setup()
+
+    def restart_level(self):
+        self.setup()
 
     def player_level_completed_check(self, uv: tuple[int, int], tile_x: int, tile_y: int):
         if self._is_level_complete():
             if uv == FLAG_UV:
-                self.game.event_handler.trigger_event(events.LevelNext)
+                self.game_handler.game_components.event_handler.trigger_event(events.LevelNext)

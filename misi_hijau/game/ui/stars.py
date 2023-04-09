@@ -18,7 +18,7 @@ from ..common import (
     WINDOW_HEIGHT,
     WINDOW_WIDTH,
 )
-from ..game_handler import GameComponents
+from ..game_handler import GameHandler
 from .. import events
 from . import UIComponent
 
@@ -27,26 +27,38 @@ class Stars(UIComponent):
     """
     Stars that scrolls in the background.
     """
-    def __init__(self, num_stars: int, game: GameComponents):
-        game.event_handler.add_handler(events.StarsScroll.name, self.update)
-        self.camera = game.camera
-        self.stars: list[tuple[float, float, float]] = []
+    def __init__(self, num_stars: int, game_handler: GameHandler):
+        self.num_stars = num_stars
+        game_handler.game_components.event_handler.add_handler(events.StarsScroll.name, self.update)
+        self.camera = game_handler.game_components.camera
+        self.stars_list = self.generate_stars_list(self.num_stars)
+
+    def generate_stars_list(self, num_stars: int) -> list[tuple[float, float, float]]:
+        stars_list: list[tuple[float, float, float]] = []
         for i in range(0, num_stars): # type: ignore
-            self.stars.append((
+            stars_list.append((
                 pyxel.rndi(0, WINDOW_WIDTH),
                 pyxel.rndi(0, WINDOW_HEIGHT),
                 pyxel.rndf(1, 5)
             ))
         
+        return stars_list
+        
     def update(self):
-        for i, (x, y, speed) in enumerate(self.stars):
+        for i, (x, y, speed) in enumerate(self.stars_list):
             y += (self.camera.dir_y / (8 + speed)) * -1
             if y >= WINDOW_HEIGHT:
                 y -= WINDOW_HEIGHT
             if y <= 0:
                 y = WINDOW_HEIGHT
-            self.stars[i] = (x, y, speed)
+            self.stars_list[i] = (x, y, speed)
 
-    def _draw(self):
-        for x, y, speed in self.stars:
+    def draw(self):
+        for x, y, speed in self.stars_list:
             pyxel.pset(x, y, pyxel.COLOR_CYAN if speed < 3 else pyxel.COLOR_NAVY)
+    
+    def init_level(self):
+        self.stars_list = self.generate_stars_list(self.num_stars)
+
+    def restart_level(self):
+        pass

@@ -14,7 +14,7 @@
 
 import pyxel
 from math import sqrt # pyxel.sqrt(0) returns denormalized number; we need it to return 0.
-from . import Sprite, SpriteCoordinate
+from . import Sprite, SpriteCoordinate, SpriteHandler
 from ..common import (
     ALPHA_COL,
     WINDOW_HEIGHT,
@@ -25,10 +25,9 @@ from ..common import (
     SoundType,
     KeyTypes,
     StatusbarItem,
-    Level,
     MAP_Y_OFFSET_TILES
 )
-from ..game_handler import GameComponents
+from ..game_handler import GameHandler
 from .. import events
 from ..utils import Ticker, tile_to_real, real_to_tile
 
@@ -39,7 +38,7 @@ class Flame(Sprite):
     # The flame here is tightly coupled with the player but
     # this shouldn't be a problem as I kinda assume the player
     # and the flame is one single entity, just with 2 components
-    def __init__(self):
+    def __init__(self, game_handler: GameHandler):
         self.img = 0
         self.u = 32
         self.v = 16
@@ -49,19 +48,24 @@ class Flame(Sprite):
         self.flames = [(32, 16), (32, 24)]
         self.coord = SpriteCoordinate(0, 0, 0, 0)
         self.ticker = Ticker(5)
+        game_handler.game_components.event_handler.add_handler(events.FlameUpdate.name, self.flame_update)
     
     def draw(self):
-        if self.ticker.get():
-            self.set_costume(self.flames[pyxel.frame_count % 2])
         pyxel.blt(self.coord.x, self.coord.y, self.img, self.u, self.v, self.w, self.h, self.colkey)
 
     def update(self):
         self.hit_this_frame = False
         self.ticker.update()
 
+        if self.ticker.get():
+            self.set_costume(self.flames[pyxel.frame_count % 2])
+
     def flame_update(self, player_x: float, player_y: float, player_h: int):
         self.coord.x = player_x
         self.coord.y = player_y + player_h
+    
+    def level_reset(self):
+        pass
     
 class Player(Sprite):
     """
@@ -102,46 +106,41 @@ class Player(Sprite):
         "blink_ship_3": (32, 64)
     }
 
-    def __init__(self, level: Level, game: GameComponents, health: int):
-        self.keybindings = {
-            "player_right": KeyFunc(pyxel.KEY_RIGHT, lambda: self.move_handler(Direction.RIGHT)),
-            "player_left": KeyFunc(pyxel.KEY_LEFT, lambda: self.move_handler(Direction.LEFT)),
-            "player_up": KeyFunc(pyxel.KEY_UP, lambda: self.move_handler(Direction.UP)),
-            "player_down": KeyFunc(pyxel.KEY_DOWN, lambda: self.move_handler(Direction.DOWN)),
-            "player_shoot": KeyFunc(pyxel.KEY_SPACE, lambda: self.shoot_handler(), KeyTypes.BTNP, hold_time=10, repeat_time=10),
-        }
+    def __init__(self, game_handler: GameHandler):
 
         self.statusbar_items = [
             StatusbarItem(100, self.get_speed, pyxel.COLOR_YELLOW),
         ]
             
-        self.game = game
-
-        self.level = level
-        self.ship_type = level.ship_type
-        levelmap = self.level.levelmap # only run ONCE; we don't want to get the level on every tick.
-        self.level_width = tile_to_real(levelmap.level_width)
-        self.level_height = tile_to_real(levelmap.level_height)
-
-        self.health = health
-        self.coord = SpriteCoordinate(self.level_width // 2, tile_to_real(4), self.level_width // 2, self.level_height - tile_to_real(4))
-        
-        self.statusbar = game.statusbar
-        self.statusbar.append(self.statusbar_items)
-
-        self.game.event_handler.add_handler(events.PlayerCollidingEnemy.name, self.is_colliding_with_enemy)
-        self.game.event_handler.add_handler(events.LevelRestart.name, self.reset_handler)
-
-        self.init_costume(self.ship_type)
+        self.game = game_handler
+        self.game.game_components.event_handler.add_handler(events.PlayerCollidingEnemy.name, self.is_colliding_with_enemy)
+        self.game.game_components.statusbar.append(self.statusbar_items)
 
         self.blinking_ticker = Ticker(10)
         self.speed_statusbar_ticker = Ticker(10)
 
-        if not self.level.idx == 3:
-            self.flame = Flame()
-        else:
+        self.player_setup()
+
+    def player_setup(self):
+        """
+        Get level and then initiate player based on the level.
+        """
+        self.level = self.game.levelhandler.get_curr_lvl()
+
+        self.ship_type = self.level.ship_type
+        levelmap = self.level.levelmap # only run ONCE; we don't want to get the level on every tick.
+        self.level_width = tile_to_real(levelmap.level_width)
+        self.level_height = tile_to_real(levelmap.level_height)
+
+        self.health = self.level.max_health
+        self.coord = SpriteCoordinate(self.level_width // 2, tile_to_real(4), self.level_width // 2, self.level_height - tile_to_real(4))
+
+        if self.level.idx:
             self.ship3_costume_ticker = Ticker(5)
             self.ship3_costume_idx = False
+
+        self.init_costume(self.ship_type)
+
 
     def init_costume(self, ship_type: PlayerShipType):
         match ship_type:
@@ -193,7 +192,7 @@ class Player(Sprite):
         tile_y = real_to_tile(self.coord.y_map) + self.level.levelmap.map_y + 1 + MAP_Y_OFFSET_TILES
 
         tilemap = pyxel.tilemap(0).pget(tile_x, tile_y)
-        self.game.event_handler.trigger_event(events.TilemapPlayerCheck(tilemap, tile_x, tile_y))
+        self.game.game_components.event_handler.trigger_event(events.TilemapPlayerCheck(tilemap, tile_x, tile_y))
 
     def move(self):
         self.player_tilemap_checker()
@@ -208,31 +207,31 @@ class Player(Sprite):
         elif self.coord.x_map > self.level_width - self.w:
             self.coord.x_map = self.level_width - self.w
         else:
-            self.game.event_handler.trigger_event(events.StarsScroll)
+            self.game.game_components.event_handler.trigger_event(events.StarsScroll)
             
         if self.coord.y_map > self.level_height - self.h:
             self.coord.y_map = self.level_height - self.h
         elif self.coord.y_map < self.speed:
             self.coord.y_map = self.speed
         else:
-            self.game.event_handler.trigger_event(events.StarsScroll)
+            self.game.game_components.event_handler.trigger_event(events.StarsScroll)
 
 
     def cam_update(self):
-        self.game.camera.y = self.coord.y_map
+        self.game.game_components.camera.y = self.coord.y_map
 
-        if self.game.camera.y > self.level_height - WINDOW_HEIGHT // 2:
-            self.game.camera.y = self.level_height - WINDOW_HEIGHT // 2
-            self.game.camera.dir_y = 0
-        elif self.game.camera.y < WINDOW_HEIGHT // 2:
-            self.game.camera.y = WINDOW_HEIGHT // 2
-            self.game.camera.dir_y = 0
+        if self.game.game_components.camera.y > self.level_height - WINDOW_HEIGHT // 2:
+            self.game.game_components.camera.y = self.level_height - WINDOW_HEIGHT // 2
+            self.game.game_components.camera.dir_y = 0
+        elif self.game.game_components.camera.y < WINDOW_HEIGHT // 2:
+            self.game.game_components.camera.y = WINDOW_HEIGHT // 2
+            self.game.game_components.camera.dir_y = 0
         else:
-            self.game.camera.dir_y = self.y_vel
-            self.game.camera.dir_x = self.x_vel
+            self.game.game_components.camera.dir_y = self.y_vel
+            self.game.game_components.camera.dir_x = self.x_vel
         
     def update(self):
-        self.map_to_view(self.game.camera.y)
+        self.map_to_view(self.game.game_components.camera.y)
         self.cam_update()
         self.speed_statusbar_ticker.update()
 
@@ -242,15 +241,9 @@ class Player(Sprite):
 
         self.update_if_has_been_hit()
 
-        self.flame_update()
-
-    def flame_update(self):
-        if not self.level.idx == 3:
-            self.flame.flame_update(self.coord.x, self.coord.y, self.h)
-            self.flame.ticker.update()
-            self.flame.update()
-        else:
-            self.ship3_costume_ticker.update()
+        self.game.game_components.event_handler.trigger_event(events.FlameUpdate(self.coord.x, self.coord.y, self.h))
+            
+        if self.level.idx == 3:
             if self.ship3_costume_ticker.get() and not self.has_been_hit:
                 self.ship3_costume_idx = not self.ship3_costume_idx
                 self.ship3_costume_set()
@@ -265,7 +258,7 @@ class Player(Sprite):
 
     def update_speed_statusbar(self):
         if self.speed_statusbar_ticker.get():
-            self.game.event_handler.trigger_event(events.UpdateStatusbar)
+            self.game.game_components.event_handler.trigger_event(events.UpdateStatusbar)
 
     def draw_if_hit(self):
         if self.hit_blink_idx:
@@ -279,34 +272,35 @@ class Player(Sprite):
             self.init_costume(self.ship_type)
 
     def draw(self):
-        if not self.level.idx == 3:
-            self.flame.draw()
+
         pyxel.blt(self.coord.x, self.coord.y, self.img, self.u, self.v, self.w, self.h, self.colkey)
 
-    
+    def level_reset(self):
+        self.player_setup()
+
     # Event handler functions
     def shoot_handler(self):
-        self.game.event_handler.trigger_event(events.PlayerShootBullets(self.coord.x_map, self.coord.y_map))
-        self.game.soundplayer.play(self.soundbank["shoot"])
+        self.game.game_components.event_handler.trigger_event(events.PlayerShootBullets(self.coord.x_map, self.coord.y_map))
+        self.game.game_components.soundplayer.play(self.soundbank["shoot"])
     
     def is_colliding_with_enemy(self, enemy_x: float, enemy_y: float, enemy_w: int, enemy_h: int) -> bool:
         if self.is_colliding(enemy_x, enemy_y, enemy_w, enemy_h):
             if not self.has_been_hit:
-                self.game.event_handler.trigger_event(events.PlayerHealthChange(-1))
+                self.game.game_components.event_handler.trigger_event(events.PlayerHealthChange(-1))
                 self.health -= 1
                 self.has_been_hit = True
-                self.game.soundplayer.play(self.soundbank["attacked"])
+                self.game.game_components.soundplayer.play(self.soundbank["attacked"])
             if self.health == 0:
-                self.game.event_handler.trigger_event(events.LevelRestart)
+                self.game.game_components.event_handler.trigger_event(events.LevelRestart)
                 return True
         return False
 
-    def reset_handler(self):
+    def restart_handler(self):
         self.coord.x_map = self.level_width // 2
         self.coord.y_map = self.level_height - tile_to_real(4)
         self.x_vel = 0
         self.y_vel = 0
-        self.game.event_handler.trigger_event(events.PlayerHealthChange(self.level.max_health))
+        self.game.game_components.event_handler.trigger_event(events.PlayerHealthChange(self.level.max_health))
         self.health = self.level.max_health
 
     # Functions for statusbar
@@ -315,3 +309,43 @@ class Player(Sprite):
         magnitude = pyxel.floor(magnitude * 100)
         string = f"Speed: {magnitude} km/h"
         return string
+
+class PlayerHandler(SpriteHandler):
+    def __init__(self, game_handler: GameHandler):
+        self.game_handler = game_handler
+        self.setup()
+        self.keybindings = {
+            "player_right": KeyFunc(pyxel.KEY_RIGHT, lambda: self.player.move_handler(Direction.RIGHT)),
+            "player_left": KeyFunc(pyxel.KEY_LEFT, lambda: self.player.move_handler(Direction.LEFT)),
+            "player_up": KeyFunc(pyxel.KEY_UP, lambda: self.player.move_handler(Direction.UP)),
+            "player_down": KeyFunc(pyxel.KEY_DOWN, lambda: self.player.move_handler(Direction.DOWN)),
+            "player_shoot": KeyFunc(pyxel.KEY_SPACE, lambda: self.player.shoot_handler(), KeyTypes.BTNP, hold_time=10, repeat_time=10),
+        }
+
+    def setup(self):
+        self.player = Player(self.game_handler)
+        level = self.game_handler.levelhandler.get_curr_lvl()
+
+        if not level.idx == 3:
+            self.flame = Flame(self.game_handler)
+            self.has_flame = True
+        else:
+            self.has_flame = False
+
+    def draw(self):
+        if self.has_flame:
+            self.flame.draw()
+
+        self.player.draw()
+
+    def update(self):
+        if self.has_flame:
+            self.flame.update()
+
+        self.player.update()
+
+    def init_level(self):
+        self.player.player_setup()
+
+    def restart_level(self):
+        self.player.restart_handler()

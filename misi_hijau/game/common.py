@@ -121,7 +121,6 @@ class Level:
         self.minerals_all_collected = False
         self.enemies_all_eliminated = False
 
-
 @dataclass
 class StatusbarItem:
     """

@@ -23,9 +23,9 @@ from .components import (
     KeyListener,
     LevelHandler,
     GameStatusbar,
-    SpriteHandler,
+    GameSprites,
     EventHandler,
-    UIHandler,
+    GameUI,
 )
 
 @dataclass
@@ -37,9 +37,9 @@ class GameComponents:
     camera: Camera
     keylistener: KeyListener
     statusbar: GameStatusbar
-    sprite_handler: SpriteHandler
+    game_sprites: GameSprites
+    game_ui: GameUI
     event_handler: EventHandler
-    ui_handler: UIHandler
 
 # Manager of (almost) Everything here
 @dataclass

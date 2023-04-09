@@ -46,7 +46,11 @@ map_2_powerups_map = [
 map_2 = LevelMap(map_2_x, map_2_y, map_2_width, map_2_height, map_2_powerups_map)
 
 # MAP 3
-map_3 = LevelMap(0, 0, 32, 72, [])
+map_3_width = 32
+map_3_height = 168
+map_3_x = 80
+map_3_y = 0
+map_3 = LevelMap(map_3_x, map_3_y, map_3_width, map_3_height, [])
 
 # Create list of levels
 levels: list[Level] = [

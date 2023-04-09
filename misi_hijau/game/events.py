@@ -82,6 +82,15 @@ class AppendBlastEffect(Event):
             "object_h": object_h
         }
 
+class FlameUpdate(Event):
+    name = "flame_update"
+    def __init__(self, x: float, y: float, h: int):
+        self.data = {
+            "player_x": x,
+            "player_y": y,
+            "player_h": h
+        }
+        
 class TilemapPlayerCheck(Event):
     name = "tilemap_player_check"
     def __init__(self, uv: tuple[int, int], tile_x: int, tile_y: int):
@@ -99,5 +108,7 @@ UpdateStatusbar = Event("update_statusbar", None)
 
 StarsScroll = Event("stars_scroll", None)
 
-LevelRestart = Event("level_restart", None)
+LevelRestart = Event("restart_level", None)
+LevelInit = Event("init_level", None)
+
 LevelNext = Event("level_next", None)

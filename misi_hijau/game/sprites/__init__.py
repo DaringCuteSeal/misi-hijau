@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # Imports
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from abc import ABC, abstractmethod
 from .. import common
 
@@ -40,21 +40,9 @@ class Sprite(ABC):
     h: int = 8
     coord: SpriteCoordinate = SpriteCoordinate(-20, -20, -20, -20)
     colkey: int | None = None
-    keybindings: dict[str, common.KeyFunc] = field(default_factory=dict[str, common.KeyFunc])
-    soundbank: dict[str, common.Sfx] = field(default_factory=dict[str, common.Sfx])
-    costumes: dict[str, tuple[int, int]] = field(default_factory=dict[str, tuple[int, int]])
-
-    @abstractmethod
-    def draw(self):
-        """
-        Draw (render) sprite.
-        """
-    
-    @abstractmethod
-    def update(self):
-        """
-        Update sprite state.
-        """
+    keybindings: dict[str, common.KeyFunc] = {}
+    soundbank: dict[str, common.Sfx] = {}
+    costumes: dict[str, tuple[int, int]] = {}
 
     def set_costume(self, costume: tuple[int, int]):
         """
@@ -92,6 +80,38 @@ class Sprite(ABC):
             and y + h > self.coord.y
         )
 
+class SpriteHandler(ABC):
+    """
+    A handler for a sprite.
+    """
+
+    keybindings: dict[str, common.KeyFunc] = {}
+    soundbank: dict[str, common.Sfx] = {}
+
+    @abstractmethod
+    def draw(self):
+        """
+        Draw (render) sprite.
+        """
+
+    @abstractmethod
+    def update(self):
+        """
+        Update sprite state.
+        """
+    
+    @abstractmethod
+    def init_level(self):
+        """
+        Function to be called on each new level.
+        """
+    
+    @abstractmethod
+    def restart_level(self):
+        """
+        Function to be called after restarting a level.
+        """
+    
 class TilemapBasedSprite(ABC):
     """
     A tilemap-based sprite object class. These sprites are event-driven meaning they don't need to implement update nor draw methods.
@@ -103,6 +123,18 @@ class TilemapBasedSprite(ABC):
     h: int = 8
     coord: SpriteCoordinate = SpriteCoordinate(-20, -20, -20, -20)
     colkey: int | None = None
-    keybindings: dict[str, common.KeyFunc] = field(default_factory=dict[str, common.KeyFunc])
-    soundbank: dict[str, common.Sfx] = field(default_factory=dict[str, common.Sfx])
-    costumes: dict[str, tuple[int, int]] = field(default_factory=dict[str, tuple[int, int]])
+    keybindings: dict[str, common.KeyFunc] = {}
+    soundbank: dict[str, common.Sfx] = {}
+    costumes: dict[str, tuple[int, int]] = {}
+
+    @abstractmethod
+    def init_level(self):
+        """
+        Function to be called on each new level.
+        """
+    
+    @abstractmethod
+    def restart_level(self):
+        """
+        Function to be called after restarting a level.
+        """

@@ -15,8 +15,8 @@
 # Imports
 import pyxel
 from game.sprites import TilemapBasedSprite
-from game.common import PowerUpType, PowerUp, Level
-from game.game_handler import GameComponents
+from game.common import PowerUpType, PowerUp
+from game.game_handler import GameHandler
 from game.utils import tile_to_real
 
 class PowerUpHandler(TilemapBasedSprite):
@@ -26,11 +26,21 @@ class PowerUpHandler(TilemapBasedSprite):
             "speed_boost": (24, 56)
         }
 
-    def __init__(self, level: Level, game: GameComponents):
-        self.game = game
-        self.levelmap = level.levelmap
-        self.powerup_coordinates_list = self.levelmap.powerups_map
+    def __init__(self, game_handler: GameHandler):
+        self.game_handler = game_handler
+        self.setup()
     
+    def setup(self):
+        self.levelmap = self.game_handler.levelhandler.get_curr_lvl().levelmap
+        self.powerup_coordinates_list = self.levelmap.powerups_map
+        self.spawn()
+
+    def init_level(self):
+        self.setup()
+    
+    def restart_level(self):
+        self.spawn()
+
     def append_powerup_list(self, powerup_coordinates_list: list[PowerUp]):
         self.powerup_coordinates_list.extend(powerup_coordinates_list)
     

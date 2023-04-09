@@ -14,10 +14,10 @@
 
 # Imports
 import pyxel
-from . import Sprite
+from . import Sprite, SpriteHandler
 from game.utils import Ticker
 import game.events as events
-from game.game_handler import GameComponents
+from game.game_handler import GameHandler
 from game.common import ALPHA_COL
 
 class Blast(Sprite):
@@ -50,24 +50,27 @@ class Blast(Sprite):
         self.set_costume(self.costumes["blast_2"]) if self.blast_stage == 3 else None
         self.set_costume(self.costumes["blast_3"]) if self.blast_stage == 4 else None
 
-class BlastsHandler(Sprite):
-    # FIXME: For now, the blasts don't follow the camera.
-    # This can be implemented by allowing the event trigger to pass the alien's map coordinates instead.
-    def __init__(self, game: GameComponents):
-        self.game = game
-        self.game.event_handler.add_handler(events.AppendBlastEffect.name, self.append_blast)
+class BlastsHandler(SpriteHandler):
+    def __init__(self, game_handler: GameHandler):
+        self.game_components = game_handler.game_components
+        self.game_components.event_handler.add_handler(events.AppendBlastEffect.name, self.append_blast)
         self.blasts: list[Blast] = []
     
     def draw(self):
-        for blast in self.blasts:
-            blast.draw()
+        [blast.draw() for blast in self.blasts]
 
     def update(self):
         for blast in self.blasts:
             blast.update()
-            blast.map_to_view(self.game.camera.y)
+            blast.map_to_view(self.game_components.camera.y)
             if blast.blast_stage == 5:
                 self.blasts.remove(blast)
 
     def append_blast(self, x: float, y: float, object_w: int, object_h: int):
         self.blasts.append(Blast(x - object_w // 2, y - object_h // 2))
+    
+    def restart_level(self):
+        self.blasts = []
+    
+    def init_level(self):
+        self.blasts = []

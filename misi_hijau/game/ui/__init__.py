@@ -40,18 +40,30 @@ class UIComponent(ABC):
     costumes: dict[str, tuple[int, int]] = field(default_factory=dict[str, tuple[int, int]])
 
     @abstractmethod
-    def _draw(self):
+    def draw(self):
         """
         The actual draw method that needs to have an implementation.
         Will only be called if UI is active.
         """
     
-    def draw(self):
+    @abstractmethod
+    def init_level(self):
+        """
+        Function to be called on every new level.
+        """
+
+    @abstractmethod
+    def restart_level(self):
+        """
+        Function to be called after restarting a level.
+        """
+
+    def draw_if_active(self):
         """
         Draw (render) UI component.
         """
         if self.active:
-            self._draw()
+            self.draw()
 
     def set_costume(self, costume: tuple[int, int]):
         """

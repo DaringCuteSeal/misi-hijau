@@ -27,71 +27,64 @@ from .common import (
     SoundType, 
     Sfx, 
     Level, 
-    LevelMap, 
+    LevelMap,
     StatusbarItem,
 )
 from game.events import Event
-from game.sprites import Sprite
+from game.sprites import Sprite, SpriteHandler, TilemapBasedSprite
 from game.ui import UIComponent
 from game import utils
 
 
 # Keyboard handling
 class KeyListener:
-    # The dictionary inside the slots are useful and more human-readable; I won't deprecate the "overkill" dict inside dict.
     """
-    A Key listener to execute functions. Operates with a dictionary like this:
+    A Key listener to execute functions. Operates with an array like this:
     ```
-    {
-        "slot1": {
+    [
+        {
+            "a_function": KeyFunc,
+            "other_function": KeyFunc
+        } 
+        { 
             "a_function": KeyFunc,
             "other_function": KeyFunc
         }
-        "slot2": {
-            "a_function": KeyFunc,
-            "other_function": KeyFunc
-        }
-    }
+    ]
     ```
     A function name that is set to "none" will be treated as the function to be run when none of the keys bound are pressed.
     """
 
     def __init__(self):
-        self.checks: dict[str, dict[str, KeyFunc]] = {}
+        self.keys_to_check: list[dict[str, KeyFunc]] = []
 
-    def append(self, slot: str, keyfunc_dict: dict[str, KeyFunc]):
+    def add(self, keyfunc_dict: dict[str, KeyFunc]):
         """
-        Append (update) list of key listeners.
+        Add a new dict of `KeyFunc`s.
         """
-        self.checks[slot] = {}
-        self.checks[slot].update(keyfunc_dict)
-
-    def set_none_binding(self, slot: str, function: Callable[[], None]):
+        self.keys_to_check.append(keyfunc_dict)
+    
+    def append(self, keyfunc_list: list[dict[str, KeyFunc]]):
         """
-        Assign a function to be executed when none of the keys from a slot was pressed.
+        Append (extend) a new list of dict containing `KeyFunc`s.
         """
-        if not self.checks[slot]["none"]:
-            self.checks[slot]["none"] = KeyFunc(0, function, KeyTypes.BTN, True)
+        self.keys_to_check.extend(keyfunc_list)
 
     def check(self):
         """
         Loop through key listeners and run function if key is pressed.
         """
-        for slot in self.checks.values():
-            no_key_pressed = True
-            for key in slot.values():
+        for i in self.keys_to_check:
+            for key in i.values():
                 if key.active:
                     match(key.btn_type):
                         case KeyTypes.BTN:
                             if pyxel.btn(key.binding):
                                 key.func()
-                                no_key_pressed = False
                         case KeyTypes.BTNP:
                             if pyxel.btnp(key.binding, hold=key.hold_time, repeat=key.repeat_time):
                                 key.func()
-                                no_key_pressed = False
-            if no_key_pressed and slot.get("none") and slot["none"].active:
-                slot["none"].func()
+
 
 
 # Level handling
@@ -227,7 +220,11 @@ class SoundPlayer():
         return True
 
 # UI Components handling
-class UIHandler():
+class GameUI():
+    """
+    Handler for Game UIs.
+    All UIs should be event-based, so there is no `update` method here.
+    """
     def __init__(self):
         self.ui_components: dict[str, UIComponent] = {}
     
@@ -235,49 +232,76 @@ class UIHandler():
         self.ui_components.update(ui_components)
     
     def draw(self):
-        for component in self.ui_components.values():
-            component.draw()
+        [component.draw_if_active() for component in self.ui_components.values()]
+    
+    def init_level(self):
+        [component.init_level() for component in self.ui_components.values()]
+    
+    def restart_level(self):
+        [component.restart_level() for component in self.ui_components.values()]
 
 # Sprites handling
-class SpriteHandler:
+class GameSprites:
     """
     Handler for sprites.
     """
     def __init__(self):
-        self.sprites: dict[str, Sprite] = {}
-    
-    def append(self, sprites: dict[str, Sprite]):
-        """
-        Append a dictionary of sprite into this sprite handler.
-        """
-        self.sprites.update(sprites)
-    
-    def replace(self, sprites: dict[str, Sprite]):
-        """
-        Replace all current sprites with new sprites collection.
-        """
-        self.sprites = sprites
+        self.init_slots()
 
+    def init_slots(self):
+        """
+        Initialize all sprite slots. Also deletes all slots content.
+        """
+        self.sprites_handler: list[SpriteHandler] = []
+        self.tilemap_sprites: list[TilemapBasedSprite] = []
+        self.raw_sprites: list[Sprite] = []
+    
+    def append_sprites_handler(self, sprites_list: dict[str, SpriteHandler]):
+        self.sprites_handler.extend(sprites_list.values())
+    
+    def append_tilemap_sprites(self, sprites_list: dict[str, TilemapBasedSprite]):
+        self.tilemap_sprites.extend(sprites_list.values())
+    
+    def append_raw_sprites(self, sprites_list: dict[str, Sprite]):
+        self.raw_sprites.extend(sprites_list.values())
+    
     def update(self):
         """
         Update all sprites state.
         """
-        for sprite in self.sprites.values():
-            sprite.update()
+        [sprite.update() for sprite in self.sprites_handler]
 
     def draw(self):
         """
         Draw all sprites.
         """
-        for sprite in self.sprites.values():
-            sprite.draw()
+        [sprite.draw() for sprite in self.sprites_handler]
     
-    def destroy_all(self):
+    def init_level(self):
         """
-        Delete all sprites.
+        Function to be called on each new level.
         """
-        self.sprites = {}
+        [sprite.init_level() for sprite in self.sprites_handler]
+        [sprite.init_level() for sprite in self.tilemap_sprites]
 
+    def restart_level(self):
+        """
+        Function to be called after restarting a level.
+        """
+        [sprite.restart_level() for sprite in self.sprites_handler]
+        [sprite.restart_level() for sprite in self.tilemap_sprites]
+
+    def get_keybinds(self) -> list[dict[str, KeyFunc]]:
+        """
+        Return a list of dictionaries containing keybinds that can be plugged into `KeyListener`.
+        """
+
+        keybinds: list[dict[str, KeyFunc]] = []
+        keybinds.extend([sprite.keybindings for sprite in self.sprites_handler if sprite.keybindings])
+        keybinds.extend([sprite.keybindings for sprite in self.raw_sprites if sprite.keybindings])
+        keybinds.extend([sprite.keybindings for sprite in self.tilemap_sprites if sprite.keybindings])
+
+        return keybinds
 
 # Event system
 class EventHandler:

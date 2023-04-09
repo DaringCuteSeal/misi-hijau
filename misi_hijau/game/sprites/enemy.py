@@ -15,8 +15,8 @@
 import pyxel
 from ..common import ALPHA_COL, Level, BLANK_UV, MAP_Y_OFFSET_TILES, StatusbarItem, EnemyType
 from ..utils import Ticker, tile_to_real
-from . import Sprite, SpriteCoordinate
-from ..game_handler import GameComponents
+from . import Sprite, SpriteCoordinate, SpriteHandler
+from ..game_handler import GameHandler
 from .. import events
 
 ENEMY_SPAWNER_UV = (7, 1)
@@ -92,18 +92,23 @@ class EnemySquidge(EnemyEntity):
     def update(self):
         pass
 
-class EnemyHandler(Sprite):
-    def __init__(self, level: Level, enemy_type: EnemyType, game: GameComponents):
+class EnemyHandler(SpriteHandler):
+    def __init__(self, game_handler: GameHandler):
+        self.game_handler = game_handler
         self.enemies_ticker = Ticker(8)
+        self.game_components = game_handler.game_components
         self.enemy_coordinates_list: list[tuple[int, int]] = []
-        self.enemy_type = enemy_type
-        self.game = game
-        self.level = level
-        self.levelmap = level.levelmap
-        self.enemies_eliminated = 0
         self.enemies: list[EnemyEntity] = []
+        self.game_components.statusbar.add(StatusbarItem(2, self.get_enemy_count, pyxel.COLOR_WHITE, 2))
+        self.setup()
+
+    def setup(self):
+        self.level = self.game_handler.levelhandler.get_curr_lvl()
+        self.levelmap = self.level.levelmap
+        self.enemy_type = self.level.enemy_type
+        self.enemies_eliminated = 0
         self.enemy_coordinates_list = self._generate_enemies_matrix()
-        self.game.statusbar.add(StatusbarItem(2, self.get_enemy_count, pyxel.COLOR_WHITE, 2))
+        self.spawn()
 
     def _generate_enemies_matrix(self) -> list[tuple[int, int]]:
         """
@@ -152,52 +157,39 @@ class EnemyHandler(Sprite):
         self.enemies_ticker.update()
 
         for enemy in self.enemies:
-            enemy.map_to_view(self.game.camera.y)
+            enemy.map_to_view(self.game_components.camera.y)
             # XXX try checking collision on individual sprite update instead (without the EnemiesHandler)
             # also maybe this can mean the enemy will only need to trigger one event and then the player can also have a handler
             if enemy.is_sprite_in_viewport() and not self.level.enemies_all_eliminated:
-                if self.game.event_handler.trigger_event(events.BulletsCheck(enemy.coord.x_map, enemy.coord.y_map, enemy.w, enemy.h)):
+                if self.game_components.event_handler.trigger_event(events.BulletsCheck(enemy.coord.x_map, enemy.coord.y_map, enemy.w, enemy.h)):
                     self.enemies.remove(enemy)
                     self.enemies_eliminated += 1
+                    self.game_components.event_handler.trigger_event(events.UpdateStatusbar)
 
                     if self.enemies_eliminated == self.enemies_length:
                         self.level.enemies_all_eliminated = True
-                        self.game.event_handler.trigger_event(events.CheckLevelComplete)
+                        self.game_components.event_handler.trigger_event(events.CheckLevelComplete)
                 
-                if self.game.event_handler.trigger_event(events.PlayerCollidingEnemy(enemy.coord.x, enemy.coord.y, enemy.w, enemy.h)):
-                    self.reset_handler()
+                self.game_components.event_handler.trigger_event(events.PlayerCollidingEnemy(enemy.coord.x, enemy.coord.y, enemy.w, enemy.h))
 
         # XXX fire the events (a.k.a check collision) from bullets instead so we don't need 2 loops.
         if self.enemies_ticker.get():
             for enemy in self.enemies:
                 enemy.update()
 
-                    
     def draw(self):
         for enemy in self.enemies:
             if enemy.is_sprite_in_viewport():
                 enemy.draw()
     
-    def reset_handler(self):
+    def init_level(self):
+        self.enemies = []
+        self.setup()
+
+    def restart_level(self):
         self.enemies = []
         self.enemies_eliminated = 0
         self.spawn()
 
     def get_enemy_count(self) -> str:
         return f"Alien lenyap: {self.enemies_eliminated:>2} / {self.enemies_length}"
-#   for enemy in enemies:
-#       for bullet in bullets:
-#           if (
-#               enemy.x + enemy.w > bullet.x
-#               and bullet.x + bullet.w > enemy.x
-#               and enemy.y + enemy.h > bullet.y
-#               and bullet.y + bullet.h > enemy.y
-#           ):
-#               enemy.is_alive = False
-#               bullet.is_alive = False
-#               blasts.append(
-#                   Blast(enemy.x + ENEMY_WIDTH / 2, enemy.y + ENEMY_HEIGHT / 2)
-#               )
-
-   
-    
