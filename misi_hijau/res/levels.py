@@ -40,8 +40,8 @@ map_2_height = 104
 map_2_x = 40
 map_2_y = 0
 map_2_powerups_map = [
-    PowerUp(PowerUpType.HEALTH, 58, 30),
-    PowerUp(PowerUpType.SPEED_BOOST, 56, 74)
+    PowerUp(PowerUpType.HEALTH, 15, 77),
+    PowerUp(PowerUpType.SPEED_BOOST, 16, 80)
 ]
 map_2 = LevelMap(map_2_x, map_2_y, map_2_width, map_2_height, map_2_powerups_map)
 

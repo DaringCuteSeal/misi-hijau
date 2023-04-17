@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from game.sprites import Sprite, SpriteHandler, TilemapBasedSprite, player, minerals, enemy, flag, bullets, blasts, powerups
+from game.sprites import player, minerals, enemy, flag, bullets, blasts, powerups
 from game.game_handler import GameHandler
+from game.sprites.sprite_classes import Sprite, SpriteHandler, TilemapBasedSprite
 
 class SpritesFactory:
     """

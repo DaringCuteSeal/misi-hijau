@@ -14,9 +14,9 @@
 
 # Imports
 import pyxel
-import os
 from game.common import WINDOW_HEIGHT, WINDOW_WIDTH
-from game.startup import Game
+from game.game import Game
+from res.resources_load import load_resources
 
 # Main App Class
 class App:
@@ -26,7 +26,7 @@ class App:
         """
         # Pyxel stuff
         pyxel.init(WINDOW_WIDTH, WINDOW_HEIGHT, capture_scale=8, title="Misi Hijau", fps=30)
-        pyxel.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), "res/res.pyxres"))
+        load_resources()
         
         self.game = Game()
 
@@ -52,7 +52,7 @@ class App:
         """
         Render (draw) frame to screen.
         """
-        self.game.draw_game_loop()
+        self.game.draw()
 
 if __name__ == "__main__":
     App()

@@ -16,6 +16,7 @@ import pyxel
 from dataclasses import dataclass
 from enum import Enum
 from typing import Callable, Optional
+from time import time
 
 """
 Common classes and functions for many files including utilities.
@@ -83,7 +84,6 @@ class Sfx():
     soundtype: SoundType
     channel: int
     idx: int = 0
-    loop: bool = False
 
 @dataclass
 class PowerUp:
@@ -133,3 +133,31 @@ class StatusbarItem:
     custom_coords: bool = False
     x: int = 0
     y: int = 0
+
+class TimerItem:
+    """
+    Helper class for `Timer`.
+    """
+    def __init__(self, time_limit: float):
+        self.time_limit = time_limit
+        self.start_timestamp = time()
+        self.function_when_over: Optional[Callable[[], None]] = None
+
+    def when_over(self, function: Callable[[], None]):
+        """
+        Set the function to run when the timer is over.
+        """
+        self.function_when_over = function
+
+    def is_over(self) -> bool:
+        """
+        Check whether the timer is over.
+        """
+        time_now = time()
+        return time_now - self.start_timestamp > self.time_limit
+
+    def run_function(self):
+        """
+        Run function that's set to run after timer is over.
+        """
+        self.function_when_over() if self.function_when_over else None

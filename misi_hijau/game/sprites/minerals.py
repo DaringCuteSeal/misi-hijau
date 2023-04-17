@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from . import TilemapBasedSprite
+from .sprite_classes import TilemapBasedSprite
 from ..game_handler import GameHandler
 from .. import events
 from ..common import MineralType, Sfx, SoundType, StatusbarItem, BLANK_UV, MAP_Y_OFFSET_TILES
@@ -27,18 +27,23 @@ class MineralsHandler(TilemapBasedSprite):
     }
 
     soundbank = {
-        "mineral_increment": Sfx(SoundType.AUDIO, 2, 12)
+        "mineral_increment": Sfx(SoundType.AUDIO, 1, 12)
     }
 
     def __init__(self, game_handler: GameHandler):
+        self.statusbar_items = [
+            StatusbarItem(1, self.get_minerals_count, pyxel.COLOR_WHITE)
+        ]
+
         self.mineral_coordinates_list: list[tuple[int, int]] = []
         self.game_handler = game_handler
         self.game_handler.game_components.event_handler.add_handler(events.TilemapPlayerCheck.name, self.player_collision_check_handler)
-        self.game_handler.game_components.statusbar.add(StatusbarItem(1, self.get_minerals_count, pyxel.COLOR_WHITE))
         self.setup()
     
     def setup(self):
         self.collected_minerals = 0
+        self.statusbar_items[0].color = pyxel.COLOR_WHITE
+
         self.game_handler.game_components.event_handler.trigger_event(events.UpdateStatusbar)
         self.level = self.game_handler.levelhandler.get_curr_lvl()
         mineral_type = self.level.mineral_type
@@ -89,6 +94,7 @@ class MineralsHandler(TilemapBasedSprite):
             self.collected_minerals += 1
             if self.collected_minerals == self.level.max_minerals:
                 self.level.minerals_all_collected = True
+                self.statusbar_items[0].color = pyxel.COLOR_LIME
                 self.game_handler.game_components.event_handler.trigger_event(events.CheckLevelComplete)
 
             self.game_handler.game_components.event_handler.trigger_event(events.UpdateStatusbar)

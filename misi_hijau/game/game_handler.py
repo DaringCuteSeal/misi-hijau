@@ -26,6 +26,7 @@ from .components import (
     GameSprites,
     EventHandler,
     GameUI,
+    Timer
 )
 
 @dataclass
@@ -40,6 +41,7 @@ class GameComponents:
     game_sprites: GameSprites
     game_ui: GameUI
     event_handler: EventHandler
+    timer: Timer
 
 # Manager of (almost) Everything here
 @dataclass

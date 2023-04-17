@@ -14,7 +14,7 @@
 
 # Imports
 import pyxel
-from game.sprites import TilemapBasedSprite
+from .sprite_classes import TilemapBasedSprite
 from game.common import PowerUpType, PowerUp
 from game.game_handler import GameHandler
 from game.utils import tile_to_real

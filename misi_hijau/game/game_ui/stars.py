@@ -20,7 +20,7 @@ from ..common import (
 )
 from ..game_handler import GameHandler
 from .. import events
-from . import UIComponent
+from .game_ui_classes import UIComponent
 
 @dataclass
 class Stars(UIComponent):
@@ -53,7 +53,7 @@ class Stars(UIComponent):
                 y = WINDOW_HEIGHT
             self.stars_list[i] = (x, y, speed)
 
-    def draw(self):
+    def _draw(self):
         for x, y, speed in self.stars_list:
             pyxel.pset(x, y, pyxel.COLOR_CYAN if speed < 3 else pyxel.COLOR_NAVY)
     

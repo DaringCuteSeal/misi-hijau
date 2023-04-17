@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-Definition for events.
+Definition for game events.
 """
 
 from dataclasses import dataclass
@@ -25,7 +25,7 @@ class Event:
     An event. May include an optional dictionary that will be passed as argument(s) to the handler function when triggered.
     """
     name: str
-    data: Optional[dict[str, Any]]
+    data: Optional[dict[str, Any]] = None
 
 # Events with data being passed
 class PlayerShootBullets(Event):
@@ -101,14 +101,16 @@ class TilemapPlayerCheck(Event):
         }
 
 # Events without data being passed
-CheckLevelComplete = Event("check_level_complete", None)
+CheckLevelComplete = Event("check_level_complete")
 
-UpdateHealthbar = Event("update_healthbar", None)
-UpdateStatusbar = Event("update_statusbar", None)
+UpdateHealthbar = Event("update_healthbar")
+UpdateStatusbar = Event("update_statusbar")
 
-StarsScroll = Event("stars_scroll", None)
+StarsScroll = Event("stars_scroll")
 
-LevelRestart = Event("restart_level", None)
-LevelInit = Event("init_level", None)
+StartGame = Event("start_game")
 
-LevelNext = Event("level_next", None)
+LevelRestart = Event("restart_level")
+LevelInit = Event("init_level")
+
+LevelNext = Event("level_next")

@@ -12,18 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Callable
 import pyxel
 
-from game.common import WINDOW_HEIGHT, WINDOW_WIDTH
+from . import events
 
-from game import events
-
-from game import components
+from . import components
 from game.game_handler import GameComponents, GameHandler
 
 from res.sprites import SpritesFactory
 from res.ui import UIComponentFactory
 from res.levels import levels
+from game.storyline import StorylinePlayer
 
 class Game():
     def __init__(self):
@@ -39,24 +39,32 @@ class Game():
         game_sprites = components.GameSprites()
         event_handler = components.EventHandler()
         ui_handler = components.GameUI()
-        game_components = GameComponents(soundplayer, camera, keylistener, statusbar, game_sprites, ui_handler, event_handler)
+        timer = components.Timer()
+        game_components = GameComponents(soundplayer, camera, keylistener, statusbar, game_sprites, ui_handler, event_handler, timer)
 
         # Set up the main game handler
         level_handler = components.LevelHandler(levels)
         self.game_handler = GameHandler(level_handler, game_components)
         self.game_handler.levelhandler.set_lvl_by_idx(1)
 
-        # Set up sprites
-        self.init_sprites()
-        self.init_ui()
-
         # Add event handler
         self.game_handler.game_components.event_handler.add_handler(events.UpdateStatusbar.name, self.update_statusbar)
         self.game_handler.game_components.event_handler.add_handler(events.LevelRestart.name, self.level_restart)
         self.game_handler.game_components.event_handler.add_handler(events.LevelNext.name, self.level_next)
+        self.game_handler.game_components.event_handler.add_handler(events.StartGame.name, self.start_game)
+
+        self.callable_draw: Callable[..., None] | None
+        # self.callable_draw = self.draw_slideshow_start
+
+        self.callable_draw = None
 
         # Debugging
         # self.debugger = Debugger(self.spr_player, self.game_handler.game_components)
+        self.ui_stars = None
+
+        self.storyline_player = StorylinePlayer(self.game_handler.game_components)
+
+        self.storyline_player.slide_intro()
         
     def update(self):
         """
@@ -64,16 +72,20 @@ class Game():
         """
         self.game_handler.game_components.game_sprites.update()
         self.game_handler.game_components.keylistener.check()
+        self.game_handler.game_components.timer.update()
     
+    def draw(self):
+        self.callable_draw() if self.callable_draw else None
+
     def draw_game_loop(self):
         """
         Draw game scene.
         """
         # Draw the black background to prevent ghosting effect
-        pyxel.bltm(0, 0, 1, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
+        pyxel.cls(pyxel.COLOR_BLACK)
 
         # Draw the stars.
-        self.ui_stars.draw()
+        self.ui_stars.draw() if self.ui_stars else None
 
         # Draw all the game stuff on top of the black background
         self.game_handler.game_components.camera.draw(self.game_handler.levelhandler.curr_level.levelmap)
@@ -87,6 +99,10 @@ class Game():
         # Statusbar
         self.game_handler.game_components.statusbar.draw()
     
+    ##################
+    # Game functions #
+    ##################
+
     ###################
     # Object creation #
     ###################
@@ -98,10 +114,16 @@ class Game():
         sprites_handler.append_tilemap_sprites(self.sprites_factory.create_tilemap_sprites())
         sprites_handler.append_raw_sprites(self.sprites_factory.create_raw_sprites())
         self.assign_keybindings_to_sprites()
+        self.append_sprites_statusbar()
+        self.game_handler.game_components.statusbar.update()
 
     def assign_keybindings_to_sprites(self):
         keybinds = self.game_handler.game_components.game_sprites.get_keybinds()
         self.game_handler.game_components.keylistener.append(keybinds)
+
+    def append_sprites_statusbar(self):
+        statusbar_items = self.game_handler.game_components.game_sprites.get_statusbars()
+        self.game_handler.game_components.statusbar.append(statusbar_items)
 
     def init_ui(self):
         self.ui_factory = UIComponentFactory(self.game_handler)
@@ -120,13 +142,21 @@ class Game():
         self.game_handler.game_components.game_sprites.restart_level()
         self.game_handler.game_components.game_ui.restart_level()
 
+        self.game_handler.game_components.statusbar.update()
+
     def level_next(self):
         curr_level = self.game_handler.levelhandler.get_curr_lvl_idx()
         self.game_handler.levelhandler.set_lvl_by_idx(curr_level + 1)
 
         self.game_handler.game_components.game_sprites.init_level()
         self.game_handler.game_components.game_ui.init_level()
-        self.level_restart()
+
+        self.game_handler.game_components.statusbar.update()
+
+    def start_game(self):
+        self.init_sprites()
+        self.init_ui()
+        self.draw_slideshow_start = self.draw_game_loop
 
     ##########################################################
     # All functions defined below are only used for TESTING. #

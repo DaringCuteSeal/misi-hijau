@@ -14,7 +14,7 @@
 
 # Imports
 import pyxel
-from . import Sprite, SpriteHandler
+from .sprite_classes import Sprite, SpriteHandler
 from game.utils import Ticker
 import game.events as events
 from game.game_handler import GameHandler

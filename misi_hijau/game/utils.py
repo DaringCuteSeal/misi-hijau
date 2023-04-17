@@ -68,25 +68,3 @@ def round_to_tile(size: float) -> int:
     Round a number to closest multiple of TILE_SIZE.
     """
     return pyxel.ceil(size / pyxel.TILE_SIZE) * pyxel.TILE_SIZE
-
-# def check_tilemap_uv(x: float, y: float, levelmap_x: int, levelmap_y: int) -> tuple[int, int]:
-#     """
-#     Return U,V of a tile from the level map's `x` and `y`.
-#     """
-#     # +1 tile here to center the player coordinate.
-
-#     x = real_to_tile(x) + self.level.levelmap.map_x + 1
-#     y = real_to_tile(y) + self.level.levelmap.map_y + 1 + MAP_Y_OFFSET_TILES
-
-#     tilemap = pyxel.tilemap(0).pget(x, y)
-#     if tilemap == (self.mineral_costume):
-#         self.collected_minerals += 1
-#         if self.collected_minerals == self.level.max_minerals:
-#             self.level.minerals_all_collected = True
-#             self.game.event_handler.trigger_event(events.CheckLevelComplete)
-
-#         self.game.event_handler.trigger_event(events.UpdateStatusbar)
-#         self.game.soundplayer.play(self.soundbank["mineral_increment"])
-#         pyxel.tilemap(0).pset(x, y, BLANK_UV)
-#         return True
-#     return False

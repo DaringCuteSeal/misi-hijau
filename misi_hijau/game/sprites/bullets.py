@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from ..common import Sfx, SoundType, WINDOW_HEIGHT
-from . import Sprite, SpriteCoordinate, SpriteHandler
+from .sprite_classes import Sprite, SpriteCoordinate, SpriteHandler
 from ..game_handler import GameHandler
 from .. import events
 import pyxel
@@ -47,7 +47,7 @@ class BulletsHandler(SpriteHandler):
         self.game_handler.game_components.event_handler.add_handler(events.PlayerShootBullets.name, self.shoot_handler)
         self.game_handler.game_components.event_handler.add_handler(events.BulletsCheck.name, self.bullets_colliding_check_handler)
         self.soundbank = {
-            "explode": Sfx(SoundType.AUDIO, 2, 11)
+            "explode": Sfx(SoundType.AUDIO, 1, 11)
         }
         self.setup()
     

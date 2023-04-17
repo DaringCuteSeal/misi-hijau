@@ -14,7 +14,7 @@
 
 import pyxel
 from math import sqrt # pyxel.sqrt(0) returns denormalized number; we need it to return 0.
-from . import Sprite, SpriteCoordinate, SpriteHandler
+from .sprite_classes import Sprite, SpriteCoordinate, SpriteHandler
 from ..common import (
     ALPHA_COL,
     WINDOW_HEIGHT,
@@ -77,11 +77,8 @@ class Player(Sprite):
     w = 16
     h = 16
     colkey = ALPHA_COL
-    speed = 1
     accel = 0.1
     drag = 0.04
-    x_vel = 0
-    y_vel = 0
 
     # Props for player that got attacked by an alien
     has_been_hit: bool = False
@@ -90,8 +87,8 @@ class Player(Sprite):
 
 
     soundbank = {
-        "shoot": Sfx(SoundType.AUDIO, 3, 10),
-        "attacked": Sfx(SoundType.AUDIO, 3, 14)
+        "shoot": Sfx(SoundType.AUDIO, 0, 10),
+        "attacked": Sfx(SoundType.AUDIO, 0, 14)
     }
 
     costumes = {
@@ -108,13 +105,8 @@ class Player(Sprite):
 
     def __init__(self, game_handler: GameHandler):
 
-        self.statusbar_items = [
-            StatusbarItem(100, self.get_speed, pyxel.COLOR_YELLOW),
-        ]
-            
         self.game = game_handler
         self.game.game_components.event_handler.add_handler(events.PlayerCollidingEnemy.name, self.is_colliding_with_enemy)
-        self.game.game_components.statusbar.append(self.statusbar_items)
 
         self.blinking_ticker = Ticker(10)
         self.speed_statusbar_ticker = Ticker(10)
@@ -125,6 +117,9 @@ class Player(Sprite):
         """
         Get level and then initiate player based on the level.
         """
+        self.x_vel = 0
+        self.y_vel = 0
+
         self.level = self.game.levelhandler.get_curr_lvl()
 
         self.ship_type = self.level.ship_type
@@ -202,8 +197,8 @@ class Player(Sprite):
         self.x_vel -= self.drag * self.x_vel
         self.y_vel -= self.drag * self.y_vel
 
-        if self.coord.x_map < self.speed:
-            self.coord.x_map = self.speed
+        if self.coord.x_map < 0:
+            self.coord.x_map = 0
         elif self.coord.x_map > self.level_width - self.w:
             self.coord.x_map = self.level_width - self.w
         else:
@@ -211,8 +206,8 @@ class Player(Sprite):
             
         if self.coord.y_map > self.level_height - self.h:
             self.coord.y_map = self.level_height - self.h
-        elif self.coord.y_map < self.speed:
-            self.coord.y_map = self.speed
+        elif self.coord.y_map < 0:
+            self.coord.y_map = 0
         else:
             self.game.game_components.event_handler.trigger_event(events.StarsScroll)
 
@@ -303,14 +298,10 @@ class Player(Sprite):
         self.game.game_components.event_handler.trigger_event(events.PlayerHealthChange(self.level.max_health))
         self.health = self.level.max_health
 
-    # Functions for statusbar
-    def get_speed(self) -> str:
-        magnitude = sqrt(self.y_vel * self.y_vel + self.x_vel * self.x_vel) #ilovepythagoras
-        magnitude = pyxel.floor(magnitude * 100)
-        string = f"Speed: {magnitude} km/h"
-        return string
+  
 
 class PlayerHandler(SpriteHandler):
+
     def __init__(self, game_handler: GameHandler):
         self.game_handler = game_handler
         self.setup()
@@ -321,6 +312,9 @@ class PlayerHandler(SpriteHandler):
             "player_down": KeyFunc(pyxel.KEY_DOWN, lambda: self.player.move_handler(Direction.DOWN)),
             "player_shoot": KeyFunc(pyxel.KEY_SPACE, lambda: self.player.shoot_handler(), KeyTypes.BTNP, hold_time=10, repeat_time=10),
         }
+        self.statusbar_items = [
+            StatusbarItem(100, self.get_player_speed, pyxel.COLOR_YELLOW),
+        ]
 
     def setup(self):
         self.player = Player(self.game_handler)
@@ -345,7 +339,15 @@ class PlayerHandler(SpriteHandler):
         self.player.update()
 
     def init_level(self):
+        self.setup()
         self.player.player_setup()
 
     def restart_level(self):
         self.player.restart_handler()
+
+    # Functions for statusbar
+    def get_player_speed(self) -> str:
+        magnitude = sqrt(self.player.y_vel * self.player.y_vel + self.player.x_vel * self.player.x_vel) #ilovepythagoras
+        magnitude = pyxel.floor(magnitude * 100)
+        string = f"Speed: {magnitude} km/h"
+        return string

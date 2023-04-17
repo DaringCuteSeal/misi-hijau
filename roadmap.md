@@ -44,9 +44,9 @@ DONE BOI!!! JUST IN TIME <3
 
 we can do it!!!!!
 
-## Apr 1-10
+## Apr 1-20
 - [ ] Power-ups
-- [ ] Statusbar logic fix
+- [x] Statusbar logic fix
 - [ ] Text engine
 - [x] Handle minerals (how to revert the changed tilemaps?)
 - [x] Reimplement minerals
@@ -55,10 +55,19 @@ we can do it!!!!!
 - [ ] Add coherent storyline
 
 MINOR ISSUES
-- [ ] Blast animation not updating correctly when there multiple blasts at a time
+- [x] Blast animation not updating correctly when there multiple blasts at a time
 
-## Apr 10-13
-- [ ] Work on video
+
+STUFF TO FIX
+- [ ] Padding on statusbar text
+- [x] Costume not alternating in 3rd level
+- [x] Speed freezes on second level
+
+
+IDEAS
+- [ ] Reimplement colors to a managable `Color` class so we can have better type checking
+
+# NEVER MIND WE GOT EXTRA 24 DAYS, WTF
 
 # Storyline
 Manusia kemungkinan besar akan berhasil menjadi makhluk pertama yang dapat pergi ke galaksi lain dan benar-benar menjadi penguasa alam ini. 100 taun yang lalu, seluruh negara di bumi bergabung dalam ISRP, organisasi raksasa yang akan melakukan banyak penelitian terhadap dunia luar angkasa.

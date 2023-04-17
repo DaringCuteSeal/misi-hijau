@@ -15,7 +15,7 @@
 import pyxel
 from ..common import ALPHA_COL, Level, BLANK_UV, MAP_Y_OFFSET_TILES, StatusbarItem, EnemyType
 from ..utils import Ticker, tile_to_real
-from . import Sprite, SpriteCoordinate, SpriteHandler
+from .sprite_classes import Sprite, SpriteCoordinate, SpriteHandler
 from ..game_handler import GameHandler
 from .. import events
 
@@ -94,12 +94,16 @@ class EnemySquidge(EnemyEntity):
 
 class EnemyHandler(SpriteHandler):
     def __init__(self, game_handler: GameHandler):
+
+        self.statusbar_items = [
+            StatusbarItem(2, self.get_enemy_count, pyxel.COLOR_WHITE, 2)
+        ]
+
         self.game_handler = game_handler
         self.enemies_ticker = Ticker(8)
         self.game_components = game_handler.game_components
         self.enemy_coordinates_list: list[tuple[int, int]] = []
         self.enemies: list[EnemyEntity] = []
-        self.game_components.statusbar.add(StatusbarItem(2, self.get_enemy_count, pyxel.COLOR_WHITE, 2))
         self.setup()
 
     def setup(self):
@@ -108,6 +112,7 @@ class EnemyHandler(SpriteHandler):
         self.enemy_type = self.level.enemy_type
         self.enemies_eliminated = 0
         self.enemy_coordinates_list = self._generate_enemies_matrix()
+        self.statusbar_items[0].color = pyxel.COLOR_WHITE
         self.spawn()
 
     def _generate_enemies_matrix(self) -> list[tuple[int, int]]:
@@ -168,6 +173,7 @@ class EnemyHandler(SpriteHandler):
 
                     if self.enemies_eliminated == self.enemies_length:
                         self.level.enemies_all_eliminated = True
+                        self.statusbar_items[0].color = pyxel.COLOR_LIME
                         self.game_components.event_handler.trigger_event(events.CheckLevelComplete)
                 
                 self.game_components.event_handler.trigger_event(events.PlayerCollidingEnemy(enemy.coord.x, enemy.coord.y, enemy.w, enemy.h))
@@ -187,6 +193,7 @@ class EnemyHandler(SpriteHandler):
         self.setup()
 
     def restart_level(self):
+        self.statusbar_items[0].color = pyxel.COLOR_WHITE
         self.enemies = []
         self.enemies_eliminated = 0
         self.spawn()

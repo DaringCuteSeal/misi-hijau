@@ -20,7 +20,7 @@ from ..common import (
 from ..utils import tile_to_real
 from ..game_handler import GameHandler
 from .. import events
-from . import UIComponent, UIComponentCoordinate
+from .game_ui_classes import UIComponent, UIComponentCoordinate
 
 class HealthBar(UIComponent):
     w = 8
@@ -39,7 +39,7 @@ class HealthBar(UIComponent):
         self.health_count = self.game_handler.levelhandler.get_curr_lvl().max_health
         self._recalculate()
 
-    def draw(self):
+    def _draw(self):
         if self.health_count > 0:
             x_prev = self.coord.x
             for i in range(0, self.health_count): # type: ignore

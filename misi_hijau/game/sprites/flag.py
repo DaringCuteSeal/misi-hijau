@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from . import TilemapBasedSprite
+from .sprite_classes import TilemapBasedSprite
 from game.game_handler import GameHandler
 import game.events as events
 
@@ -21,10 +21,11 @@ FLAG_UV = (2, 7)
 class LevelFlag(TilemapBasedSprite):
     def __init__(self, game_handler: GameHandler):
        self.game_handler = game_handler
-       self.level = self.game_handler.levelhandler.get_curr_lvl()
        self.game_handler.game_components.event_handler.add_handler(events.TilemapPlayerCheck.name, self.player_level_completed_check)
+       self.setup()
     
     def setup(self):
+        self.level = self.game_handler.levelhandler.get_curr_lvl()
         self.level.minerals_all_collected = False
         self.level.enemies_all_eliminated = False
 

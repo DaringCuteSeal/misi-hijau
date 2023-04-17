@@ -18,6 +18,7 @@ Game components such as camera, sound player, key listener, etc.
 
 # Imports
 import pyxel
+from time import time
 from typing import Any, Callable
 from dataclasses import dataclass
 
@@ -29,11 +30,12 @@ from .common import (
     Level, 
     LevelMap,
     StatusbarItem,
+    TimerItem
 )
 from game.events import Event
-from game.sprites import Sprite, SpriteHandler, TilemapBasedSprite
-from game.ui import UIComponent
-from game import utils
+from game.sprites.sprite_classes import Sprite, SpriteHandler, TilemapBasedSprite
+from game.game_ui.game_ui_classes import UIComponent
+from . import utils
 
 
 # Keyboard handling
@@ -205,19 +207,26 @@ class SoundPlayer():
     """
     A sound player.
     """
-    def play(self, sfx: Sfx):
+    def play(self, sfx: Sfx, loop: bool = False):
         """
         Play a sound (Sfx).
         """
         match(sfx.soundtype):
             case SoundType.AUDIO:
-                pyxel.play(sfx.channel, sfx.idx, loop=sfx.loop)
+                pyxel.play(sfx.channel, sfx.idx, loop=loop)
             case SoundType.MUSIC:
-                pyxel.playm(sfx.idx, loop=sfx.loop)
+                pyxel.playm(sfx.idx, loop=loop)
+
     def is_playing(self, sfx: Sfx) -> bool:
         if pyxel.play_pos(sfx.channel) == None:
             return False
         return True
+
+    def stop_sfx_channel_playback(self, sfx: Sfx):
+        pyxel.stop(sfx.channel)
+
+    def stop_channel_playback(self, channel: int):
+        pyxel.stop(channel)
 
 # UI Components handling
 class GameUI():
@@ -232,7 +241,7 @@ class GameUI():
         self.ui_components.update(ui_components)
     
     def draw(self):
-        [component.draw_if_active() for component in self.ui_components.values()]
+        [component.draw() for component in self.ui_components.values()]
     
     def init_level(self):
         [component.init_level() for component in self.ui_components.values()]
@@ -293,7 +302,7 @@ class GameSprites:
 
     def get_keybinds(self) -> list[dict[str, KeyFunc]]:
         """
-        Return a list of dictionaries containing keybinds that can be plugged into `KeyListener`.
+        Get a list of dictionaries containing keybinds from all sprites that can be plugged into `KeyListener`.
         """
 
         keybinds: list[dict[str, KeyFunc]] = []
@@ -302,6 +311,53 @@ class GameSprites:
         keybinds.extend([sprite.keybindings for sprite in self.tilemap_sprites if sprite.keybindings])
 
         return keybinds
+    
+    def get_statusbars(self) -> list[StatusbarItem]:
+        """
+        Get an array of StatusbarItem from all sprites that can be plugged into `GameStatusBar`.
+        """
+        keybinds: list[StatusbarItem] = []
+        [keybinds.extend(sprite.statusbar_items) for sprite in self.sprites_handler if sprite.statusbar_items]
+        [keybinds.extend(sprite.statusbar_items) for sprite in self.raw_sprites if sprite.statusbar_items]
+        [keybinds.extend(sprite.statusbar_items) for sprite in self.tilemap_sprites if sprite.statusbar_items]
+
+        return keybinds
+
+
+# Timer system
+class Timer:
+    """
+    This timer provides a way to "wait" for a process without clogging up other processes, with precision up to 1s ÷ <game FPS>.
+    """
+
+    def __init__(self):
+        self.time_start = time
+        self.timer_items: list[TimerItem] = []
+    
+    def attach(self, limit: float) -> TimerItem:
+        """
+        Add a new function to run after waiting for `limit` seconds. This will return a `TimerItem`.
+        Do NOT call this inside a game loop, as the timer will keep getting reinstantiated.
+
+        Generally, you'd use this method like so:
+        ```python
+        Timer.attach(1).when_over(function_to_call)
+        ```
+        """
+
+        timer_item = TimerItem(limit)
+        self.timer_items.append(timer_item)
+        return timer_item
+    
+    def update(self):
+        """
+        Update status of all items (`self.timer_items`).
+        """
+        for item in self.timer_items:
+            if item.is_over():
+                item.run_function()
+                self.timer_items.remove(item)
+
 
 # Event system
 class EventHandler:
