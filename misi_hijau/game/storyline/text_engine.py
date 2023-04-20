@@ -12,15 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# from pyxelunicode import PyxelUnicode # type: ignore # there's no stub file for this package.
+from res.resources_load import FONT_PATH
 import pyxel
 from ..game_handler import GameComponents
 from ..common import WINDOW_WIDTH, Sfx, SoundType
 
 class TextEngine():
-    pyxel.FONT_HEIGHT = 20
     typing_sfx = Sfx(SoundType.AUDIO, 1, 17)
 
     def __init__(self, game_components: GameComponents):
+        # self.pyuni = PyxelUnicode(FONT_PATH, 12, 1)
         self.timer = game_components.timer
         self.soundplayer = game_components.soundplayer
         self.strings_collection: dict[str, list[str]] = {}
@@ -43,7 +45,7 @@ class TextEngine():
             lines.append(current_line.strip())
         return '\n'.join(lines)
     
-    def show_text_collection(self, string: str, x: int, y: int, sfx: bool = False, speed: float = 0.03, color: int = pyxel.COLOR_WHITE):
+    def animate_text(self, string: str, x: int, y: int, sfx: bool = False, speed: float = 0.03, color: int = pyxel.COLOR_WHITE):
         self.x = x
         self.y = y
         self.current_string = self._wrap_string(string)
@@ -60,10 +62,12 @@ class TextEngine():
             self.string_pos += 1
             self._draw() # only draw when needed. Not clearing the text from before is fine, because the current string is just the previous string plus a new character.
         else:
-            self.soundplayer.stop_sfx_channel_playback(self.typing_sfx)
+            if self.use_sfx:
+                self.soundplayer.stop_sfx_channel_playback(self.typing_sfx)
                 
     def clear_text(self):
         self.string_pos = 0
     
     def _draw(self):
+        # self.pyuni.text(self.x, self.y, self.current_string[:self.string_pos], self.current_color) # type: ignore # the author of PyxelUnicode didn't specify the type for the `s` parameter :)
         pyxel.text(self.x, self.y, self.current_string[:self.string_pos], self.current_color)

@@ -156,7 +156,7 @@ class Game():
     def start_game(self):
         self.init_sprites()
         self.init_ui()
-        self.draw_slideshow_start = self.draw_game_loop
+        self.callable_draw = self.draw_game_loop
 
     ##########################################################
     # All functions defined below are only used for TESTING. #

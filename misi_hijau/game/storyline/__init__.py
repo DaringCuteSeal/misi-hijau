@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import pyxel
+import os
 
 from ..game_handler import GameComponents
 from ..common import Sfx, SoundType
@@ -38,8 +39,12 @@ class StorylinePlayer:
         self.game_components.timer.attach(4.8).when_over(self._start_intro_text_story) # start slideshow after 5 seconds
 
     def _start_intro_text_story(self):
+        pyxel.image(1).load(0, 0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../res/intro_slideshows/1.png"))
+
         self.game_components.soundplayer.play(self.soundbank["start_sfx"])
         self.game_components.soundplayer.play(self.soundbank["typing"])
-        pyxel.cls(pyxel.COLOR_BLACK)
-        self.textengine.show_text_collection(self.string_collection["intro"][0], 5, 5, sfx=True, speed=0.02, color=pyxel.COLOR_WHITE)
-    
+        pyxel.cls(0)
+        pyxel.blt(0, 0, 1, 256, 0, 256, 256)
+
+        self.textengine.animate_text(self.string_collection["intro"][0], 5, 5, sfx=True, speed=0.02, color=pyxel.COLOR_WHITE)
+        # self.game_components.event_handler.trigger_event(events.StartGame)
