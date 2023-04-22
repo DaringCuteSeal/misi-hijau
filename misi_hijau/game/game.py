@@ -60,6 +60,7 @@ class Game():
 
         # Debugging
         # self.debugger = Debugger(self.spr_player, self.game_handler.game_components)
+
         self.ui_stars = None
 
         self.storyline_player = StorylinePlayer(self.game_handler.game_components)

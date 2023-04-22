@@ -310,7 +310,7 @@ class PlayerHandler(SpriteHandler):
             "player_left": KeyFunc(pyxel.KEY_LEFT, lambda: self.player.move_handler(Direction.LEFT)),
             "player_up": KeyFunc(pyxel.KEY_UP, lambda: self.player.move_handler(Direction.UP)),
             "player_down": KeyFunc(pyxel.KEY_DOWN, lambda: self.player.move_handler(Direction.DOWN)),
-            "player_shoot": KeyFunc(pyxel.KEY_SPACE, lambda: self.player.shoot_handler(), KeyTypes.BTNP, hold_time=10, repeat_time=10),
+            "player_shoot": KeyFunc(pyxel.KEY_SPACE, self.player.shoot_handler, KeyTypes.BTNP, hold_time=10, repeat_time=10),
         }
         self.statusbar_items = [
             StatusbarItem(100, self.get_player_speed, pyxel.COLOR_YELLOW),

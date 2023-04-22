@@ -66,7 +66,8 @@ class Sprite(ABC):
         """
         Returns `True` if sprite is within the camera boundary, else `False`.
         """
-        if self.coord.x < -10 or self.coord.x > common.WINDOW_WIDTH or self.coord.y < -10 or self.coord.y > common.WINDOW_HEIGHT:
+        
+        if (self.coord.x < -10) or (self.coord.x > common.WINDOW_WIDTH) or (self.coord.y < -10) or (self.coord.y > common.WINDOW_HEIGHT):
             return False
         else:
             return True
@@ -77,9 +78,9 @@ class Sprite(ABC):
         """
         return (
             self.coord.x + self.w > x
-            and x + w > self.coord.x
-            and self.coord.y + self.h > y
-            and y + h > self.coord.y
+                and x + w > self.coord.x
+                and self.coord.y + self.h > y
+                and y + h > self.coord.y
         )
 
 class SpriteHandler(ABC):
@@ -117,11 +118,9 @@ class SpriteHandler(ABC):
     
 class TilemapBasedSprite(ABC):
     """
-    A tilemap-based sprite object class. These sprites are event-driven meaning they don't need to implement update nor draw methods.
+    A tilemap-based sprite object class. These sprites are event-driven, meaning they don't need to implement the update and draw methods.
     """
     img: int = 0
-    u: int = 0
-    v: int = 0
     w: int = 8
     h: int = 8
     coord: SpriteCoordinate = SpriteCoordinate(-20, -20, -20, -20)

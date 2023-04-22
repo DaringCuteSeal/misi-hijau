@@ -106,6 +106,8 @@ CheckLevelComplete = Event("check_level_complete")
 UpdateHealthbar = Event("update_healthbar")
 UpdateStatusbar = Event("update_statusbar")
 
+SlideshowNext = Event("slideshow_next")
+
 StarsScroll = Event("stars_scroll")
 
 StartGame = Event("start_game")

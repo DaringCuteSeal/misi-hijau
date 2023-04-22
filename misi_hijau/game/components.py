@@ -130,7 +130,7 @@ class Camera:
 
     def __init__(self):
        pyxel.camera()
-   
+  
     def draw(self, levelmap: LevelMap):
         pyxel.bltm(0, 0, 0, self.x + utils.tile_to_real(levelmap.map_x), self.y + utils.tile_to_real(levelmap.map_y), 256, 256, pyxel.COLOR_BLACK)
 
