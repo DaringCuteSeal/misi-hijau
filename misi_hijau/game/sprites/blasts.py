@@ -15,9 +15,9 @@
 # Imports
 import pyxel
 from .sprite_classes import Sprite, SpriteHandler
-from game.utils import Ticker
 import game.events as events
 from game.game_handler import GameHandler
+from game.components import TickerHandler
 from game.common import ALPHA_COL
 
 class Blast(Sprite):
@@ -30,15 +30,14 @@ class Blast(Sprite):
         "blast_3": (0, 80)
     }
 
-    def __init__(self, x: float, y: float):
+    def __init__(self, ticker: TickerHandler, x: float, y: float):
         self.blast_stage: int = 1
         self.set_costume(self.costumes["blast_1"])
         self.coord.x_map = x
         self.coord.y_map = y
-        self.ticker = Ticker(5)
+        self.ticker = ticker.attach(5)
     
     def update(self):
-        self.ticker.update()
         if self.ticker.get():
             self.blast_stage += 1
 
@@ -67,7 +66,7 @@ class BlastsHandler(SpriteHandler):
                 self.blasts.remove(blast)
 
     def append_blast(self, x: float, y: float, object_w: int, object_h: int):
-        self.blasts.append(Blast(x - object_w // 2, y - object_h // 2))
+        self.blasts.append(Blast(self.game_components.ticker, x - object_w // 2, y - object_h // 2))
     
     def restart_level(self):
         self.blasts = []

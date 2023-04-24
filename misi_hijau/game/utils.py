@@ -21,8 +21,10 @@ import pyxel
 class Ticker:
     """
     Retro games aren't meant to be smooth. However, Pyxel supports high frame rate. This timer can be used to limit a rate of something without messing with the game's actual FPS.
+
+    The `get` method from this class will return `True` on every `frame_limit` frames.
     """
-    def __init__(self, frame_limit: float):
+    def __init__(self, frame_limit: int):
         """
         Initialize a new tick timer for an entity.
         """
@@ -30,9 +32,9 @@ class Ticker:
         self.time_last_frame = 0
         self.limit = frame_limit
     
-    def update(self):
+    def tick(self):
         """
-        Update tick counts. Should be run on every game tick by sprite.
+        Update tick counts. Should be run on every game tick.
         """
         time_this_frame = pyxel.frame_count
         self.dt = time_this_frame - self.time_last_frame
@@ -43,7 +45,6 @@ class Ticker:
         """
         Get status of tick.
         """
-        
         if self.time_since_last_move * 10 >= self.limit * 10:
             self.time_since_last_move = 0
             return True

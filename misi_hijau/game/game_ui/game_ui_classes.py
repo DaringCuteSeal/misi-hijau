@@ -64,10 +64,3 @@ class UIComponent(ABC):
         """
         if self.active:
             self._draw()
-
-    def set_costume(self, costume: tuple[int, int]):
-        """
-        Set costume based on spritesheet coordinate.
-        """
-        self.u = costume[0]
-        self.v = costume[1]

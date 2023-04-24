@@ -25,20 +25,20 @@ from typing import Optional
 @dataclass
 class SpriteCoordinate:
     # ↓ needs to be float because we use smooth movements and acceleration/drag might increment the coordinate values by some non-round number.
-    x: float = 0
-    y: float = 0
-    x_map: float = 0
-    y_map: float = 0
+    x: float = 0 # x coord (viewport)
+    y: float = 0 # y coord (viewport)
+    x_map: float = 0 # x coord (relative to the map)
+    y_map: float = 0 # y coord (relative to the map)
 
 class Sprite(ABC):
     """
     A sprite object class.
     """
     img: int = 0
-    u: int = 0
-    v: int = 0
-    w: int = 8
-    h: int = 8
+    u: int = 0 # 2D coord of the spritesheet
+    v: int = 0 # 2D coord of the spritesheet
+    w: int = 8 # width
+    h: int = 8 # height
     coord: SpriteCoordinate = SpriteCoordinate(-20, -20, -20, -20)
     colkey: Optional[int]
     keybindings: dict[str, common.KeyFunc] = {}
@@ -67,10 +67,9 @@ class Sprite(ABC):
         Returns `True` if sprite is within the camera boundary, else `False`.
         """
         
-        if (self.coord.x < -10) or (self.coord.x > common.WINDOW_WIDTH) or (self.coord.y < -10) or (self.coord.y > common.WINDOW_HEIGHT):
+        if (self.coord.x < 0) or (self.coord.x > common.WINDOW_WIDTH) or (self.coord.y < 0) or (self.coord.y > common.WINDOW_HEIGHT):
             return False
-        else:
-            return True
+        return True
 
     def is_colliding(self, x: float, y: float, w: float, h: float) -> bool:
         """
@@ -120,9 +119,12 @@ class TilemapBasedSprite(ABC):
     """
     A tilemap-based sprite object class. These sprites are event-driven, meaning they don't need to implement the update and draw methods.
     """
+    # UV mapping is the 3D modeling process of projecting a 3D model's surface to a 2D image for texture mapping. The letters "U" and "V" denote the axes of the 2D texture because "X", "Y", and "Z" are already used to denote the axes of the 3D object in model space, while "W" (in addition to XYZ) is used in… +
+    # thanks for the suggestion
+
     img: int = 0
-    w: int = 8
-    h: int = 8
+    w: int = 8 # width
+    h: int = 8 # height
     coord: SpriteCoordinate = SpriteCoordinate(-20, -20, -20, -20)
     colkey: Optional[int]
     keybindings: dict[str, common.KeyFunc] = {}

@@ -23,15 +23,47 @@ from game.game_handler import GameComponents, GameHandler
 from res.sprites import SpritesFactory
 from res.ui import UIComponentFactory
 from res.levels import levels
-from game.storyline import StorylinePlayer
+from game.storyline.intro import StorylinePlayer
 
 class Game():
+    ##################
+    # Initialization #
+    ##################
+
     def __init__(self):
         """
         Game initialization.
         """
-        # Set up components
-        # Make sure the keybind_setup is on the LAST list
+        game_components = self.init_game_components()
+
+        self.init_game_handler(game_components)
+
+        # Add event handler
+        self.init_event_handlers()
+
+        self.callable_draw: Callable[[None], None] | None
+
+        # Debugging
+        # self.debugger = Debugger(self.spr_player, self.game_handler.game_components)
+
+        self.ui_stars = None # stars are separated from the other UI components so it can be drawn first
+
+        self.init_intro_slideshow()
+
+    def init_intro_slideshow(self):
+        self.storyline_player = StorylinePlayer(self.game_handler)
+        self.storyline_player.slide_intro()
+
+    def init_event_handlers(self):
+        self.game_handler.game_components.event_handler.add_handler(events.UpdateStatusbar.name, self.update_statusbar)
+        self.game_handler.game_components.event_handler.add_handler(events.LevelRestart.name, self.level_restart)
+        self.game_handler.game_components.event_handler.add_handler(events.LevelNext.name, self.level_next)
+        self.game_handler.game_components.event_handler.add_handler(events.StartGame.name, self.start_game)
+
+    def init_game_components(self):
+        """
+        Set up (create) game components.
+        """
         camera = components.Camera()
         soundplayer = components.SoundPlayer()
         keylistener = components.KeyListener()
@@ -39,44 +71,34 @@ class Game():
         game_sprites = components.GameSprites()
         event_handler = components.EventHandler()
         ui_handler = components.GameUI()
+        ticker = components.TickerHandler()
         timer = components.Timer()
-        game_components = GameComponents(soundplayer, camera, keylistener, statusbar, game_sprites, ui_handler, event_handler, timer)
-
-        # Set up the main game handler
+        game_components = GameComponents(soundplayer, camera, keylistener, statusbar, game_sprites, ui_handler, event_handler, ticker, timer)
+        return game_components
+        
+    def init_game_handler(self, game_components: GameComponents):
+        """
+        Set up the main game handler.
+        """
         level_handler = components.LevelHandler(levels)
-        self.game_handler = GameHandler(level_handler, game_components)
+        self.game_handler = GameHandler(level_handler, game_components, None)
         self.game_handler.levelhandler.set_lvl_by_idx(1)
 
-        # Add event handler
-        self.game_handler.game_components.event_handler.add_handler(events.UpdateStatusbar.name, self.update_statusbar)
-        self.game_handler.game_components.event_handler.add_handler(events.LevelRestart.name, self.level_restart)
-        self.game_handler.game_components.event_handler.add_handler(events.LevelNext.name, self.level_next)
-        self.game_handler.game_components.event_handler.add_handler(events.StartGame.name, self.start_game)
+    #########
+    # Loops #
+    #########
 
-        self.callable_draw: Callable[..., None] | None
-        # self.callable_draw = self.draw_slideshow_start
-
-        self.callable_draw = None
-
-        # Debugging
-        # self.debugger = Debugger(self.spr_player, self.game_handler.game_components)
-
-        self.ui_stars = None
-
-        self.storyline_player = StorylinePlayer(self.game_handler.game_components)
-
-        self.storyline_player.slide_intro()
-        
     def update(self):
         """
         Update game state.
         """
         self.game_handler.game_components.game_sprites.update()
         self.game_handler.game_components.keylistener.check()
+        self.game_handler.game_components.ticker.update()
         self.game_handler.game_components.timer.update()
     
     def draw(self):
-        self.callable_draw() if self.callable_draw else None
+        self.game_handler.callable_draw() if self.game_handler.callable_draw else None
 
     def draw_game_loop(self):
         """
@@ -157,7 +179,7 @@ class Game():
     def start_game(self):
         self.init_sprites()
         self.init_ui()
-        self.callable_draw = self.draw_game_loop
+        self.game_handler.callable_draw = self.draw_game_loop
 
     ##########################################################
     # All functions defined below are only used for TESTING. #

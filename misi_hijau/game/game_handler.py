@@ -17,6 +17,7 @@ Game handler which holds game components.
 """
 
 from dataclasses import dataclass
+from typing import Callable, Optional
 from .components import (
     SoundPlayer,
     Camera,
@@ -26,6 +27,7 @@ from .components import (
     GameSprites,
     EventHandler,
     GameUI,
+    TickerHandler,
     Timer
 )
 
@@ -41,13 +43,15 @@ class GameComponents:
     game_sprites: GameSprites
     game_ui: GameUI
     event_handler: EventHandler
+    ticker: TickerHandler
     timer: Timer
 
 # Manager of (almost) Everything here
 @dataclass
 class GameHandler:
     """
-    Main game handler so sprites can't mess with the leveling system.
+    Master game handler.
     """
     levelhandler: LevelHandler
     game_components: GameComponents
+    callable_draw: Optional[Callable[..., None]]

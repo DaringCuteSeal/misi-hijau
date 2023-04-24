@@ -29,7 +29,7 @@ from ..common import (
 )
 from ..game_handler import GameHandler
 from .. import events
-from ..utils import Ticker, tile_to_real, real_to_tile
+from ..utils import tile_to_real, real_to_tile
 
 class Flame(Sprite):
     """
@@ -47,7 +47,7 @@ class Flame(Sprite):
         self.colkey = ALPHA_COL
         self.flames = [(32, 16), (32, 24)]
         self.coord = SpriteCoordinate(0, 0, 0, 0)
-        self.ticker = Ticker(5)
+        self.ticker = game_handler.game_components.ticker.attach(5)
         game_handler.game_components.event_handler.add_handler(events.FlameUpdate.name, self.flame_update)
     
     def draw(self):
@@ -55,7 +55,6 @@ class Flame(Sprite):
 
     def update(self):
         self.hit_this_frame = False
-        self.ticker.update()
 
         if self.ticker.get():
             self.set_costume(self.flames[pyxel.frame_count % 2])
@@ -108,8 +107,8 @@ class Player(Sprite):
         self.game = game_handler
         self.game.game_components.event_handler.add_handler(events.PlayerCollidingEnemy.name, self.is_colliding_with_enemy)
 
-        self.blinking_ticker = Ticker(10)
-        self.speed_statusbar_ticker = Ticker(10)
+        self.blinking_ticker = self.game.game_components.ticker.attach(10)
+        self.speed_statusbar_ticker = self.game.game_components.ticker.attach(10)
 
         self.player_setup()
 
@@ -131,7 +130,7 @@ class Player(Sprite):
         self.coord = SpriteCoordinate(self.level_width // 2, tile_to_real(4), self.level_width // 2, self.level_height - tile_to_real(4))
 
         if self.level.idx:
-            self.ship3_costume_ticker = Ticker(5)
+            self.ship3_costume_ticker = self.game.game_components.ticker.attach(5)
             self.ship3_costume_idx = False
 
         self.init_costume(self.ship_type)
@@ -228,7 +227,6 @@ class Player(Sprite):
     def update(self):
         self.map_to_view(self.game.game_components.camera.y)
         self.cam_update()
-        self.speed_statusbar_ticker.update()
 
         self.move()
 
@@ -249,7 +247,6 @@ class Player(Sprite):
                 self.hit_blink_count += 1
                 self.hit_blink_idx = not self.hit_blink_idx
             self.draw_if_hit()
-            self.blinking_ticker.update()
 
     def update_speed_statusbar(self):
         if self.speed_statusbar_ticker.get():

@@ -18,6 +18,9 @@ from game.common import WINDOW_HEIGHT, WINDOW_WIDTH
 from game.game import Game
 from res.resources_load import load_resources
 
+LANG = "id_ID"
+# LANG = "en_US"
+
 # Main App Class
 class App:
     def __init__(self):

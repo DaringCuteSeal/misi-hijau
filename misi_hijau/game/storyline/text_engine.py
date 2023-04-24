@@ -13,7 +13,6 @@
 # limitations under the License.
 
 # from pyxelunicode import PyxelUnicode # type: ignore # there's no stub file for this package.
-from res.resources_load import FONT_PATH
 from typing import Callable, Optional
 import pyxel
 from ..game_handler import GameComponents
@@ -33,6 +32,7 @@ class TextEngine():
         self.string_pos: int = 0
         self.use_sfx: bool = False
         self.function_when_done: Optional[Callable[..., None]] = None
+        self.interrupted = False
     
     def _wrap_string(self, string: str) -> str:
         words = string.split()
@@ -55,6 +55,7 @@ class TextEngine():
         self.current_speed = speed
         self.use_sfx = sfx
         self.function_when_done = function_when_done
+
         if self.use_sfx:
             self.soundplayer.play(self.typing_sfx, loop=True)
         self._recursively_increment_length()

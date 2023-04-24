@@ -15,7 +15,7 @@
 import pyxel
 from dataclasses import dataclass
 from enum import Enum
-from typing import Callable, Optional
+from typing import Any, Callable, Optional
 from time import time
 
 """
@@ -70,7 +70,7 @@ class KeyFunc:
     An object with a key and its associated function.
     """
     binding: int
-    func: Callable[[], None]
+    func: Callable[[], Any]
     btn_type: KeyTypes = KeyTypes.BTN
     active: bool = True
     hold_time: Optional[int] = None
@@ -141,13 +141,13 @@ class TimerItem:
     def __init__(self, time_limit: float):
         self.time_limit = time_limit
         self.start_timestamp = time()
-        self.function_when_over: Optional[Callable[[], None]] = None
+        self._function_when_over: Optional[Callable[[], None]] = None
 
     def when_over(self, function: Callable[[], None]):
         """
         Set the function to run when the timer is over.
         """
-        self.function_when_over = function
+        self._function_when_over = function
 
     def is_over(self) -> bool:
         """
@@ -160,4 +160,4 @@ class TimerItem:
         """
         Run function that's set to run after timer is over.
         """
-        self.function_when_over() if self.function_when_over else None
+        self._function_when_over() if self._function_when_over else None

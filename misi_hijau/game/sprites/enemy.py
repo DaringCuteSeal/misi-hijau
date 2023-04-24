@@ -14,7 +14,7 @@
 
 import pyxel
 from ..common import ALPHA_COL, Level, BLANK_UV, MAP_Y_OFFSET_TILES, StatusbarItem, EnemyType
-from ..utils import Ticker, tile_to_real
+from ..utils import tile_to_real
 from .sprite_classes import Sprite, SpriteCoordinate, SpriteHandler
 from ..game_handler import GameHandler
 from .. import events
@@ -100,7 +100,7 @@ class EnemyHandler(SpriteHandler):
         ]
 
         self.game_handler = game_handler
-        self.enemies_ticker = Ticker(8)
+        self.enemies_ticker = self.game_handler.game_components.ticker.attach(8)
         self.game_components = game_handler.game_components
         self.enemy_coordinates_list: list[tuple[int, int]] = []
         self.enemies: list[EnemyEntity] = []
@@ -159,8 +159,6 @@ class EnemyHandler(SpriteHandler):
         self.enemies.append(enemy)
 
     def update(self):
-        self.enemies_ticker.update()
-
         for enemy in self.enemies:
             enemy.map_to_view(self.game_components.camera.y)
             # XXX try checking collision on individual sprite update instead (without the EnemiesHandler)
