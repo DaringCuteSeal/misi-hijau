@@ -33,7 +33,7 @@ class Bullet(Sprite):
         self.is_dead = False
     
     def update(self):
-        pass
+        self.coord.y_map -= self.speed
 
     def draw(self):
         if self.is_sprite_in_viewport():
@@ -57,19 +57,18 @@ class BulletsHandler(SpriteHandler):
 
     def append_bullet(self, x: float, y: float, color: int):
         bullet = Bullet(SpriteCoordinate(-30, -30, x, y), color)
+        bullet.map_to_view(self.game_handler.game_components.camera.y)
         self.bullets.append(bullet)
 
     def update(self):
         if len(self.bullets) > 0:
             for bullet in self.bullets:
-                bullet.map_to_view(self.game_handler.game_components.camera.y)
-                bullet.coord.y_map -= bullet.speed
                 bullet.update()
-                if bullet.coord.y_map < 0 or bullet.coord.y + bullet.h - 1 < 0:
-                        bullet.is_dead = True
+                bullet.map_to_view(self.game_handler.game_components.camera.y)
 
-                if bullet.is_dead:
+                if bullet.coord.y_map < 0 or bullet.coord.y + bullet.h - 1 < 0:
                     self.bullets.remove(bullet)
+                bullet.map_to_view(self.game_handler.game_components.camera.y)
 
 
     def draw(self):
@@ -91,7 +90,6 @@ class BulletsHandler(SpriteHandler):
                 y = enemy_y_map - self.game_handler.game_components.camera.y + WINDOW_HEIGHT // 2
 
                 if bullet.is_colliding(x, y, enemy_w, enemy_h):
-
                     self.bullets.remove(bullet)
                     self.game_handler.game_components.event_handler.trigger_event(events.AppendBlastEffect(enemy_x_map, enemy_y_map, enemy_w, enemy_h))
                     self.game_handler.game_components.soundplayer.play(self.soundbank["explode"])

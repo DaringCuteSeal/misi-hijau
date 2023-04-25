@@ -48,9 +48,10 @@ class Game():
 
         self.ui_stars = None # stars are separated from the other UI components so it can be drawn first
 
-        self.init_intro_slideshow()
+        # self.start_game()
+        self.start_intro_slideshow()
 
-    def init_intro_slideshow(self):
+    def start_intro_slideshow(self):
         self.storyline_player = StorylinePlayer(self.game_handler)
         self.storyline_player.slide_intro()
 

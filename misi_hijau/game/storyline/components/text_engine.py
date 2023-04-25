@@ -12,11 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# from pyxelunicode import PyxelUnicode # type: ignore # there's no stub file for this package.
 from typing import Callable, Optional
 import pyxel
-from ..game_handler import GameComponents
-from ..common import WINDOW_WIDTH, Sfx, SoundType
+from ...game_handler import GameComponents
+from ...common import WINDOW_WIDTH, Sfx, SoundType
 
 class TextEngine():
     typing_sfx = Sfx(SoundType.AUDIO, 1, 17)
@@ -34,6 +33,9 @@ class TextEngine():
         self.function_when_done: Optional[Callable[..., None]] = None
     
     def _wrap_string(self, string: str) -> str:
+        """
+        Generate a wrapped string that doesn't overflow beyond the screen size.
+        """
         words = string.split()
         lines: list[str] = []
         current_line = ''
@@ -47,6 +49,9 @@ class TextEngine():
         return '\n'.join(lines)
     
     def animate_text(self, string: str, x: int, y: int, function_when_done: Optional[Callable[..., None]] = None, sfx: bool = False, speed: float = 0.03, color: int = pyxel.COLOR_WHITE):
+        """
+        Animate a string (with typing effect).
+        """
         self.string_pos = 0
         self.x = x
         self.y = y

@@ -86,7 +86,6 @@ class Player(Sprite):
 
 
     soundbank = {
-        "shoot": Sfx(SoundType.AUDIO, 0, 10),
         "attacked": Sfx(SoundType.AUDIO, 0, 14)
     }
 
@@ -105,12 +104,13 @@ class Player(Sprite):
     def __init__(self, game_handler: GameHandler):
 
         self.game = game_handler
-        self.game.game_components.event_handler.add_handler(events.PlayerCollidingEnemy.name, self.is_colliding_with_enemy)
 
+        self.coord = SpriteCoordinate(0, 0, 0, 0)
         self.blinking_ticker = self.game.game_components.ticker.attach(10)
         self.speed_statusbar_ticker = self.game.game_components.ticker.attach(10)
 
         self.player_setup()
+        self.game.game_components.event_handler.add_handler(events.PlayerCollidingEnemy.name, self.is_colliding_with_enemy)
 
     def player_setup(self):
         """
@@ -127,13 +127,20 @@ class Player(Sprite):
         self.level_height = tile_to_real(levelmap.level_height)
 
         self.health = self.level.max_health
-        self.coord = SpriteCoordinate(self.level_width // 2, tile_to_real(4), self.level_width // 2, self.level_height - tile_to_real(4))
+        self.reset_coord() # don't reinstantiate or else we will break bound values
+        self.map_to_view(self.game.game_components.camera.y)
 
         if self.level.idx:
             self.ship3_costume_ticker = self.game.game_components.ticker.attach(5)
             self.ship3_costume_idx = False
 
         self.init_costume(self.ship_type)
+
+    def reset_coord(self):
+        self.coord.x = self.level_width // 2
+        self.coord.y = tile_to_real(4)
+        self.coord.x_map = self.level_width // 2
+        self.coord.y_map = self.level_height - tile_to_real(4)
 
 
     def init_costume(self, ship_type: PlayerShipType):
@@ -271,9 +278,6 @@ class Player(Sprite):
         self.player_setup()
 
     # Event handler functions
-    def shoot_handler(self):
-        self.game.game_components.event_handler.trigger_event(events.PlayerShootBullets(self.coord.x_map, self.coord.y_map))
-        self.game.game_components.soundplayer.play(self.soundbank["shoot"])
     
     def is_colliding_with_enemy(self, enemy_x: float, enemy_y: float, enemy_w: int, enemy_h: int) -> bool:
         if self.is_colliding(enemy_x, enemy_y, enemy_w, enemy_h):
@@ -302,12 +306,16 @@ class PlayerHandler(SpriteHandler):
     def __init__(self, game_handler: GameHandler):
         self.game_handler = game_handler
         self.setup()
+
+        self.soundbank = {
+            "shoot": Sfx(SoundType.AUDIO, 0, 10),
+        }
         self.keybindings = {
             "player_right": KeyFunc(pyxel.KEY_RIGHT, lambda: self.player.move_handler(Direction.RIGHT)),
             "player_left": KeyFunc(pyxel.KEY_LEFT, lambda: self.player.move_handler(Direction.LEFT)),
             "player_up": KeyFunc(pyxel.KEY_UP, lambda: self.player.move_handler(Direction.UP)),
             "player_down": KeyFunc(pyxel.KEY_DOWN, lambda: self.player.move_handler(Direction.DOWN)),
-            "player_shoot": KeyFunc(pyxel.KEY_SPACE, self.player.shoot_handler, KeyTypes.BTNP, hold_time=10, repeat_time=10),
+            "player_shoot": KeyFunc(pyxel.KEY_SPACE, self.shoot_handler, KeyTypes.BTNP, hold_time=10, repeat_time=10),
         }
         self.statusbar_items = [
             StatusbarItem(100, self.get_player_speed, pyxel.COLOR_YELLOW),
@@ -341,10 +349,14 @@ class PlayerHandler(SpriteHandler):
 
     def restart_level(self):
         self.player.restart_handler()
+    
+    def shoot_handler(self):
+        self.game_handler.game_components.event_handler.trigger_event(events.PlayerShootBullets(self.player.coord.x_map, self.player.coord.y_map))
+        self.game_handler.game_components.soundplayer.play(self.soundbank["shoot"])
 
     # Functions for statusbar
     def get_player_speed(self) -> str:
         magnitude = sqrt(self.player.y_vel * self.player.y_vel + self.player.x_vel * self.player.x_vel) #ilovepythagoras
         magnitude = pyxel.floor(magnitude * 100)
-        string = f"Speed: {magnitude} km/h"
+        string = f"Kecepatan: {magnitude} km/h"
         return string

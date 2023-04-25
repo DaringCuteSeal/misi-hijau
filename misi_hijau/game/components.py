@@ -38,7 +38,7 @@ from game.game_ui.game_ui_classes import UIComponent
 from . import utils
 
 
-# Keyboard handling
+# Keyboard input handling
 class KeyListener:
     """
     A Key listener to execute functions. Operates with an array like this:
@@ -154,14 +154,14 @@ class GameStatusbar:
         Append (extend) an array of `StatusBarItem` to the statusbar's store.
         """
         self.items.extend(items)
-        self._recalculate()
+        self._recalculate_position()
     
     def add(self, item: StatusbarItem):
         """
         Add a `StatusBarItem` to the statusbar's store.
         """
         self.items.append(item)
-        self._recalculate()
+        self._recalculate_position()
 
     def clear(self):
         """
@@ -185,7 +185,7 @@ class GameStatusbar:
                 string = self.strings[i]
                 pyxel.text(item.x, item.y, string, item.color)
         
-    def _recalculate(self):
+    def _recalculate_position(self):
         """
         Recalculate position for each statusbar item.
         """
@@ -316,12 +316,12 @@ class GameSprites:
         """
         Get an array of StatusbarItem from all sprites that can be plugged into `GameStatusBar`.
         """
-        keybinds: list[StatusbarItem] = []
-        [keybinds.extend(sprite.statusbar_items) for sprite in self.sprites_handler if sprite.statusbar_items]
-        [keybinds.extend(sprite.statusbar_items) for sprite in self.raw_sprites if sprite.statusbar_items]
-        [keybinds.extend(sprite.statusbar_items) for sprite in self.tilemap_sprites if sprite.statusbar_items]
+        statusbar_items: list[StatusbarItem] = []
+        [statusbar_items.extend(sprite.statusbar_items) for sprite in self.sprites_handler if sprite.statusbar_items]
+        [statusbar_items.extend(sprite.statusbar_items) for sprite in self.raw_sprites if sprite.statusbar_items]
+        [statusbar_items.extend(sprite.statusbar_items) for sprite in self.tilemap_sprites if sprite.statusbar_items]
 
-        return keybinds
+        return statusbar_items
 
 # Ticker handler
 class TickerHandler:
