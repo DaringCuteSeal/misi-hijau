@@ -6,7 +6,7 @@ STARS_COUNT = 100
 
 class UIComponentFactory:
     """
-    A sprite factory.
+    A UI Component factory.
     """
     def __init__(self, game_handler: GameHandler):
         self.game_handler = game_handler

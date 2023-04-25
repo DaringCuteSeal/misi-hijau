@@ -31,7 +31,7 @@ class StorylinePlayer:
     }
     string_collection = story_text
 
-    SLIDESHOW_WAIT_STRING = "press space to continue..."
+    SLIDESHOW_WAIT_STRING = "tekan spasi untuk lanjut..."
     SLIDESHOW_WAIT_COORD = (5, WINDOW_HEIGHT - pyxel.FONT_HEIGHT - 5)
     SLIDESHOW_WAIT_BORDER_WIDTH = len(SLIDESHOW_WAIT_STRING) * pyxel.FONT_WIDTH
     SLIDESHOW_WAIT_BORDER_HEIGHT = pyxel.FONT_HEIGHT
@@ -46,7 +46,7 @@ class StorylinePlayer:
         game_components.event_handler.add_handler(events.SlideshowNext.name, self.slideshow_next_handler)
 
         self.hint_text_blink_ticker = game_components.ticker.attach(30)
-        self.hint_text_idx = False
+        self.hint_text_blink_idx = False
 
         self.slideshow_idx = 1
 
@@ -72,13 +72,11 @@ class StorylinePlayer:
     def _show_slideshow_slide(self):
         self.keybindings["slideshow_next"].active = False
 
-        self.game_handler.game_components.timer.attach(1).when_over(lambda: self._alter_keylistener_state(True))
-
         self._load_slide_background_image(self.slideshow_idx)
         self._play_sfx()
         self._draw_background()
 
-        self.textengine.animate_text(self.string_collection["intro"][0], 5, 5, lambda: self.game_handler.game_components.timer.attach(1).when_over(self._post_text_show), sfx=True, speed=0.02, color=pyxel.COLOR_WHITE)
+        self.textengine.animate_text(self.string_collection["intro"][self.slideshow_idx - 1], 5, 5, lambda: self.game_handler.game_components.timer.attach(1).when_over(self._post_text_show), sfx=True, speed=0.02, color=pyxel.COLOR_WHITE)
 
     def _post_text_show(self):
         self.game_handler.callable_draw = self._text_hint_wait # activate the text hint loop
@@ -86,9 +84,9 @@ class StorylinePlayer:
 
     def _text_hint_wait(self):
         if self.hint_text_blink_ticker.get():
-            self.hint_text_idx = not self.hint_text_idx
+            self.hint_text_blink_idx = not self.hint_text_blink_idx
 
-            if self.hint_text_idx:
+            if self.hint_text_blink_idx:
                 pyxel.text(self.SLIDESHOW_WAIT_COORD[0], self.SLIDESHOW_WAIT_COORD[1], self.SLIDESHOW_WAIT_STRING, pyxel.COLOR_WHITE)
             else: 
                 # blit the text background with the background image instead of constantly drawing everything (computationally cheaper) 👍
@@ -116,4 +114,5 @@ class StorylinePlayer:
         self.keybindings["slideshow_next"].active = False
         self.game_handler.callable_draw = None
         self.slideshow_idx += 1
+        pyxel.cls(0)
         self._show_slideshow_slide()

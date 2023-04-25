@@ -32,7 +32,6 @@ class TextEngine():
         self.string_pos: int = 0
         self.use_sfx: bool = False
         self.function_when_done: Optional[Callable[..., None]] = None
-        self.interrupted = False
     
     def _wrap_string(self, string: str) -> str:
         words = string.split()
@@ -48,6 +47,7 @@ class TextEngine():
         return '\n'.join(lines)
     
     def animate_text(self, string: str, x: int, y: int, function_when_done: Optional[Callable[..., None]] = None, sfx: bool = False, speed: float = 0.03, color: int = pyxel.COLOR_WHITE):
+        self.string_pos = 0
         self.x = x
         self.y = y
         self.current_string = self._wrap_string(string)
