@@ -16,9 +16,11 @@ from typing import Callable, Optional
 import pyxel
 from ...game_handler import GameComponents
 from ...common import WINDOW_WIDTH, Sfx, SoundType
+from ... import events
 
 class TextEngine():
     typing_sfx = Sfx(SoundType.AUDIO, 1, 17)
+    TIMER_ID = "text_engine"
 
     def __init__(self, game_components: GameComponents):
         # self.pyuni = PyxelUnicode(FONT_PATH, 12, 1)
@@ -31,6 +33,9 @@ class TextEngine():
         self.string_pos: int = 0
         self.use_sfx: bool = False
         self.function_when_done: Optional[Callable[..., None]] = None
+        self._is_interrupted: bool = False
+
+        game_components.event_handler.add_handler(events.TextengineInterrupt.name, self._interrupt_handler)
     
     def _wrap_string(self, string: str) -> str:
         """
@@ -52,6 +57,8 @@ class TextEngine():
         """
         Animate a string (with typing effect).
         """
+        self._interrupt_reset()
+
         self.string_pos = 0
         self.x = x
         self.y = y
@@ -66,8 +73,12 @@ class TextEngine():
         self._recursively_increment_length()
     
     def _recursively_increment_length(self):
+        if self._is_interrupted:
+            self._interrupt_reset()
+            return
+
         if self.string_pos != len(self.current_string):
-            self.timer.attach(self.current_speed).when_over(self._recursively_increment_length)
+            self.timer.attach(self.current_speed, self.TIMER_ID).when_over(self._recursively_increment_length)
             self.string_pos += 1
             self._draw() # only draw when needed. Not clearing the text from before is fine, because the current string is just the previous string plus a new character.
         else:
@@ -81,3 +92,12 @@ class TextEngine():
     def _draw(self):
         # self.pyuni.text(self.x, self.y, self.current_string[:self.string_pos], self.current_color) # type: ignore # the author of PyxelUnicode didn't specify the type for the `s` parameter :)
         pyxel.text(self.x, self.y, self.current_string[:self.string_pos], self.current_color)
+    
+    def _interrupt_handler(self):
+        self.soundplayer.stop_sfx_channel_playback(self.typing_sfx)
+        self._is_interrupted = True
+    
+    def _interrupt_reset(self):
+        self.soundplayer.stop_sfx_channel_playback(self.typing_sfx)
+        self._is_interrupted = False
+        self.timer.destroy_by_id(self.TIMER_ID)

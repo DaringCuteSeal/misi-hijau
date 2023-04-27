@@ -54,7 +54,6 @@ class KeyListener:
         }
     ]
     ```
-    A function name that is set to "none" will be treated as the function to be run when none of the keys bound are pressed.
     """
 
     def __init__(self):
@@ -352,7 +351,7 @@ class Timer:
         self.time_start = time
         self.timer_items: list[TimerItem] = []
     
-    def attach(self, limit: float) -> TimerItem:
+    def attach(self, limit: float, item_id: str = "timer_item") -> TimerItem:
         """
         Add a new function to run after waiting for `limit` seconds. This will return a `TimerItem`.
         Do NOT call this inside a game loop, as the timer will keep getting reinstantiated.
@@ -361,12 +360,18 @@ class Timer:
         ```python
         Timer.attach(1).when_over(function_to_call)
         ```
+
+        The `id` variable is optional but useful because the `destroy` method of this game timer can then be called to delete all timer items with the specified `id`.
         """
 
-        timer_item = TimerItem(limit)
+        timer_item = TimerItem(limit, item_id)
         self.timer_items.append(timer_item)
         return timer_item
-    
+
+    def destroy_by_id(self, item_id: str):
+        for item in self.timer_items:
+            self.timer_items.remove(item) if item.timer_id == item_id else None
+
     def update(self):
         """
         Update status of all timer items (`self.timer_items`).
@@ -374,7 +379,7 @@ class Timer:
         for item in self.timer_items:
             if item.is_over():
                 item.run_function()
-                self.timer_items.remove(item)
+                self.timer_items.remove(item) if item in self.timer_items else None # don't do anything if the item is already gone (the timer suddenly got removed)
 
 # Event system
 class EventHandler:

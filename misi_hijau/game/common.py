@@ -136,9 +136,10 @@ class StatusbarItem:
 
 class TimerItem:
     """
-    Helper class for `Timer`.
+    A Timer item.
     """
-    def __init__(self, time_limit: float):
+    def __init__(self, time_limit: float, timer_id: str = "timer_item"):
+        self.timer_id = timer_id
         self.time_limit = time_limit
         self.start_timestamp = time()
         self._function_when_over: Optional[Callable[[], None]] = None

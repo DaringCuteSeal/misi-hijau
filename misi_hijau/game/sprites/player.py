@@ -76,8 +76,8 @@ class Player(Sprite):
     w = 16
     h = 16
     colkey = ALPHA_COL
-    accel = 0.1
-    drag = 0.04
+    accel = 0.2
+    drag = 0.09
 
     # Props for player that got attacked by an alien
     has_been_hit: bool = False

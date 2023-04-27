@@ -101,6 +101,8 @@ class TilemapPlayerCheck(Event):
         }
 
 # Events without data being passed
+TextengineInterrupt = Event("text_engine_interrupt")
+
 CheckLevelComplete = Event("check_level_complete")
 
 UpdateHealthbar = Event("update_healthbar")

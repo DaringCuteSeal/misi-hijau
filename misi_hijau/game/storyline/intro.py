@@ -71,17 +71,21 @@ class StorylinePlayer:
         self.game_handler.game_components.timer.attach(4.8).when_over(self._show_slideshow_slide) # start slideshow after 5 seconds
 
     def _show_slideshow_slide(self):
-        self.keybindings["slideshow_next"].active = False
+        self._alter_keylistener_state(False)
 
         self._load_slide_background_image(self.slideshow_idx)
-        self._play_sfx()
         self._draw_background()
+        self._play_sfx()
+
+        self.game_handler.game_components.timer.attach(0.2).when_over(lambda: self._alter_keylistener_state(True))
 
         self.textengine.animate_text(self.string_collection["intro"][self.slideshow_idx - 1], 5, 5, lambda: self.game_handler.game_components.timer.attach(1).when_over(self._post_text_show), sfx=True, speed=0.02, color=pyxel.COLOR_WHITE)
 
     def _post_text_show(self):
+        """
+        Functions to be run after the text is done being animated.
+        """
         self.game_handler.callable_draw = self._text_hint_wait # activate the text hint loop
-        self._alter_keylistener_state(True) # activate the key listener
 
     def _text_hint_wait(self):
         if self.hint_text_blink_ticker.get():
@@ -111,11 +115,13 @@ class StorylinePlayer:
 
     def slideshow_next_handler(self):
         if self.slideshow_idx != self.INTRO_SLIDESHOW_COUNT:
+            self.game_handler.game_components.event_handler.trigger_event(events.TextengineInterrupt)
             self.keybindings["slideshow_next"].active = False
             self.game_handler.callable_draw = None
             self.slideshow_idx += 1
             self._show_slideshow_slide()
         else:
             self.keybindings["slideshow_next"].active = False
+            self.game_handler.game_components.event_handler.trigger_event(events.TextengineInterrupt)
             self.game_handler.game_components.event_handler.trigger_event(events.StartGame)
             self.game_handler.game_components.event_handler.trigger_event(events.ShowInstructions)
