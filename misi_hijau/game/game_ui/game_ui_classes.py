@@ -62,5 +62,5 @@ class UIComponent(ABC):
         """
         Draw (render) UI component.
         """
-        if self.active:
-            self._draw()
+        
+        self._draw if self.active else None

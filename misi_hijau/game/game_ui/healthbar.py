@@ -42,7 +42,7 @@ class HealthBar(UIComponent):
     def _draw(self):
         if self.health_count > 0:
             x_prev = self.coord.x
-            for i in range(0, self.health_count): # type: ignore
+            for _ in range(0, self.health_count):
                 x = x_prev + self.w + self.def_gap_x
                 pyxel.blt(x, self.coord.y, 0, self.costume[0], self.costume[1], self.w, self.h, ALPHA_COL)
                 x_prev = x

@@ -86,8 +86,6 @@ class KeyListener:
                             if pyxel.btnp(key.binding, hold=key.hold_time, repeat=key.repeat_time):
                                 key.func()
 
-
-
 # Level handling
 class LevelHandler:
     """
@@ -112,7 +110,6 @@ class LevelHandler:
         for level in self.levels:
             if level.idx == idx:
                 return level
-    
 
 # Camera handling
 @dataclass

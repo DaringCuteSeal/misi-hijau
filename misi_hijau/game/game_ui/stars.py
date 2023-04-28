@@ -35,7 +35,7 @@ class Stars(UIComponent):
 
     def generate_stars_list(self, num_stars: int) -> list[tuple[float, float, float]]:
         stars_list: list[tuple[float, float, float]] = []
-        for i in range(0, num_stars): # type: ignore
+        for _ in range(0, num_stars): # type: ignore
             stars_list.append((
                 pyxel.rndi(0, WINDOW_WIDTH),
                 pyxel.rndi(0, WINDOW_HEIGHT),

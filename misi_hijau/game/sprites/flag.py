@@ -16,9 +16,9 @@ from .sprite_classes import TilemapBasedSprite
 from game.game_handler import GameHandler
 import game.events as events
 
-FLAG_UV = (2, 7)
-
 class LevelFlag(TilemapBasedSprite):
+    FLAG_UV = (2, 7)
+
     def __init__(self, game_handler: GameHandler):
        self.game_handler = game_handler
        self.game_handler.game_components.event_handler.add_handler(events.TilemapPlayerCheck.name, self.player_level_completed_check)
@@ -39,6 +39,5 @@ class LevelFlag(TilemapBasedSprite):
         self.setup()
 
     def player_level_completed_check(self, uv: tuple[int, int], tile_x: int, tile_y: int):
-        if self._is_level_complete():
-            if uv == FLAG_UV:
-                self.game_handler.game_components.event_handler.trigger_event(events.LevelNext)
+        if self._is_level_complete() and uv == self.FLAG_UV:
+            self.game_handler.game_components.event_handler.trigger_event(events.LevelNext)

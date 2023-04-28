@@ -12,11 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import pyxel
+
 from ..common import Sfx, SoundType, WINDOW_HEIGHT
 from .sprite_classes import Sprite, SpriteCoordinate, SpriteHandler
 from ..game_handler import GameHandler
 from .. import events
-import pyxel
 
 class Bullet(Sprite):
     w = 2
@@ -70,7 +71,6 @@ class BulletsHandler(SpriteHandler):
                     self.bullets.remove(bullet)
                 bullet.map_to_view(self.game_handler.game_components.camera.y)
 
-
     def draw(self):
         if len(self.bullets) > 0:
             for bullet in self.bullets:
@@ -102,5 +102,3 @@ class BulletsHandler(SpriteHandler):
     
     def init_level(self):
         self.setup()
-    
-    # Functions for statusbar

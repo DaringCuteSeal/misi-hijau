@@ -54,13 +54,12 @@ class EnemyGrug(EnemyEntity):
     def update(self):
         self.coord.x_map += pyxel.rndf(-2, 2)
         self.coord.y_map += pyxel.rndf(-2, 2)
-        if self.coord.x_map > self.level_width: 
+        if self.coord.x_map > self.level_width:
             self.coord.x_map = self.level_width - 2
         if self.coord.x_map < 0:
             self.coord.x_map = 0
         if self.coord.y_map > self.level_height:
             self.coord.y_map = self.level_height
-
     
 class EnemyPhong(EnemyEntity):
     u = 8
