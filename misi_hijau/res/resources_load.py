@@ -16,10 +16,15 @@ import pyxel
 import os
 
 PYXEL_RESOURCE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "res.pyxres")
-SPLASH_SCREEN_IMAGE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "game_splash_screen.png")
-INTRO_SLIDESHOW_IMAGE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "intro_slideshow_image")
+
+IMG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "img")
+
+SPLASH_SCREEN_IMAGE = os.path.join(IMG_PATH, "game_splash_screen.png")
+INTRO_SLIDESHOW_IMAGE_PATH = os.path.join(IMG_PATH, "intro_slideshow_image")
+INSTRUCTIONS_IMAGE_PATH = os.path.join(IMG_PATH, "instructions.png")
+
 # FONT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "font", "PIXELADE.ttf")
 
-def load_resources():
+def startup_load_resources():
     pyxel.load(PYXEL_RESOURCE_PATH)
     pyxel.image(1).load(0, 0, SPLASH_SCREEN_IMAGE)

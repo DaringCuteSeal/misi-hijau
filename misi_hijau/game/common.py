@@ -51,9 +51,9 @@ class MineralType(Enum):
     MINERAL_3 = 2
 
 class EnemyType(Enum):
-    ENEMY_1 = 0 # Krelth/Grug
-    ENEMY_2 = 1 # Naxor/Phong
-    ENEMY_3 = 2 # Octyca/Squidge
+    ENEMY_1 = 0 # Grug / MulticoloredSplotch
+    ENEMY_2 = 1 # Phong / ObeseSpider
+    ENEMY_3 = 2 # Squidge / PinkRetardWithLegs
 
 class PowerUpType(Enum):
     HEALTH = 0
@@ -69,7 +69,7 @@ class KeyFunc:
     """
     An object with a key and its associated function.
     """
-    binding: int
+    binding: list[int]
     func: Callable[[], Any]
     btn_type: KeyTypes = KeyTypes.BTN
     active: bool = True

@@ -32,11 +32,11 @@ from .common import (
     StatusbarItem,
     TimerItem
 )
+
 from game.events import Event
 from game.sprites.sprite_classes import Sprite, SpriteHandler, TilemapBasedSprite
 from game.game_ui.game_ui_classes import UIComponent
 from . import utils
-
 
 # Keyboard input handling
 class KeyListener:
@@ -75,16 +75,21 @@ class KeyListener:
         """
         Loop through key listeners and run function if key is pressed.
         """
+        # I am sincerely very sory for the amount of indentations this thing has
         for i in self.keys_to_check:
-            for key in i.values():
-                if key.active:
-                    match(key.btn_type):
+            for keyfunc in i.values():
+                if keyfunc.active:
+                    match keyfunc.btn_type:
                         case KeyTypes.BTN:
-                            if pyxel.btn(key.binding):
-                                key.func()
+                            for key in keyfunc.binding:
+                                if pyxel.btn(key):
+                                    keyfunc.func()
+                                    break # don't execute another function if 2 keys are pressed at the same time
                         case KeyTypes.BTNP:
-                            if pyxel.btnp(key.binding, hold=key.hold_time, repeat=key.repeat_time):
-                                key.func()
+                            for key in keyfunc.binding:
+                                if pyxel.btnp(key, hold=keyfunc.hold_time, repeat=keyfunc.repeat_time):
+                                    keyfunc.func()
+                                    break
 
 # Level handling
 class LevelHandler:
@@ -170,6 +175,7 @@ class GameStatusbar:
         """
         Update statusbar strings (call all functions used to get the string).
         """
+        
         self.strings = [item.function() for item in self.items]
 
     def draw(self):
@@ -207,7 +213,7 @@ class SoundPlayer():
         """
         Play a sound (Sfx).
         """
-        match(sfx.soundtype):
+        match sfx.soundtype:
             case SoundType.AUDIO:
                 pyxel.play(sfx.channel, sfx.idx, loop=loop)
             case SoundType.MUSIC:
@@ -237,13 +243,16 @@ class GameUI():
         self.ui_components.update(ui_components)
     
     def draw(self):
-        [component.draw() for component in self.ui_components.values()]
+        for component in self.ui_components.values():
+            component.draw()
     
     def init_level(self):
-        [component.init_level() for component in self.ui_components.values()]
+        for component in self.ui_components.values():
+            component.init_level()
     
     def restart_level(self):
-        [component.restart_level() for component in self.ui_components.values()]
+        for component in self.ui_components.values():
+            component.restart_level()
 
 # Sprites handling
 class GameSprites:
@@ -274,27 +283,35 @@ class GameSprites:
         """
         Update all sprites state.
         """
-        [sprite.update() for sprite in self.sprites_handler]
+        for sprite in self.sprites_handler:
+            sprite.update()
 
     def draw(self):
         """
         Draw all sprites.
         """
-        [sprite.draw() for sprite in self.sprites_handler]
+        for sprite in self.sprites_handler:
+            sprite.draw()
     
     def init_level(self):
         """
         Function to be called on each new level.
         """
-        [sprite.init_level() for sprite in self.sprites_handler]
-        [sprite.init_level() for sprite in self.tilemap_sprites]
+        for sprite in self.sprites_handler:
+            sprite.init_level()
+
+        for sprite in self.tilemap_sprites:
+            sprite.init_level()
 
     def restart_level(self):
         """
         Function to be called after restarting a level.
         """
-        [sprite.restart_level() for sprite in self.sprites_handler]
-        [sprite.restart_level() for sprite in self.tilemap_sprites]
+        for sprite in self.sprites_handler:
+            sprite.restart_level()
+        
+        for sprite in self.tilemap_sprites:
+            sprite.restart_level()
 
     def get_keybinds(self) -> list[dict[str, KeyFunc]]:
         """
@@ -302,6 +319,7 @@ class GameSprites:
         """
 
         keybinds: list[dict[str, KeyFunc]] = []
+
         keybinds.extend([sprite.keybindings for sprite in self.sprites_handler if sprite.keybindings])
         keybinds.extend([sprite.keybindings for sprite in self.raw_sprites if sprite.keybindings])
         keybinds.extend([sprite.keybindings for sprite in self.tilemap_sprites if sprite.keybindings])
@@ -313,16 +331,23 @@ class GameSprites:
         Get an array of StatusbarItem from all sprites that can be plugged into `GameStatusBar`.
         """
         statusbar_items: list[StatusbarItem] = []
-        [statusbar_items.extend(sprite.statusbar_items) for sprite in self.sprites_handler if sprite.statusbar_items]
-        [statusbar_items.extend(sprite.statusbar_items) for sprite in self.raw_sprites if sprite.statusbar_items]
-        [statusbar_items.extend(sprite.statusbar_items) for sprite in self.tilemap_sprites if sprite.statusbar_items]
+
+        for sprite in self.sprites_handler:
+            statusbar_items.extend(sprite.statusbar_items) if sprite.statusbar_items else None
+
+        for sprite in self.raw_sprites:
+            statusbar_items.extend(sprite.statusbar_items) if sprite.statusbar_items else None
+
+        for sprite in self.tilemap_sprites:
+            statusbar_items.extend(sprite.statusbar_items) if sprite.statusbar_items  else None
 
         return statusbar_items
 
 # Ticker handler
 class TickerHandler:
     """
-    Ticker handler class. Each individual sprite that has a ticker doesn't need to update the ticker"""
+    Ticker handler class. Each individual sprite that has a ticker doesn't need to update the ticker
+    """
     def __init__(self):
         self.ticker_items: list[utils.Ticker] = []
     

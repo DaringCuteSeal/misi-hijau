@@ -121,8 +121,6 @@ class TilemapBasedSprite(ABC):
     """
     A tilemap-based sprite object class. These sprites are event-driven, meaning they don't need to implement the update and draw methods.
     """
-    # UV mapping is the 3D modeling process of projecting a 3D model's surface to a 2D image for texture mapping. The letters "U" and "V" denote the axes of the 2D texture because "X", "Y", and "Z" are already used to denote the axes of the 3D object in model space, while "W" (in addition to XYZ) is used in… +
-    # thanks for the suggestion
 
     img: int = 0
     w: int = 8 # width

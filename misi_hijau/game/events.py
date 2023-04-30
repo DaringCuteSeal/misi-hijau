@@ -16,8 +16,10 @@
 Definition for game events.
 """
 
+import pyxel
+
 from dataclasses import dataclass
-from typing import Optional, Any
+from typing import Callable, Optional, Any
 
 @dataclass
 class Event:
@@ -98,6 +100,20 @@ class TilemapPlayerCheck(Event):
             "uv": uv,
             "tile_x": tile_x,
             "tile_y": tile_y
+        }
+
+class ShowDialog(Event):
+    name = "show_dialog"
+    def __init__(self, message: str, width: int, text_gap: int, text_color: int, bg_color: int, function_when_done: Optional[Callable[..., Any]] = None, key_dismiss: int = pyxel.KEY_SPACE, sfx: bool = False):
+        self.data = {
+            "message": message,
+            "width": width,
+            "text_gap": text_gap,
+            "text_color": text_color,
+            "bg_color": bg_color,
+            "function_when_done": function_when_done,
+            "key_dismiss": key_dismiss,
+            "sfx": sfx
         }
 
 # Events without data being passed

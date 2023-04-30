@@ -20,10 +20,9 @@ from ..common import (
 )
 from ..game_handler import GameHandler
 from .. import events
-from .game_ui_classes import UIComponent
 
 @dataclass
-class Stars(UIComponent):
+class Stars: # kinda a UI component but is drawn before everything else so the component rules don't apply to this class
     """
     Stars that scrolls in the background.
     """
@@ -53,7 +52,7 @@ class Stars(UIComponent):
                 y = WINDOW_HEIGHT
             self.stars_list[i] = (x, y, speed)
 
-    def _draw(self):
+    def draw(self):
         for x, y, speed in self.stars_list:
             pyxel.pset(x, y, pyxel.COLOR_CYAN if speed < 3 else pyxel.COLOR_NAVY)
     

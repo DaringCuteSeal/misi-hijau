@@ -23,7 +23,9 @@ from game.game_handler import GameComponents, GameHandler
 from res.sprites import SpritesFactory
 from res.ui import UIComponentFactory
 from res.levels import levels
+
 from game.storyline.intro import StorylinePlayer
+from game.storyline.story_dialogs import StoryDialogs
 
 class Game():
     ##################
@@ -48,12 +50,16 @@ class Game():
 
         self.ui_stars = None # stars are separated from the other UI components so it can be drawn first
 
-        # self.start_game()
-        self.start_intro_slideshow()
+        self._start_intro_slideshow()
 
-    def start_intro_slideshow(self):
+        self._init_story_dialog()
+
+    def _start_intro_slideshow(self):
         self.storyline_player = StorylinePlayer(self.game_handler)
         self.storyline_player.slide_intro()
+    
+    def _init_story_dialog(self):
+        self.story_dialog = StoryDialogs(self.game_handler)
 
     def init_event_handlers(self):
         self.game_handler.game_components.event_handler.add_handler(events.UpdateStatusbar.name, self.update_statusbar)

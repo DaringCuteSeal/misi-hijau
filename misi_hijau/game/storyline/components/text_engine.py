@@ -26,6 +26,12 @@ class TextEngine():
         # self.pyuni = PyxelUnicode(FONT_PATH, 12, 1)
         self.timer = game_components.timer
         self.soundplayer = game_components.soundplayer
+        self._set_defaults()
+        self._is_interrupted: bool = False
+
+        game_components.event_handler.add_handler(events.TextengineInterrupt.name, self._interrupt_handler)
+
+    def _set_defaults(self):
         self.strings_collection: dict[str, list[str]] = {}
         self.current_string: str = ''
         self.current_color: int = pyxel.COLOR_WHITE
@@ -33,17 +39,14 @@ class TextEngine():
         self.string_pos: int = 0
         self.use_sfx: bool = False
         self.function_when_done: Optional[Callable[..., None]] = None
-        self._is_interrupted: bool = False
-
-        game_components.event_handler.add_handler(events.TextengineInterrupt.name, self._interrupt_handler)
     
     def _wrap_string(self, string: str) -> str:
         """
         Generate a wrapped string that doesn't overflow beyond the screen size.
         """
-        words = string.split()
+        words: list[str] = string.split()
         lines: list[str] = []
-        current_line = ''
+        current_line: str = ''
         for word in words:
             if (len(current_line + word) + 1) * pyxel.FONT_WIDTH + self.x > WINDOW_WIDTH:
                 lines.append(current_line.strip())

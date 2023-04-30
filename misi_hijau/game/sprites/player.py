@@ -311,11 +311,11 @@ class PlayerHandler(SpriteHandler):
             "shoot": Sfx(SoundType.AUDIO, 0, 10),
         }
         self.keybindings = {
-            "player_right": KeyFunc(pyxel.KEY_RIGHT, lambda: self.player.move_handler(Direction.RIGHT)),
-            "player_left": KeyFunc(pyxel.KEY_LEFT, lambda: self.player.move_handler(Direction.LEFT)),
-            "player_up": KeyFunc(pyxel.KEY_UP, lambda: self.player.move_handler(Direction.UP)),
-            "player_down": KeyFunc(pyxel.KEY_DOWN, lambda: self.player.move_handler(Direction.DOWN)),
-            "player_shoot": KeyFunc(pyxel.KEY_SPACE, self.shoot_handler, KeyTypes.BTNP, hold_time=10, repeat_time=10),
+            "player_right": KeyFunc([pyxel.KEY_RIGHT, pyxel.KEY_D], lambda: self.player.move_handler(Direction.RIGHT), active=False),
+            "player_left": KeyFunc([pyxel.KEY_LEFT, pyxel.KEY_A], lambda: self.player.move_handler(Direction.LEFT), active=False),
+            "player_up": KeyFunc([pyxel.KEY_UP, pyxel.KEY_W], lambda: self.player.move_handler(Direction.UP), active=False),
+            "player_down": KeyFunc([pyxel.KEY_DOWN, pyxel.KEY_S], lambda: self.player.move_handler(Direction.DOWN), active=False),
+            "player_shoot": KeyFunc([pyxel.KEY_SPACE], self.shoot_handler, KeyTypes.BTNP, hold_time=10, repeat_time=10),
         }
         self.statusbar_items = [
             StatusbarItem(100, self.get_player_speed, pyxel.COLOR_YELLOW),
@@ -353,6 +353,10 @@ class PlayerHandler(SpriteHandler):
     def shoot_handler(self):
         self.game_handler.game_components.event_handler.trigger_event(events.PlayerShootBullets(self.player.coord.x_map, self.player.coord.y_map))
         self.game_handler.game_components.soundplayer.play(self.soundbank["shoot"])
+
+    def enable_keybinds(self):
+        for key in self.keybindings.values():
+            key.active = True
 
     # Functions for statusbar
     def get_player_speed(self) -> str:

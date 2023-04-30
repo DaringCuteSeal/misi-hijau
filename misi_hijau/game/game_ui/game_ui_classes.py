@@ -28,7 +28,6 @@ class UIComponent(ABC):
     """
     A game UI Component.
     """
-    coord: UIComponentCoordinate
     img: int = 0
     u: int = 0
     v: int = 0
@@ -38,6 +37,7 @@ class UIComponent(ABC):
     keybindings: dict[str, common.KeyFunc] = field(default_factory=dict[str, common.KeyFunc])
     soundbank: dict[str, common.Sfx] = field(default_factory=dict[str, common.Sfx])
     costumes: dict[str, tuple[int, int]] = field(default_factory=dict[str, tuple[int, int]])
+    coord: UIComponentCoordinate = UIComponentCoordinate(0, 0)
 
     @abstractmethod
     def _draw(self):
@@ -63,4 +63,4 @@ class UIComponent(ABC):
         Draw (render) UI component.
         """
         
-        self._draw if self.active else None
+        self._draw() if self.active else None

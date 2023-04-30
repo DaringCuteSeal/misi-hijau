@@ -26,15 +26,8 @@ story_text = {
         "Bumi masih memiliki cukup energi untuk 7 tahun ke depan, apabila dihemat dengan baik. Misi Sarah dan timnya kemungkinan besar akan memakan waktu selama 5 tahun. Sarah dan timnya adalah harapan satu-satunya bagi kelangsungan hidup umat manusia."
     ],
 
-    "instructions": [
-        "Tugasmu dalam misi ini adalah membantu Sarah dan timnya untuk mengendalikan kapal terbang mereka dan mengumpulkan 3 mineral yang dapat mencegah krisis energi bumi.",
-        "Kumpulkan mineral sesuai dengan jumlah yang diperlukan. Kamu dapat melihat perkembanganmu pada status bar di ujung kiri atas."
-        "Selain itu, kamu juga perlu menyingkirkan seluruh alien di sekitar daerah untuk mencegah mereka mengikuti kapal kita dan mengganggu makhluk hidup di bumi. Alien-alien ini sangat cerdik."
-        "Semoga berhasil!"
-    ],
-
     "story_start_level_1": [
-        "Elemen pertama: Nethonite. Nethonite berwarna biru safir. Menurut prediksi Sarah, Nethonite merupakan mineral yang terdiri sepenuhnya dari Dimensium, elemen dengan interaksi paling aneh yang diketahui manusia. Apabile Nethonite diputar dengan kecepatan >32 ribu RPM dalam sebuah bola kaca tebal hampa, Nathonite dapat menghasilkan listrik yang stabil dengan tegangan yang luar biasa.",
+        "Elemen pertama: Nethonite. Nethonite berwarna biru safir. Menurut prediksi Sarah, Nethonite merupakan mineral yang terdiri sepenuhnya dari Dimensium, elemen dengan interaksi paling aneh yang diketahui manusia. Apabile Nethonite diputar dengan kecepatan >32 ribu RPM dalam sebuah bola kaca tebal hampa, Nathonite dapat menghasilkan listrik yang stabil dengan tegangan yang luar biasa."
     ],
 
     "story_start_level_2": [

@@ -16,7 +16,7 @@
 import pyxel
 from game.common import WINDOW_HEIGHT, WINDOW_WIDTH
 from game.game import Game
-from res.resources_load import load_resources
+from res.resources_load import startup_load_resources
 
 LANG = "id_ID"
 # LANG = "en_US"
@@ -29,7 +29,7 @@ class App:
         """
         # Pyxel stuff
         pyxel.init(WINDOW_WIDTH, WINDOW_HEIGHT, capture_scale=8, title="Misi Hijau", fps=30)
-        load_resources()
+        startup_load_resources()
         
         self.game = Game()
 

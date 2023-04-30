@@ -10,6 +10,13 @@ Ringkasan keseluruhan desain program ini dapat dibaca di [OVERVIEW.md](OVERVIEW.
 
 Catatan: **Proyek ini tidak menerima PR sampai 5 Mei 2023.**
 
+# Blog
+Baca proses pembuatan game ini di blog websiteku:
+* [Blog 1](https://daringcuteseal.xyz/blog/misi-hijau-devlog/)
+* [Blog 2](https://daringcuteseal.xyz/blog/misi-hijau-devlog-2/)
+* [Blog 3](https://daringcuteseal.xyz/blog/misi-hijau-devlog-3/)
+* [Blog 4](https://daringcuteseal.xyz/blog/misi-hijau-devlog-4/)
+
 # Terima Kasih
 ## Proyek Lain
 * [Pyxel](https://github.com/kitao/pyxel) oleh [kitao](https://github.com/kitao): *game engine* yang digunakan proyek ini.
@@ -21,7 +28,8 @@ Catatan: **Proyek ini tidak menerima PR sampai 5 Mei 2023.**
     * [Scratch RPG Tutorial](https://www.youtube.com/playlist?list=PLy4zsTUHwGJJM6OFblu_t-5I5Yw5SxvhT) untuk teknis scrolling kamera
 
 ## Beberapa Orang
-* [placeholder]()
-* [Clarisa](https://www.instagram.com/clarisahtb/) yang telah memberi masukkan terhadap cerita dan beberapa bagian *engine* game
-* Penguji beta game ini
+* [Eason](https://ezntek.github.io) yang telah memberi masukan terhadap berbagai aspek game, dan merapikan kodeku (sambil bercanda di call; aku masih mengerjakan 99% game-nya 😁)
+* [Clarisa](https://www.instagram.com/clarisahtb/) yang telah memberi masukan terhadap cerita dan beberapa bagian *engine* game
+* [Kylee](https://kylee.site) yang telah memberi masukan terhadap beberapa bagian *engine* game
+* Penguji beta lain game ini
 * Beberapa teman lain yang telah mendukung dan memberi masukan terhadap proyek ini

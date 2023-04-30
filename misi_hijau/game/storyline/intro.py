@@ -18,7 +18,7 @@ import os
 from res.storyline_text import story_text
 
 from ..game_handler import GameHandler
-from res.resources_load import INTRO_SLIDESHOW_IMAGE_PATH, SPLASH_SCREEN_IMAGE
+from res.resources_load import INTRO_SLIDESHOW_IMAGE_PATH, SPLASH_SCREEN_IMAGE, INSTRUCTIONS_IMAGE_PATH
 from ..common import WINDOW_HEIGHT, KeyFunc, Sfx, SoundType
 from .components.text_engine import TextEngine
 from .. import events
@@ -27,8 +27,11 @@ class StorylinePlayer:
     soundbank = {
         "music": Sfx(SoundType.MUSIC, 3, 0),
         "start_sfx": Sfx(SoundType.AUDIO, 0, 16),
+        "instruction_sfx": Sfx(SoundType.AUDIO, 0, 18)
     }
     string_collection = story_text
+
+    TEXTENGINE_BORDER = 5
 
     SLIDESHOW_WAIT_STRING = "tekan spasi untuk lanjut..."
     SLIDESHOW_WAIT_COORD = (5, WINDOW_HEIGHT - pyxel.FONT_HEIGHT - 5)
@@ -56,7 +59,7 @@ class StorylinePlayer:
 
     def set_keybindings(self):
         self.keybindings = {
-            "slideshow_next": KeyFunc(pyxel.KEY_SPACE, lambda: self.game_handler.game_components.event_handler.trigger_event(events.SlideshowNext), active=False, repeat_time=3)
+            "slideshow_next": KeyFunc([pyxel.KEY_SPACE], lambda: self.game_handler.game_components.event_handler.trigger_event(events.SlideshowNext), active=False, repeat_time=3)
         }
 
         self.game_handler.game_components.keylistener.add(self.keybindings)
@@ -69,22 +72,17 @@ class StorylinePlayer:
         pyxel.image(1).load(0, 0, SPLASH_SCREEN_IMAGE)
         pyxel.blt(0, 0, 1, 0, 0, 256, 256)
         self.game_handler.game_components.timer.attach(4.8).when_over(self._show_slideshow_slide) # start slideshow after 5 seconds
-
+        
     def _show_slideshow_slide(self):
-        self._alter_keylistener_state(False)
+        self._post_slideshow_show()
 
         self._load_slide_background_image(self.slideshow_idx)
         self._draw_background()
-        self._play_sfx()
+        self._play_slide_sfx()
 
-        self.game_handler.game_components.timer.attach(0.2).when_over(lambda: self._alter_keylistener_state(True))
+        self.textengine.animate_text(self.string_collection["intro"][self.slideshow_idx - 1], self.TEXTENGINE_BORDER, self.TEXTENGINE_BORDER, lambda: self.game_handler.game_components.timer.attach(1).when_over(self._enable_spacebar_hint), sfx=True, speed=0.02, color=pyxel.COLOR_WHITE)
 
-        self.textengine.animate_text(self.string_collection["intro"][self.slideshow_idx - 1], 5, 5, lambda: self.game_handler.game_components.timer.attach(1).when_over(self._post_text_show), sfx=True, speed=0.02, color=pyxel.COLOR_WHITE)
-
-    def _post_text_show(self):
-        """
-        Functions to be run after the text is done being animated.
-        """
+    def _enable_spacebar_hint(self):
         self.game_handler.callable_draw = self._text_hint_wait # activate the text hint loop
 
     def _text_hint_wait(self):
@@ -94,10 +92,10 @@ class StorylinePlayer:
             if self.hint_text_blink_idx:
                 pyxel.text(self.SLIDESHOW_WAIT_COORD[0], self.SLIDESHOW_WAIT_COORD[1], self.SLIDESHOW_WAIT_STRING, pyxel.COLOR_WHITE)
             else: 
-                # blit back of the text with the background image instead of constantly drawing everything (computationally cheaper) 👍
+                # blit back of the text with the background image instead of constantly drawing everything (computationally cheaper)
                 pyxel.blt(self.SLIDESHOW_WAIT_COORD[0], self.SLIDESHOW_WAIT_COORD[1], 1, self.SLIDESHOW_WAIT_COORD[0], self.SLIDESHOW_WAIT_COORD[1], self.SLIDESHOW_WAIT_BORDER_WIDTH, self.SLIDESHOW_WAIT_BORDER_HEIGHT)
 
-    def _play_sfx(self):
+    def _play_slide_sfx(self):
         self.game_handler.game_components.soundplayer.play(self.soundbank["start_sfx"])
     
     def _load_slide_background_image(self, idx: int):
@@ -106,22 +104,39 @@ class StorylinePlayer:
     def _draw_background(self):
         pyxel.blt(0, 0, 1, 0, 0, 256, 256) # draw background image
 
-    ##################
+    def _post_slideshow_show(self):
+        """
+        Functions to be run after showing a slideshow.
+        """
+        self.game_handler.game_components.event_handler.trigger_event(events.TextengineInterrupt)
+        self._alter_keylistener_state(False)
+        self.game_handler.callable_draw = None
+        self.game_handler.game_components.timer.attach(0.2).when_over(lambda: self._alter_keylistener_state(True))
+
+    ################
+    # Instructions #
+    ################
+
+    def show_instructions(self):
+        self._post_slideshow_show()
+        pyxel.image(1).load(0, 0, INSTRUCTIONS_IMAGE_PATH)
+        self.game_handler.game_components.soundplayer.play(self.soundbank["instruction_sfx"])
+        pyxel.blt(0, 0, 1, 0, 0, 256, 256)
+
+    ################
     # Key handlers #
-    ##################
+    ################
 
     def _alter_keylistener_state(self, state: bool):
         self.keybindings["slideshow_next"].active = state
 
     def slideshow_next_handler(self):
-        if self.slideshow_idx != self.INTRO_SLIDESHOW_COUNT:
-            self.game_handler.game_components.event_handler.trigger_event(events.TextengineInterrupt)
-            self.keybindings["slideshow_next"].active = False
-            self.game_handler.callable_draw = None
+        if self.slideshow_idx < self.INTRO_SLIDESHOW_COUNT: # a normal slideshow
             self.slideshow_idx += 1
             self._show_slideshow_slide()
+        elif self.slideshow_idx == self.INTRO_SLIDESHOW_COUNT: # show instructions on last slideshow
+            self.slideshow_idx += 1
+            self.show_instructions()
         else:
-            self.keybindings["slideshow_next"].active = False
-            self.game_handler.game_components.event_handler.trigger_event(events.TextengineInterrupt)
             self.game_handler.game_components.event_handler.trigger_event(events.StartGame)
-            self.game_handler.game_components.event_handler.trigger_event(events.ShowInstructions)
+            self._alter_keylistener_state(False)
