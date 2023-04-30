@@ -21,19 +21,36 @@ from res.storyline_text import story_text
 class StoryDialogs:
     DIALOG_WIDTH = 200
 
+    dialog_strings: list[str] = [
+        story_text["story_start_level_1"][0],
+        story_text["story_start_level_2"][0],
+        story_text["story_start_level_3"][0]
+    ]
+
     def __init__(self, game_handler: GameHandler):
+        self.level_handler = game_handler.levelhandler
         self.event_handler = game_handler.game_components.event_handler
-        self.event_handler.add_handler(events.StartGame.name, self.start_game_dialog)
+        self.event_handler.add_handler(events.StartGame.name, self.show_dialog_handler)
+        self.event_handler.add_handler(events.LevelInit.name, self.show_dialog_handler)
     
-    def start_game_dialog(self):
+    def show_dialog_handler(self):
+        curr_level_idx = self.level_handler.get_curr_lvl().idx - 1
+        self._show_dialog_by_level_idx(curr_level_idx)
+
+    def _show_dialog_by_level_idx(self, level_idx: int):
         self.event_handler.trigger_event(
             events.ShowDialog(
-                story_text["story_start_level_1"][0],
+                self.dialog_strings[level_idx],
                 self.DIALOG_WIDTH,
                 5,
                 pyxel.COLOR_WHITE,
-                pyxel.COLOR_ORANGE,
-                None,
-                pyxel.KEY_Q
+                pyxel.COLOR_BROWN,
+                lambda: self.event_handler.trigger_event(events.ActivateLevel),
+                pyxel.KEY_Q,
+                True,
+                show_dismiss_msg=True,
+                dismiss_msg_col= pyxel.COLOR_YELLOW,
+                dismiss_msg_str="q untuk abaikan dan mulai.."
             )
         )
+ 

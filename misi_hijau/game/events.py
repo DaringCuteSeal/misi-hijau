@@ -104,7 +104,19 @@ class TilemapPlayerCheck(Event):
 
 class ShowDialog(Event):
     name = "show_dialog"
-    def __init__(self, message: str, width: int, text_gap: int, text_color: int, bg_color: int, function_when_done: Optional[Callable[..., Any]] = None, key_dismiss: int = pyxel.KEY_SPACE, sfx: bool = False):
+    def __init__(self,
+                 message: str,
+                 width: int,
+                 text_gap: int,
+                 text_color: int,
+                 bg_color: int,
+                 function_when_done: Optional[Callable[..., Any]] = None,
+                 key_dismiss: int = pyxel.KEY_SPACE,
+                 sfx: bool = False,
+                 show_dismiss_msg: bool = True,
+                 dismiss_msg_col: int = pyxel.COLOR_GRAY,
+                 dismiss_msg_str: str = "UNDEFINED"):
+
         self.data = {
             "message": message,
             "width": width,
@@ -113,24 +125,22 @@ class ShowDialog(Event):
             "bg_color": bg_color,
             "function_when_done": function_when_done,
             "key_dismiss": key_dismiss,
-            "sfx": sfx
+            "sfx": sfx,
+            "show_dismiss_msg": show_dismiss_msg,
+            "dismiss_msg_col": dismiss_msg_col,
+            "dismiss_msg_str": dismiss_msg_str
         }
 
 # Events without data being passed
+ActivateLevel = Event("activate_level")
 TextengineInterrupt = Event("text_engine_interrupt")
-
 CheckLevelComplete = Event("check_level_complete")
-
 UpdateHealthbar = Event("update_healthbar")
 UpdateStatusbar = Event("update_statusbar")
-
 SlideshowNext = Event("slideshow_next")
 ShowInstructions = Event("show_instruction")
-
 StarsScroll = Event("stars_scroll")
-
 StartGame = Event("start_game")
-
 LevelRestart = Event("restart_level")
 LevelInit = Event("init_level")
 LevelNext = Event("level_next")

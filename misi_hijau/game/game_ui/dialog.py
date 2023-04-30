@@ -23,8 +23,10 @@ from .. import events
 
 class Dialog(UIComponent):
     soundbank = {
-        "popup": Sfx(SoundType.AUDIO, 0, 16),
+        "popup": Sfx(SoundType.AUDIO, 0, 18),
     }
+
+    DISMISS_MSG_GAP = 5
 
     def __init__(self, game_handler: GameHandler):
         self.timer = game_handler.game_components.timer
@@ -36,7 +38,7 @@ class Dialog(UIComponent):
         self.w: int = 0
         self.message: str = ''
         self.bg_color: int = pyxel.COLOR_WHITE
-        self.message_width: int = 0
+        self.message_len: int = 0
         self.text_color: int = pyxel.COLOR_BLACK
 
         game_handler.game_components.keylistener.add({"dialog_dismiss_btn": self.tmp_keyfunc})
@@ -53,14 +55,25 @@ class Dialog(UIComponent):
             function_when_done: Optional[Callable[..., Any]] = None,
             key_dismiss: int = pyxel.KEY_SPACE,
             sfx: bool = False, 
-            show_dismiss_msg: bool = True) -> None:
+            show_dismiss_msg: bool = True,
+            dismiss_msg_col: int = pyxel.COLOR_GRAY,
+            dismiss_msg_str: str = "UNDEFINED" # too lazy to write name for every pyxel key
+            ) -> None:
+        """
+        Show a pop-up dialog with text. The width can be specified; while the height is calculated automatically.
+
+        Note: you must pass `dismiss_msg_str` argument if `show_dismiss_msg` is enabled or else, the message would show as UNDEFINED.
+        """
         
         self.tmp_keyfunc.binding = [key_dismiss]
         self.function_when_done = function_when_done
         self.text_gap = text_gap
-        self._calculate_dialog_size(width, message)
         self.bg_color = bg_color
         self.text_color = text_color
+        self.show_dismiss_msg = show_dismiss_msg
+        self.dismiss_msg_col = dismiss_msg_col
+        self.dismiss_msg_str = dismiss_msg_str
+        self._calculate_dialog_size(width, message)
         self._calculate_dialog_pos()
 
         self.timer.attach(1).when_over(lambda: self._alter_keyfunc_state(True))
@@ -75,17 +88,25 @@ class Dialog(UIComponent):
         self.message = self._wrap_string(message)
 
         self.message_rows_count = len(self.message.splitlines())
-        self.message_width = max([len(length) for length in self.message.splitlines()])
+        self.message_len = max([len(length) for length in self.message.splitlines()])
 
-        self.h = (self.message_rows_count * pyxel.FONT_HEIGHT) + self.text_gap * 2
+        if self.show_dismiss_msg:
+            self.h = (self.message_rows_count * pyxel.FONT_HEIGHT) + (self.text_gap * 2) + self.DISMISS_MSG_GAP + pyxel.FONT_HEIGHT
+        else:
+            # The height is calculated last because we need message_rows_count which we can get after
+            # we parsed (wrapped) the message.
+            self.h = (self.message_rows_count * pyxel.FONT_HEIGHT) + self.text_gap * 2
 
     def hide(self):
-        self.tmp_keyfunc.active = False
+        self._alter_keyfunc_state(False)
         self.active = False
+        self.function_when_done() if self.function_when_done else None
 
     def _calculate_dialog_pos(self):
-        self.coord.x = (WINDOW_WIDTH - self.w - 2 * self.text_gap) // 2
-        self.coord.y = (WINDOW_HEIGHT - self.h - 2 * self.text_gap) // 2
+        # x + dialog width/height + x = window height
+        # we can then find the position (x) like this:
+        self.coord.x = (WINDOW_WIDTH - self.w) // 2
+        self.coord.y = (WINDOW_HEIGHT - self.h) // 2
 
     def _draw(self):
         pyxel.rect(self.coord.x, self.coord.y, self.w, self.h, self.bg_color)
@@ -95,7 +116,16 @@ class Dialog(UIComponent):
         self.tmp_keyfunc.active = state
 
     def _draw_text(self):
-        pyxel.text(self.coord.x + (self.w - (self.message_width * pyxel.FONT_WIDTH))/2, self.coord.y + self.text_gap, self.message, self.text_color)
+        # x + message_len × font width + x = dialog width
+        # we can then find the position (x) like this:
+        base_x = self.coord.x + (self.w - (self.message_len * pyxel.FONT_WIDTH))/2
+
+        base_y = self.coord.y + self.text_gap
+
+        pyxel.text(base_x, base_y, self.message, self.text_color)
+
+        if self.show_dismiss_msg:
+            pyxel.text(self.coord.x + self.DISMISS_MSG_GAP, self.coord.y + self.h - pyxel.FONT_HEIGHT - self.DISMISS_MSG_GAP, self.dismiss_msg_str, self.dismiss_msg_col)
         
     def _wrap_string(self, string: str) -> str:
         """

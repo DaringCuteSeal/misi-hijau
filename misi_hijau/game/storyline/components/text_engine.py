@@ -23,15 +23,9 @@ class TextEngine():
     TIMER_ID = "text_engine"
 
     def __init__(self, game_components: GameComponents):
-        # self.pyuni = PyxelUnicode(FONT_PATH, 12, 1)
         self.timer = game_components.timer
         self.soundplayer = game_components.soundplayer
-        self._set_defaults()
         self._is_interrupted: bool = False
-
-        game_components.event_handler.add_handler(events.TextengineInterrupt.name, self._interrupt_handler)
-
-    def _set_defaults(self):
         self.strings_collection: dict[str, list[str]] = {}
         self.current_string: str = ''
         self.current_color: int = pyxel.COLOR_WHITE
@@ -39,7 +33,8 @@ class TextEngine():
         self.string_pos: int = 0
         self.use_sfx: bool = False
         self.function_when_done: Optional[Callable[..., None]] = None
-    
+        game_components.event_handler.add_handler(events.TextengineInterrupt.name, self._interrupt_handler)
+
     def _wrap_string(self, string: str) -> str:
         """
         Generate a wrapped string that doesn't overflow beyond the screen size.
@@ -56,7 +51,14 @@ class TextEngine():
             lines.append(current_line.strip())
         return '\n'.join(lines)
     
-    def animate_text(self, string: str, x: int, y: int, function_when_done: Optional[Callable[..., None]] = None, sfx: bool = False, speed: float = 0.03, color: int = pyxel.COLOR_WHITE):
+    def animate_text(self,
+                     string: str,
+                     x: int,
+                     y: int,
+                     function_when_done: Optional[Callable[..., None]] = None,
+                     sfx: bool = False,
+                     speed: float = 0.03,
+                     color: int = pyxel.COLOR_WHITE):
         """
         Animate a string (with typing effect).
         """
@@ -93,7 +95,6 @@ class TextEngine():
         self.string_pos = 0
     
     def _draw(self):
-        # self.pyuni.text(self.x, self.y, self.current_string[:self.string_pos], self.current_color) # type: ignore # the author of PyxelUnicode didn't specify the type for the `s` parameter :)
         pyxel.text(self.x, self.y, self.current_string[:self.string_pos], self.current_color)
     
     def _interrupt_handler(self):

@@ -67,7 +67,7 @@ class KeyTypes(Enum):
 @dataclass
 class KeyFunc:
     """
-    An object with a key and its associated function.
+    Class with key and its associated function.
     """
     binding: list[int]
     func: Callable[[], Any]

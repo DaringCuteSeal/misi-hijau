@@ -41,7 +41,7 @@ class Game():
         self.init_game_handler(game_components)
 
         # Add event handler
-        self.init_event_handlers()
+        self._init_event_handlers()
 
         self.callable_draw: Callable[[None], None] | None
 
@@ -61,7 +61,7 @@ class Game():
     def _init_story_dialog(self):
         self.story_dialog = StoryDialogs(self.game_handler)
 
-    def init_event_handlers(self):
+    def _init_event_handlers(self):
         self.game_handler.game_components.event_handler.add_handler(events.UpdateStatusbar.name, self.update_statusbar)
         self.game_handler.game_components.event_handler.add_handler(events.LevelRestart.name, self.level_restart)
         self.game_handler.game_components.event_handler.add_handler(events.LevelNext.name, self.level_next)
@@ -187,7 +187,3 @@ class Game():
         self.init_sprites()
         self.init_ui()
         self.game_handler.callable_draw = self.draw_game_loop
-
-    ##########################################################
-    # All functions defined below are only used for TESTING. #
-    ##########################################################

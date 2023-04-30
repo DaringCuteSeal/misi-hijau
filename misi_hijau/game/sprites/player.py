@@ -110,6 +110,9 @@ class Player(Sprite):
         self.speed_statusbar_ticker = self.game.game_components.ticker.attach(10)
 
         self.player_setup()
+        self.setup_event_handlers()
+    
+    def setup_event_handlers(self):
         self.game.game_components.event_handler.add_handler(events.PlayerCollidingEnemy.name, self.is_colliding_with_enemy)
 
     def player_setup(self):
@@ -217,7 +220,6 @@ class Player(Sprite):
         else:
             self.game.game_components.event_handler.trigger_event(events.StarsScroll)
 
-
     def cam_update(self):
         self.game.game_components.camera.y = self.coord.y_map
 
@@ -300,11 +302,11 @@ class Player(Sprite):
         self.health = self.level.max_health
 
   
-
 class PlayerHandler(SpriteHandler):
 
     def __init__(self, game_handler: GameHandler):
         self.game_handler = game_handler
+        self.game_handler.game_components.event_handler.add_handler(events.ActivateLevel.name, self.enable_player_keys)
         self.setup()
 
         self.soundbank = {
@@ -315,11 +317,15 @@ class PlayerHandler(SpriteHandler):
             "player_left": KeyFunc([pyxel.KEY_LEFT, pyxel.KEY_A], lambda: self.player.move_handler(Direction.LEFT), active=False),
             "player_up": KeyFunc([pyxel.KEY_UP, pyxel.KEY_W], lambda: self.player.move_handler(Direction.UP), active=False),
             "player_down": KeyFunc([pyxel.KEY_DOWN, pyxel.KEY_S], lambda: self.player.move_handler(Direction.DOWN), active=False),
-            "player_shoot": KeyFunc([pyxel.KEY_SPACE], self.shoot_handler, KeyTypes.BTNP, hold_time=10, repeat_time=10),
+            "player_shoot": KeyFunc([pyxel.KEY_SPACE], self.shoot_handler, KeyTypes.BTNP, hold_time=10, repeat_time=10, active=False),
         }
         self.statusbar_items = [
             StatusbarItem(100, self.get_player_speed, pyxel.COLOR_YELLOW),
         ]
+
+    def enable_player_keys(self):
+        for key in self.keybindings.values():
+            key.active = True
 
     def setup(self):
         self.player = Player(self.game_handler)
