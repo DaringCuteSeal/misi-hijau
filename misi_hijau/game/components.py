@@ -76,21 +76,24 @@ class KeyListener:
         """
         Loop through key listeners and run function if key is pressed.
         """
-        # I am sincerely very sory for the amount of indentations this thing has
         for i in self.keys_to_check:
             for keyfunc in i.values():
-                if keyfunc.active:
-                    match keyfunc.btn_type:
-                        case KeyTypes.BTN:
-                            for key in keyfunc.binding:
-                                if pyxel.btn(key):
-                                    keyfunc.func()
-                                    break # don't execute another function if 2 keys are pressed at the same time
-                        case KeyTypes.BTNP:
-                            for key in keyfunc.binding:
-                                if pyxel.btnp(key, hold=keyfunc.hold_time, repeat=keyfunc.repeat_time):
-                                    keyfunc.func()
-                                    break
+                if not keyfunc.active:
+                    continue
+
+                match keyfunc.btn_type:
+                    case KeyTypes.BTN:
+                        for key in keyfunc.binding:
+                            if not pyxel.btn(key):
+                                continue
+                            keyfunc.func()
+                            break # don't execute another function if 2 keys are pressed at the same time
+                    case KeyTypes.BTNP:
+                        for key in keyfunc.binding:
+                            if not pyxel.btnp(key, hold=keyfunc.hold_time, repeat=keyfunc.repeat_time):
+                                continue
+                            keyfunc.func()
+                            break
 
 # Level handling
 class LevelHandler:
@@ -406,9 +409,10 @@ class Timer:
         Update status of all timer items (`self.timer_items`).
         """
         for item in self.timer_items:
-            if item.is_over():
-                item.run_function()
-                self.timer_items.remove(item) if item in self.timer_items else None # don't do anything if the item is already gone (the timer suddenly got removed)
+            if not item.is_over():
+                continue
+            item.run_function()
+            self.timer_items.remove(item) if item in self.timer_items else None # don't do anything if the item is already gone (the timer suddenly got removed)
 
 # Event system
 class EventHandler:
@@ -449,6 +453,7 @@ class EventHandler:
         Trigger an event.
         """
         if event.name in self._handlers:
+        
             results: list[bool | None] = []
             for handler in self._handlers[event.name]:
                 if event.data:
@@ -456,9 +461,9 @@ class EventHandler:
                 else:
                     results.append(handler())
 
-            # The value return is either "succeeded" or "failed", so if
-            # there's a handler function that returned False, this
-            # event trigger result should be False, and so on.
+        # The value return is either "succeeded" or "failed", so if
+        # there's a handler function that returned False, this
+        # event trigger result should be False, and so on.
 
             if any(result is False for result in results):
                 return False

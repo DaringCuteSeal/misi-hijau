@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import pyxel
-from math import sqrt # pyxel.sqrt(0) returns denormalized number; we need it to return 0.
 from .sprite_classes import Sprite, SpriteCoordinate, SpriteHandler
 from ..common import (
     ALPHA_COL,
@@ -29,7 +28,7 @@ from ..common import (
 )
 from ..game_handler import GameHandler
 from .. import events
-from ..utils import tile_to_real, real_to_tile
+from ..utils import tile_to_real, real_to_tile, hypotenuse
 
 class Flame(Sprite):
     """
@@ -144,7 +143,6 @@ class Player(Sprite):
         self.coord.y = tile_to_real(4)
         self.coord.x_map = self.level_width // 2
         self.coord.y_map = self.level_height - tile_to_real(4)
-
 
     def init_costume(self, ship_type: PlayerShipType):
         match ship_type:
@@ -331,11 +329,11 @@ class PlayerHandler(SpriteHandler):
         self.player = Player(self.game_handler)
         level = self.game_handler.levelhandler.get_curr_lvl()
 
-        if not level.idx == 3:
+        if level.idx == 3:
+            self.has_flame = False
+        else:
             self.flame = Flame(self.game_handler)
             self.has_flame = True
-        else:
-            self.has_flame = False
 
     def draw(self):
         if self.has_flame:
@@ -366,7 +364,8 @@ class PlayerHandler(SpriteHandler):
 
     # Functions for statusbar
     def get_player_speed(self) -> str:
-        magnitude = sqrt(self.player.y_vel * self.player.y_vel + self.player.x_vel * self.player.x_vel) #ilovepythagoras
-        magnitude = pyxel.floor(magnitude * 100)
-        string = f"Kecepatan: {magnitude} km/h"
-        return string
+
+        magnitude = pyxel.floor(
+            hypotenuse(self.player.y_vel, self.player.x_vel) * 100
+        )
+        return f"Kecepatan: {magnitude} km/h"

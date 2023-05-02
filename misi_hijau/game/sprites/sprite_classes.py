@@ -69,9 +69,7 @@ class Sprite(ABC):
         
         # The self.h is added to calculate the actual border of the viewport
         # (if that makes sense)
-        if (self.coord.x < -self.h) or (self.coord.x > common.WINDOW_WIDTH + self.h) or (self.coord.y < -self.h) or (self.coord.y > common.WINDOW_HEIGHT + self.h):
-            return False
-        return True
+        return not ((self.coord.x < -self.h) or (self.coord.x > common.WINDOW_WIDTH + self.h) or (self.coord.y < -self.h) or (self.coord.y > common.WINDOW_HEIGHT + self.h))
 
     def is_colliding(self, x: float, y: float, w: float, h: float) -> bool:
         """

@@ -62,39 +62,44 @@ class BulletsHandler(SpriteHandler):
         self.bullets.append(bullet)
 
     def update(self):
-        if len(self.bullets) > 0:
-            for bullet in self.bullets:
-                bullet.update()
-                bullet.map_to_view(self.game_handler.game_components.camera.y)
+        if len(self.bullets) <= 0:
+            return
+        
+        for bullet in self.bullets:
+            bullet.update()
+            bullet.map_to_view(self.game_handler.game_components.camera.y)
 
-                if bullet.coord.y_map < 0 or bullet.coord.y + bullet.h - 1 < 0:
-                    self.bullets.remove(bullet)
-                bullet.map_to_view(self.game_handler.game_components.camera.y)
+            if bullet.coord.y_map < 0 or bullet.coord.y + bullet.h - 1 < 0:
+                self.bullets.remove(bullet)
+            bullet.map_to_view(self.game_handler.game_components.camera.y)
 
     def draw(self):
-        if len(self.bullets) > 0:
-            for bullet in self.bullets:
-                bullet.draw()
+        if len(self.bullets) <= 0:
+            return
+        
+        for bullet in self.bullets:
+            bullet.draw()
     
     def shoot_handler(self, player_x: float, player_y: float):
         self.append_bullet(player_x + 7, player_y - 8, self.bullet_color)
 
     def bullets_colliding_check_handler(self, enemy_x_map: float, enemy_y_map: float, enemy_w: int, enemy_h: int) -> bool:
-        if len(self.bullets) > 0: # Only check collision if there are actually bullets to check for.
-            for bullet in self.bullets:
+        if len(self.bullets) <= 0: # Only check collision if there are actually bullets to check for.
+            return False
+        
+        for bullet in self.bullets:
+            # Calculate the viewport coordinates because we always use viewport coords for
+            # collision detection...
+            # XXX kinda clunky, make the collision detection use map coords directly if needed.
+            x = enemy_x_map
+            y = enemy_y_map - self.game_handler.game_components.camera.y + WINDOW_HEIGHT // 2
 
-                # Calculate the viewport coordinates because we always use viewport coords for
-                # collision detection...
-                # XXX kinda clunky, make the collision detection use map coords directly if needed.
-                x = enemy_x_map
-                y = enemy_y_map - self.game_handler.game_components.camera.y + WINDOW_HEIGHT // 2
-
-                if bullet.is_colliding(x, y, enemy_w, enemy_h):
-                    self.bullets.remove(bullet)
-                    self.game_handler.game_components.event_handler.trigger_event(events.AppendBlastEffect(enemy_x_map, enemy_y_map, enemy_w, enemy_h))
-                    self.game_handler.game_components.soundplayer.play(self.soundbank["explode"])
-                    self.game_handler.game_components.event_handler.trigger_event(events.UpdateStatusbar)
-                    return True
+            if bullet.is_colliding(x, y, enemy_w, enemy_h):
+                self.bullets.remove(bullet)
+                self.game_handler.game_components.event_handler.trigger_event(events.AppendBlastEffect(enemy_x_map, enemy_y_map, enemy_w, enemy_h))
+                self.game_handler.game_components.soundplayer.play(self.soundbank["explode"])
+                self.game_handler.game_components.event_handler.trigger_event(events.UpdateStatusbar)
+                return True
         return False
     
     def restart_level(self):
