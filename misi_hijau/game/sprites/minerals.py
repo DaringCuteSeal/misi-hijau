@@ -15,10 +15,11 @@
 from .sprite_classes import TilemapBasedSprite
 from ..game_handler import GameHandler
 from .. import events
-from ..common import MineralType, Sfx, SoundType, TextStatusbarItem, BLANK_UV, MAP_Y_OFFSET_TILES
+from ..common import MineralType, Sfx, SoundType, ProgressStatusbarItem, BLANK_UV, MAP_Y_OFFSET_TILES, Icon
 import pyxel
 
 class MineralsHandler(TilemapBasedSprite):
+    MINERAL_ICON = Icon(0, 8, 96, 8, 8)
 
     costumes = {
         "mineral_1": (1, 2),
@@ -31,18 +32,20 @@ class MineralsHandler(TilemapBasedSprite):
     }
 
     def __init__(self, game_handler: GameHandler):
+        self.minerals_progressbar = ProgressStatusbarItem(1, 0, self.get_minerals_count, pyxel.COLOR_WHITE, 0, 75, 10, True, self.MINERAL_ICON, "Mineral", pyxel.COLOR_WHITE)
+
         self.statusbar_items = [
-            TextStatusbarItem(1, self.get_minerals_count, pyxel.COLOR_WHITE)
+            self.minerals_progressbar
         ]
 
         self.mineral_coordinates_list: list[tuple[int, int]] = []
         self.game_handler = game_handler
         self.game_handler.game_components.event_handler.add_handler(events.TilemapPlayerCheck.name, self.player_collision_check_handler)
         self.setup()
+        self._reset_progressbar()
     
     def setup(self):
         self.collected_minerals = 0
-        self.statusbar_items[0].color = pyxel.COLOR_WHITE
 
         self.game_handler.game_components.event_handler.trigger_event(events.UpdateStatusbar)
         self.level = self.game_handler.levelhandler.get_curr_lvl()
@@ -55,6 +58,10 @@ class MineralsHandler(TilemapBasedSprite):
             case MineralType.MINERAL_3:
                 self.mineral_costume = self.costumes["mineral_3"]
         self.spawn()
+
+    def _reset_progressbar(self):
+        self.minerals_progressbar.progress_col = self.level.minerals_statusbar_color
+        self.minerals_progressbar.new_max_val(self.level.max_minerals)
 
     def spawn(self):
         """
@@ -88,14 +95,15 @@ class MineralsHandler(TilemapBasedSprite):
     
     def init_level(self):
         self.setup()
+        self._reset_progressbar()
 
     def player_collision_check_handler(self, uv: tuple[int, int], tile_x: int, tile_y: int) -> bool:
         if uv == (self.mineral_costume):
             self.collected_minerals += 1
             if self.collected_minerals == self.level.max_minerals:
                 self.level.minerals_all_collected = True
-                self.statusbar_items[0].color = pyxel.COLOR_LIME
                 self.game_handler.game_components.event_handler.trigger_event(events.CheckLevelComplete)
+                self.minerals_progressbar.progress_col = pyxel.COLOR_GREEN
 
             self.game_handler.game_components.event_handler.trigger_event(events.UpdateStatusbar)
             self.game_handler.game_components.soundplayer.play(self.soundbank["mineral_increment"])
@@ -104,5 +112,5 @@ class MineralsHandler(TilemapBasedSprite):
         return False
     
     # Functions for statusbar
-    def get_minerals_count(self) -> str:
-        return f"Mineral terkumpulkan: {self.collected_minerals:>2} / {self.level.max_minerals}"
+    def get_minerals_count(self) -> int:
+        return self.collected_minerals

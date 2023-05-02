@@ -67,7 +67,8 @@ class Sprite(ABC):
         Returns `True` if sprite is within the camera boundary, else `False`.
         """
         
-        # The self.h is added to calculate the actual border of the viewport
+        # The self.h is added to calculate the actual border of the viewport where the
+        # sprite will fully vanish
         # (if that makes sense)
         return not ((self.coord.x < -self.h) or (self.coord.x > common.WINDOW_WIDTH + self.h) or (self.coord.y < -self.h) or (self.coord.y > common.WINDOW_HEIGHT + self.h))
 

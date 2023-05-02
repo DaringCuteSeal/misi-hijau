@@ -123,25 +123,27 @@ class Level:
     minerals_all_collected = False
     enemies_all_eliminated = False
 
-
 @dataclass
 class Icon:
     """
     Basic image from the spritesheet.
     """
+    img: int
     u: int 
     v: int 
     w: int
     h: int
+    colkey: Optional[int] = pyxel.COLOR_PURPLE
 
 class TextStatusbarItem:
     """
     String to be displayed at the statusbar.
     """
-    def __init__(self, idx: int, function: Callable[[], str], color: int, custom_coords: bool = False, x: int = 0, y: int = 0):
+    def __init__(self, idx: int, function: Callable[[], str], color: int, gap: int = 2, custom_coords: bool = False, x: int = 0, y: int = 0):
         self.idx = idx
         self.function = function # function that returns a string
         self.color = color
+        self.gap = gap
         self.custom_coords = custom_coords
         self.x = x # only need to be set explicitly if custom_coords is enabled
         self.y = y
@@ -158,47 +160,79 @@ class ProgressStatusbarItem:
     """
     A progress bar to be displayed at the statusbar.
     """
-    def __init__(self, 
-                idx: int,
-                max_val: int,
-                function: Callable[[], int],
-                border_col: int,
-                progress_col: int,
-                width: int,
-                height: int,
-                custom_coords: bool = False,
-                x: int = 0,
-                y: int = 0):
+    idx: int
+    max_val: int
+    function: Callable[[], int]
+    border_col: int
+    progress_col: int
+    bar_width: int
+    bar_height: int
+    use_icon: bool = False
+    icon: Optional[Icon] = None
+    text_over_bar: Optional[str] = None
+    text_over_bar_col: int = pyxel.COLOR_WHITE
+    gap: int = 2
+    icon_gap: int = 2 # gap from icon to bar
+    custom_coords: bool = False
+    x: int = 0
+    y: int = 0
 
-        self.idx = idx
-        self.max_val = max_val
-        self.function = function
-        self.border_col = border_col
-        self.progress_col = progress_col
-        self.width = width
-        self.height = height
-        self.custom_coords = custom_coords
-        self.x = x
-        self.y = y
-        self.value: int = 0
-        self._calculate_pixels_per_val()
+    def __post_init__(self):
+        self._recalculate()
+        self.height = 0
+        self.text_x = self.x
+        self.text_y = self.y
 
     def new_max_val(self, max_val: int):
         """
         Set a new max value.
         """
         self.max_val = max_val
-        self._calculate_pixels_per_val()
+        self._recalculate()
 
-    def _calculate_pixels_per_val(self):
-        self.pixels_per_val = (self.width - 2) / self.max_val
+    def _recalculate(self):
+        try:
+            self.pixels_per_val = (self.bar_width - 2) / self.max_val # set pixels per val
+        except ZeroDivisionError:
+            self.pixels_per_val = self.bar_width
+
+        self._recalculate_bar_coords()
+        
+    def post_recalculate(self):
+        self._recalculate_bar_coords()
+        self._recalculate_text_coords()
+
+    def _recalculate_text_coords(self):
+        if self.text_over_bar:
+            self.text_x = self.bar_x + (self.bar_width - len(self.text_over_bar * pyxel.FONT_WIDTH)) // 2
+            self.text_y = self.bar_y + (self.bar_height - pyxel.FONT_HEIGHT) // 2
+
+    def _recalculate_bar_coords(self):
+        if self.use_icon and self.icon:
+            self.height = max(self.icon.h, self.bar_height)
+            self.bar_y = self.y + (self.icon.h - self.bar_height) // 2
+            self.bar_x = self.x + self.icon.w + self.icon_gap
+        else:
+            self.height = self.bar_height
+            self.bar_y = self.y
+            self.bar_x = self.x
+
+    def _draw_text_over_bar(self):
+        if self.text_over_bar:
+            pyxel.text(self.text_x, self.text_y, self.text_over_bar, self.text_over_bar_col)
+
+    def _draw_icon_if_icon(self):
+        if self.icon:
+            pyxel.blt(self.x, self.y, self.icon.img, self.icon.u, self.icon.v, self.icon.w, self.icon.h, self.icon.colkey)
 
     def update(self):
         self.value = self.function()
 
     def draw(self):
-        pyxel.rectb(self.x, self.y, self.width, self.height, self.border_col) # border
-        pyxel.rect(self.x + 1, self.y + 1, self.value * self.pixels_per_val, self.height - 2, self.progress_col) # progress
+        pyxel.rectb(self.bar_x, self.bar_y, self.bar_width, self.bar_height, self.border_col) # border
+        pyxel.rect(self.bar_x + 1, self.bar_y + 1, self.value * self.pixels_per_val, self.bar_height - 2, self.progress_col) # progress
+        self._draw_icon_if_icon()
+        self._draw_text_over_bar()
     
 class TimerItem:
     """

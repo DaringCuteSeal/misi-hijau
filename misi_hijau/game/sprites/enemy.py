@@ -13,18 +13,16 @@
 # limitations under the License.
 
 import pyxel
-from ..common import ALPHA_COL, Level, BLANK_UV, MAP_Y_OFFSET_TILES, ProgressStatusbarItem, EnemyType
+from abc import abstractmethod
+from ..common import ALPHA_COL, Level, BLANK_UV, MAP_Y_OFFSET_TILES, ProgressStatusbarItem, EnemyType, Icon
 from ..utils import tile_to_real
 from .sprite_classes import Sprite, SpriteCoordinate, SpriteHandler
 from ..game_handler import GameHandler
 from .. import events
 
 ENEMY_SPAWNER_UV = (7, 1)
-class EnemyEntity(Sprite):
-    keybindings = {}
-    soundbank = {}
-    costumes = {}
 
+class EnemyEntity(Sprite):
     def __init__(self, x_map: float, y_map: float):
         self.coord = SpriteCoordinate()
         self.coord.x_map = x_map
@@ -33,15 +31,15 @@ class EnemyEntity(Sprite):
     def draw(self):
         pyxel.blt(self.coord.x, self.coord.y, self.img, self.u, self.v, self.w, self.h, ALPHA_COL)
     
+    @abstractmethod
     def update(self):
-        pass
-
-    def reset(self):
         pass
 
 class EnemyGrug(EnemyEntity):
     u = 0
     v = 48
+    w = 8
+    h = 8
     health = 2
 
     def __init__(self, x_map: float, y_map: float, level: Level):
@@ -82,7 +80,7 @@ class EnemyPhong(EnemyEntity):
             self.coord.x_map = 0
         if self.coord.y_map > self.level_height:
             self.coord.y_map = self.level_height
-
+    
 class EnemySquidge(EnemyEntity):
     u = 0
     v = 56
@@ -92,15 +90,17 @@ class EnemySquidge(EnemyEntity):
         pass
 
 class EnemyHandler(SpriteHandler):
+    ENEMY_ICON = Icon(0, 0, 96, 8, 8)
+
     def __init__(self, game_handler: GameHandler):
         self.game_handler = game_handler
         self.enemies_ticker = self.game_handler.game_components.ticker.attach(8)
         self.game_components = game_handler.game_components
         self.enemy_coordinates_list: list[tuple[int, int]] = []
         self.enemies: list[EnemyEntity] = []
+        self.enemies_hit_progressbar = ProgressStatusbarItem(2, 1, self.get_enemies_eliminated_count, pyxel.COLOR_WHITE, 0, 75, 10, True, self.ENEMY_ICON, "Alien", pyxel.COLOR_WHITE)
         self.setup()
-
-        self.enemies_hit_progressbar = ProgressStatusbarItem(2, self.enemies_count, self.get_enemy_count, pyxel.COLOR_WHITE, pyxel.COLOR_GREEN, 70, 8)
+        self._reset_progressbar()
 
         self.statusbar_items = [
             self.enemies_hit_progressbar
@@ -113,6 +113,10 @@ class EnemyHandler(SpriteHandler):
         self.enemies_eliminated = 0
         self.enemy_coordinates_list = self._generate_enemies_matrix()
         self.spawn()
+
+    def _reset_progressbar(self):
+        self.enemies_hit_progressbar.progress_col = self.level.enemies_statusbar_color
+        self.enemies_hit_progressbar.new_max_val(self.enemies_count)
 
     def _generate_enemies_matrix(self) -> list[tuple[int, int]]:
         """
@@ -170,7 +174,7 @@ class EnemyHandler(SpriteHandler):
 
                     if self.enemies_eliminated == self.enemies_count:
                         self.level.enemies_all_eliminated = True
-                        self.enemies_hit_progressbar.progress_col = pyxel.COLOR_LIME
+                        self.enemies_hit_progressbar.progress_col = pyxel.COLOR_GREEN
                         self.game_components.event_handler.trigger_event(events.CheckLevelComplete)
                 
                 self.game_components.event_handler.trigger_event(events.PlayerCollidingEnemy(enemy.coord.x, enemy.coord.y, enemy.w, enemy.h))
@@ -188,14 +192,12 @@ class EnemyHandler(SpriteHandler):
     def init_level(self):
         self.enemies = []
         self.setup()
-        self.enemies_hit_progressbar.new_max_val(self.enemies_count)
+        self._reset_progressbar()
 
     def restart_level(self):
-        self.enemies_hit_progressbar.max_val = self.enemies_count
-        # self.enemies_hit_progressbar.progress_col = self.
         self.enemies = []
         self.enemies_eliminated = 0
         self.spawn()
 
-    def get_enemy_count(self) -> int:
+    def get_enemies_eliminated_count(self) -> int:
         return self.enemies_eliminated

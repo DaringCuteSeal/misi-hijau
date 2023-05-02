@@ -171,8 +171,7 @@ class Game():
     def level_restart(self):
         self.game_handler.game_components.game_sprites.restart_level()
         self.game_handler.game_components.game_ui.restart_level()
-
-        self.game_handler.game_components.statusbar.update()
+        self.game_handler.game_components.statusbar.update() # make sure the new item values show up
 
     def level_next(self):
         curr_level = self.game_handler.levelhandler.get_curr_lvl_idx()
@@ -180,8 +179,7 @@ class Game():
 
         self.game_handler.game_components.game_sprites.init_level()
         self.game_handler.game_components.game_ui.init_level()
-
-        self.game_handler.game_components.statusbar.update()
+        self.game_handler.game_components.statusbar.update() # make sure the new item values show up
 
     def start_game(self):
         self.init_sprites()

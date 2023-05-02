@@ -42,9 +42,9 @@ class Blast(Sprite):
     def update(self):
         if self.ticker.get():
             self.blast_stage += 1
+        self.costume_change()
 
     def draw(self):
-        self.costume_change()
         pyxel.blt(self.coord.x, self.coord.y, 0, self.u, self.v, self.w, self.h, ALPHA_COL)
     
     def costume_change(self):
@@ -58,7 +58,8 @@ class BlastsHandler(SpriteHandler):
         self.blasts: list[Blast] = []
     
     def draw(self):
-        [blast.draw() for blast in self.blasts]
+        for blast in self.blasts:
+            blast.draw()
 
     def update(self):
         for blast in self.blasts:

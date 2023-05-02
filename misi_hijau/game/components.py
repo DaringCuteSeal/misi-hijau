@@ -152,7 +152,6 @@ class GameStatusbar:
         self.strings: list[str] = []
         self.def_x = pyxel.TILE_SIZE + 3
         self.def_y = 10
-        self.def_gap_y = 2
     
     def append(self, items: list[TextStatusbarItem | ProgressStatusbarItem]):
         """
@@ -199,19 +198,22 @@ class GameStatusbar:
         self.items[0].y = self.def_y
         self.items[0].x = self.def_x
 
-        last_y = self.def_y
+        next_y = self.def_y
 
         for item in self.items:
             if item.custom_coords:
                 continue
+
             if isinstance(item, TextStatusbarItem):
                 item.x = self.def_x
-                item.y = last_y + self.def_gap_y
-                last_y = item.y + pyxel.FONT_HEIGHT
+                item.y = next_y + item.gap
+                next_y = item.y + pyxel.FONT_HEIGHT
+
             if isinstance(item, ProgressStatusbarItem):
                 item.x = self.def_x
-                item.y = last_y + self.def_gap_y
-                last_y = item.y + item.height
+                item.y = next_y + item.gap
+                item.post_recalculate()
+                next_y = item.y + item.height
 
 # Sound handling
 @dataclass
