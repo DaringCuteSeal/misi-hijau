@@ -104,36 +104,102 @@ class LevelMap:
     level_height: int
     powerups_map: list[PowerUp]
 
+@dataclass
 class Level:
     """
     A level.
     """
-    def __init__(self, idx: int, levelmap: LevelMap, ship_type: PlayerShipType, enemy_type: EnemyType, mineral_type: MineralType, bullet_color: int, max_minerals: int, max_health: int):
-        self.idx = idx
-        self.levelmap = levelmap
-        self.ship_type = ship_type
-        self.enemy_type = enemy_type
-        self.mineral_type = mineral_type
-        self.bullet_color = bullet_color
-        self.max_minerals = max_minerals
-        self.max_health = max_health
+    idx: int
+    levelmap: LevelMap
+    ship_type: PlayerShipType
+    enemy_type: EnemyType
+    mineral_type: MineralType
+    bullet_color: int
+    enemies_statusbar_color: int
+    minerals_statusbar_color: int
+    max_minerals: int
+    max_health: int
 
-        self.minerals_all_collected = False
-        self.enemies_all_eliminated = False
+    minerals_all_collected = False
+    enemies_all_eliminated = False
+
 
 @dataclass
-class StatusbarItem:
+class Icon:
     """
-    Item to be displayed in the statusbar.
+    Basic image from the spritesheet.
     """
-    idx: int
-    function: Callable[[], str] # function that returns a string
-    color: int
-    update_interval: float = 1
-    custom_coords: bool = False
-    x: int = 0
-    y: int = 0
+    u: int 
+    v: int 
+    w: int
+    h: int
 
+class TextStatusbarItem:
+    """
+    String to be displayed at the statusbar.
+    """
+    def __init__(self, idx: int, function: Callable[[], str], color: int, custom_coords: bool = False, x: int = 0, y: int = 0):
+        self.idx = idx
+        self.function = function # function that returns a string
+        self.color = color
+        self.custom_coords = custom_coords
+        self.x = x # only need to be set explicitly if custom_coords is enabled
+        self.y = y
+        self.string: str = ""
+
+    def update(self):
+        self.string = self.function()
+
+    def draw(self):
+        pyxel.text(self.x, self.y, self.string, self.color)
+
+@dataclass
+class ProgressStatusbarItem:
+    """
+    A progress bar to be displayed at the statusbar.
+    """
+    def __init__(self, 
+                idx: int,
+                max_val: int,
+                function: Callable[[], int],
+                border_col: int,
+                progress_col: int,
+                width: int,
+                height: int,
+                custom_coords: bool = False,
+                x: int = 0,
+                y: int = 0):
+
+        self.idx = idx
+        self.max_val = max_val
+        self.function = function
+        self.border_col = border_col
+        self.progress_col = progress_col
+        self.width = width
+        self.height = height
+        self.custom_coords = custom_coords
+        self.x = x
+        self.y = y
+        self.value: int = 0
+        self._calculate_pixels_per_val()
+
+    def new_max_val(self, max_val: int):
+        """
+        Set a new max value.
+        """
+        self.max_val = max_val
+        self._calculate_pixels_per_val()
+
+    def _calculate_pixels_per_val(self):
+        self.pixels_per_val = (self.width - 2) / self.max_val
+
+    def update(self):
+        self.value = self.function()
+
+    def draw(self):
+        pyxel.rectb(self.x, self.y, self.width, self.height, self.border_col) # border
+        pyxel.rect(self.x + 1, self.y + 1, self.value * self.pixels_per_val, self.height - 2, self.progress_col) # progress
+    
 class TimerItem:
     """
     A Timer item.

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import pyxel
-from ..common import ALPHA_COL, Level, BLANK_UV, MAP_Y_OFFSET_TILES, StatusbarItem, EnemyType
+from ..common import ALPHA_COL, Level, BLANK_UV, MAP_Y_OFFSET_TILES, ProgressStatusbarItem, EnemyType
 from ..utils import tile_to_real
 from .sprite_classes import Sprite, SpriteCoordinate, SpriteHandler
 from ..game_handler import GameHandler
@@ -93,11 +93,6 @@ class EnemySquidge(EnemyEntity):
 
 class EnemyHandler(SpriteHandler):
     def __init__(self, game_handler: GameHandler):
-
-        self.statusbar_items = [
-            StatusbarItem(2, self.get_enemy_count, pyxel.COLOR_WHITE, 2)
-        ]
-
         self.game_handler = game_handler
         self.enemies_ticker = self.game_handler.game_components.ticker.attach(8)
         self.game_components = game_handler.game_components
@@ -105,13 +100,18 @@ class EnemyHandler(SpriteHandler):
         self.enemies: list[EnemyEntity] = []
         self.setup()
 
+        self.enemies_hit_progressbar = ProgressStatusbarItem(2, self.enemies_count, self.get_enemy_count, pyxel.COLOR_WHITE, pyxel.COLOR_GREEN, 70, 8)
+
+        self.statusbar_items = [
+            self.enemies_hit_progressbar
+        ]
+
     def setup(self):
         self.level = self.game_handler.levelhandler.get_curr_lvl()
         self.levelmap = self.level.levelmap
         self.enemy_type = self.level.enemy_type
         self.enemies_eliminated = 0
         self.enemy_coordinates_list = self._generate_enemies_matrix()
-        self.statusbar_items[0].color = pyxel.COLOR_WHITE
         self.spawn()
 
     def _generate_enemies_matrix(self) -> list[tuple[int, int]]:
@@ -127,7 +127,7 @@ class EnemyHandler(SpriteHandler):
                 tile_type = tilemap.pget(x, y)
                 if tile_type == ENEMY_SPAWNER_UV:
                     enemies_matrix.append((x, y))
-        self.enemies_length = len(enemies_matrix)
+        self.enemies_count = len(enemies_matrix)
         return enemies_matrix
 
     def spawn(self):
@@ -168,9 +168,9 @@ class EnemyHandler(SpriteHandler):
                     self.enemies_eliminated += 1
                     self.game_components.event_handler.trigger_event(events.UpdateStatusbar)
 
-                    if self.enemies_eliminated == self.enemies_length:
+                    if self.enemies_eliminated == self.enemies_count:
                         self.level.enemies_all_eliminated = True
-                        self.statusbar_items[0].color = pyxel.COLOR_LIME
+                        self.enemies_hit_progressbar.progress_col = pyxel.COLOR_LIME
                         self.game_components.event_handler.trigger_event(events.CheckLevelComplete)
                 
                 self.game_components.event_handler.trigger_event(events.PlayerCollidingEnemy(enemy.coord.x, enemy.coord.y, enemy.w, enemy.h))
@@ -188,12 +188,14 @@ class EnemyHandler(SpriteHandler):
     def init_level(self):
         self.enemies = []
         self.setup()
+        self.enemies_hit_progressbar.new_max_val(self.enemies_count)
 
     def restart_level(self):
-        self.statusbar_items[0].color = pyxel.COLOR_WHITE
+        self.enemies_hit_progressbar.max_val = self.enemies_count
+        # self.enemies_hit_progressbar.progress_col = self.
         self.enemies = []
         self.enemies_eliminated = 0
         self.spawn()
 
-    def get_enemy_count(self) -> str:
-        return f"Alien lenyap: {self.enemies_eliminated:>2} / {self.enemies_length}"
+    def get_enemy_count(self) -> int:
+        return self.enemies_eliminated

@@ -29,7 +29,8 @@ from .common import (
     Sfx, 
     Level, 
     LevelMap,
-    StatusbarItem,
+    TextStatusbarItem,
+    ProgressStatusbarItem,
     TimerItem
 )
 
@@ -144,20 +145,20 @@ class GameStatusbar:
     # The `update` method calls all function and stores it in an array of strings, which will be drawn
     # with the `draw` method.
     def __init__(self):
-        self.items: list[StatusbarItem] = []
+        self.items: list[TextStatusbarItem | ProgressStatusbarItem] = []
         self.strings: list[str] = []
         self.def_x = pyxel.TILE_SIZE + 3
         self.def_y = 10
-        self.def_gap_y = 8
+        self.def_gap_y = 2
     
-    def append(self, items: list[StatusbarItem]):
+    def append(self, items: list[TextStatusbarItem | ProgressStatusbarItem]):
         """
         Append (extend) an array of `StatusBarItem` to the statusbar's store.
         """
         self.items.extend(items)
         self._recalculate_position()
     
-    def add(self, item: StatusbarItem):
+    def add(self, item: TextStatusbarItem | ProgressStatusbarItem):
         """
         Add a `StatusBarItem` to the statusbar's store.
         """
@@ -176,16 +177,16 @@ class GameStatusbar:
         Update statusbar strings (call all functions used to get the string).
         """
         
-        self.strings = [item.function() for item in self.items]
+        for item in self.items:
+            item.update()
 
     def draw(self):
         """
         Draw statusbar.
         """
-        if len(self.strings) > 0:
-            for i, item in enumerate(self.items):
-                string = self.strings[i]
-                pyxel.text(item.x, item.y, string, item.color)
+
+        for item in self.items:
+            item.draw()
         
     def _recalculate_position(self):
         """
@@ -194,14 +195,20 @@ class GameStatusbar:
         self.items = sorted(self.items, key=lambda x: x.idx)
         self.items[0].y = self.def_y
         self.items[0].x = self.def_x
+
         last_y = self.def_y
 
-        for item in self.items[1:]:
+        for item in self.items:
             if item.custom_coords:
                 continue
-            item.x = self.def_x
-            item.y = last_y + self.def_gap_y
-            last_y = item.y
+            if isinstance(item, TextStatusbarItem):
+                item.x = self.def_x
+                item.y = last_y + self.def_gap_y
+                last_y = item.y + pyxel.FONT_HEIGHT
+            if isinstance(item, ProgressStatusbarItem):
+                item.x = self.def_x
+                item.y = last_y + self.def_gap_y
+                last_y = item.y + item.height
 
 # Sound handling
 @dataclass
@@ -326,11 +333,11 @@ class GameSprites:
 
         return keybinds
     
-    def get_statusbars(self) -> list[StatusbarItem]:
+    def get_statusbars(self) -> list[TextStatusbarItem | ProgressStatusbarItem]:
         """
         Get an array of StatusbarItem from all sprites that can be plugged into `GameStatusBar`.
         """
-        statusbar_items: list[StatusbarItem] = []
+        statusbar_items: list[TextStatusbarItem | ProgressStatusbarItem] = []
 
         for sprite in self.sprites_handler:
             statusbar_items.extend(sprite.statusbar_items) if sprite.statusbar_items else None

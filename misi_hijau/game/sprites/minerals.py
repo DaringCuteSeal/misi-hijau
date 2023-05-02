@@ -15,7 +15,7 @@
 from .sprite_classes import TilemapBasedSprite
 from ..game_handler import GameHandler
 from .. import events
-from ..common import MineralType, Sfx, SoundType, StatusbarItem, BLANK_UV, MAP_Y_OFFSET_TILES
+from ..common import MineralType, Sfx, SoundType, TextStatusbarItem, BLANK_UV, MAP_Y_OFFSET_TILES
 import pyxel
 
 class MineralsHandler(TilemapBasedSprite):
@@ -32,7 +32,7 @@ class MineralsHandler(TilemapBasedSprite):
 
     def __init__(self, game_handler: GameHandler):
         self.statusbar_items = [
-            StatusbarItem(1, self.get_minerals_count, pyxel.COLOR_WHITE)
+            TextStatusbarItem(1, self.get_minerals_count, pyxel.COLOR_WHITE)
         ]
 
         self.mineral_coordinates_list: list[tuple[int, int]] = []

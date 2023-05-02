@@ -42,7 +42,7 @@ class Sprite(ABC):
     coord: SpriteCoordinate = SpriteCoordinate(-20, -20, -20, -20)
     colkey: Optional[int]
     keybindings: dict[str, common.KeyFunc] = {}
-    statusbar_items: list[common.StatusbarItem] = []
+    statusbar_items: list[common.TextStatusbarItem | common.ProgressStatusbarItem] = []
     soundbank: dict[str, common.Sfx] = {}
     costumes: dict[str, tuple[int, int]] = {}
 
@@ -91,7 +91,7 @@ class SpriteHandler(ABC):
 
     keybindings: dict[str, common.KeyFunc] = {}
     soundbank: dict[str, common.Sfx] = {}
-    statusbar_items: list[common.StatusbarItem] = []
+    statusbar_items: list[common.TextStatusbarItem | common.ProgressStatusbarItem] = []
 
     @abstractmethod
     def draw(self):
@@ -130,7 +130,7 @@ class TilemapBasedSprite(ABC):
     keybindings: dict[str, common.KeyFunc] = {}
     soundbank: dict[str, common.Sfx] = {}
     costumes: dict[str, tuple[int, int]] = {}
-    statusbar_items: list[common.StatusbarItem] = []
+    statusbar_items: list[common.TextStatusbarItem | common.ProgressStatusbarItem] = []
 
     @abstractmethod
     def init_level(self):

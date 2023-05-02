@@ -24,7 +24,7 @@ from ..common import (
     Sfx,
     SoundType,
     KeyTypes,
-    StatusbarItem,
+    TextStatusbarItem,
     MAP_Y_OFFSET_TILES
 )
 from ..game_handler import GameHandler
@@ -320,7 +320,7 @@ class PlayerHandler(SpriteHandler):
             "player_shoot": KeyFunc([pyxel.KEY_SPACE], self.shoot_handler, KeyTypes.BTNP, hold_time=10, repeat_time=10, active=False),
         }
         self.statusbar_items = [
-            StatusbarItem(100, self.get_player_speed, pyxel.COLOR_YELLOW),
+            TextStatusbarItem(100, self.get_player_speed, pyxel.COLOR_YELLOW),
         ]
 
     def enable_player_keys(self):
