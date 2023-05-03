@@ -15,7 +15,7 @@
 # Imports
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
-from .. import common
+from core import common
 from typing import Optional
 
 # XXX idea: sprite could automatically subscribe to events and we only need to specify an array of events.

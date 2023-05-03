@@ -17,10 +17,10 @@ import pyxel
 
 import game.events as events
 
-from .sprite_classes import Sprite, SpriteHandler
-from game.game_handler import GameHandler
-from game.components import TickerHandler
-from game.common import ALPHA_COL
+from core.sprite_classes import Sprite, SpriteHandler
+from core.game_handler import GameHandler
+from core.components import TickerHandler
+from core.common import ALPHA_COL
 
 class Blast(Sprite):
     w = 16

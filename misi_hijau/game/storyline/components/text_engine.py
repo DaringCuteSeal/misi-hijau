@@ -14,8 +14,8 @@
 
 from typing import Callable, Optional
 import pyxel
-from ...game_handler import GameComponents
-from ...common import WINDOW_WIDTH, Sfx, SoundType
+from core.game_handler import GameComponents
+from core.common import WINDOW_WIDTH, Sfx, SoundType
 from ... import events
 
 class TextEngine():

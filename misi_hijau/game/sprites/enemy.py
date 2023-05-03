@@ -14,10 +14,10 @@
 
 import pyxel
 from abc import abstractmethod
-from ..common import ALPHA_COL, Level, BLANK_UV, MAP_Y_OFFSET_TILES, ProgressStatusbarItem, EnemyType, Icon
-from ..utils import tile_to_real
-from .sprite_classes import Sprite, SpriteCoordinate, SpriteHandler
-from ..game_handler import GameHandler
+from core.common import ALPHA_COL, Level, BLANK_UV, MAP_Y_OFFSET_TILES, ProgressStatusbarItem, EnemyType, Icon
+from core.utils import tile_to_real
+from core.sprite_classes import Sprite, SpriteCoordinate, SpriteHandler
+from core.game_handler import GameHandler
 from .. import events
 
 ENEMY_SPAWNER_UV = (7, 1)
@@ -98,7 +98,7 @@ class EnemyHandler(SpriteHandler):
         self.game_components = game_handler.game_components
         self.enemy_coordinates_list: list[tuple[int, int]] = []
         self.enemies: list[EnemyEntity] = []
-        self.enemies_hit_progressbar = ProgressStatusbarItem(2, 1, self.get_enemies_eliminated_count, pyxel.COLOR_WHITE, 0, 75, 10, True, self.ENEMY_ICON, "Alien", pyxel.COLOR_WHITE)
+        self.enemies_hit_progressbar = ProgressStatusbarItem(2, 1, self.get_enemies_eliminated_count, pyxel.COLOR_WHITE, 0, 75, 10, self.ENEMY_ICON, "Alien", pyxel.COLOR_WHITE)
         self.setup()
         self._reset_progressbar()
 

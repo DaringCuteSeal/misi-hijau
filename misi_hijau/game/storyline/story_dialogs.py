@@ -14,7 +14,7 @@
 
 import pyxel
 
-from game.game_handler import GameHandler
+from core.game_handler import GameHandler
 from game import events
 from res.storyline_text import story_text
 

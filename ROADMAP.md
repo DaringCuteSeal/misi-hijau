@@ -67,8 +67,6 @@ STUFF TO FIX
 IDEAS
 - [ ] Reimplement colors to a managable `Color` class so we can have better type checking
 
-# NEVER MIND WE GOT EXTRA 24 DAYS, WTF
-
 # Storyline
 Manusia kemungkinan besar akan berhasil menjadi makhluk pertama yang dapat pergi ke galaksi lain dan benar-benar menjadi penguasa alam ini. 100 taun yang lalu, seluruh negara di bumi bergabung dalam ISRP (*Interntional Space Research Project*), organisasi raksasa yang akan melakukan banyak penelitian terhadap dunia luar angkasa.
 
@@ -76,7 +74,7 @@ Manusia kemungkinan besar akan berhasil menjadi makhluk pertama yang dapat pergi
 
 Sekarang tahun 3000. Sarah, seorang ilmuwan wanita genius berusia 22 tahun dari Indonesia, menggemparkan berita internasional karena penemuannya. Ia menemukan 3 elemen baru yang dapat mencegah krisis energi bumi yang sekarang ini terjadi karena proyek penjelajahan intergalaktik.
 
-Proyek pembangunan kapal terbang raksasa dengan kecepatan 25 kali kecepatan cahaya yang berpusat di Amerika Serikat, Rusia, Jepang, dan Singapura telah berlangsung selama kurang lebih 87 tahun. Proyek tersebut dikerjakan cukup lama karena sulitnya realisasi pembangunan mesin yang ternyata tidak sesuai rencana, serta beberapa isu politik antara AS dan Rusia. Namun, baru-baru ini, telah terungkap bahwa wakil pemimpin dari proyek ini berbohong tentang penggunaan energi dalam mesin pembangkit energi untuk mesin inti kapal tersebut. 
+Proyek pembangunan kapal terbang raksasa dengan kecepatan 25 kali kecepatan cahaya yang berpusat di Amerika Serikat, Rusia, Jepang, dan Singapura telah berlangsung selama kurang lebih 87 tahun. Proyek tersebut dikerjakan cukup lama karena sulitnya realisasi pembangunan mesin yang ternyata tidak sesuai rencana, serta beberapa isu politik antara AS dan Rusia. Akan tetapi, baru-baru ini, telah terungkap bahwa wakil pemimpin dari proyek ini berbohong tentang penggunaan energi dalam mesin pembangkit energi untuk mesin inti kapal tersebut. 
 
 Kebohongan besar tersebut akhirnya memicu kemarahan dari seluruh umat bumi yang akhirnya mengetahui bahwa bumi kini telah mengalami krisis energi. Proyek tersebut dan proyek pembangunan Bola Dyson di matahari yang telah dikerjakan selama 14 tahun pun ditunda sampai krisis energi ini dapat diselesaikan.
 

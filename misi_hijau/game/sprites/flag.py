@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .sprite_classes import TilemapBasedSprite
-from game.game_handler import GameHandler
-import game.events as events
+from core.sprite_classes import TilemapBasedSprite
+from core.game_handler import GameHandler
+from game import events
 
 class LevelFlag(TilemapBasedSprite):
     FLAG_UV = (2, 7)

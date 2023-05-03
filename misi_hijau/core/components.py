@@ -35,8 +35,8 @@ from .common import (
 )
 
 from game.events import Event
-from game.sprites.sprite_classes import Sprite, SpriteHandler, TilemapBasedSprite
-from game.game_ui.game_ui_classes import UIComponent
+from core.sprite_classes import Sprite, SpriteHandler, TilemapBasedSprite
+from core.game_ui_classes import UIComponent
 from . import utils
 
 # Keyboard input handling

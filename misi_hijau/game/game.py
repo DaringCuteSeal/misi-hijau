@@ -17,8 +17,8 @@ import pyxel
 
 from . import events
 
-from . import components
-from game.game_handler import GameComponents, GameHandler
+from core import components
+from core.game_handler import GameComponents, GameHandler
 
 from res.sprites import SpritesFactory
 from res.ui import UIComponentFactory

@@ -14,11 +14,11 @@
 
 from dataclasses import dataclass
 import pyxel
-from ..common import (
+from core.common import (
     WINDOW_HEIGHT,
     WINDOW_WIDTH,
 )
-from ..game_handler import GameHandler
+from core.game_handler import GameHandler
 from .. import events
 
 @dataclass

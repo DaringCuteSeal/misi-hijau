@@ -17,7 +17,7 @@ Level storing.
 """
 from game.sprites.powerups import PowerUp
 import pyxel
-from game.common import (
+from core.common import (
     LevelMap,
     Level,
     MineralType,

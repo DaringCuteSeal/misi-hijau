@@ -15,7 +15,7 @@
 # Imports
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
-from .. import common
+from . import common
 
 # Classes for UI Components
 

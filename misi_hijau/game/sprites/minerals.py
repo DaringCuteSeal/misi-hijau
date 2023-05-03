@@ -12,11 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .sprite_classes import TilemapBasedSprite
-from ..game_handler import GameHandler
-from .. import events
-from ..common import MineralType, Sfx, SoundType, ProgressStatusbarItem, BLANK_UV, MAP_Y_OFFSET_TILES, Icon
 import pyxel
+
+from core.sprite_classes import TilemapBasedSprite
+from core.game_handler import GameHandler
+from core.common import MineralType, Sfx, SoundType, ProgressStatusbarItem, BLANK_UV, MAP_Y_OFFSET_TILES, Icon
+from game import events
 
 class MineralsHandler(TilemapBasedSprite):
     MINERAL_ICON = Icon(0, 8, 96, 8, 8)
@@ -32,7 +33,7 @@ class MineralsHandler(TilemapBasedSprite):
     }
 
     def __init__(self, game_handler: GameHandler):
-        self.minerals_progressbar = ProgressStatusbarItem(1, 0, self.get_minerals_count, pyxel.COLOR_WHITE, 0, 75, 10, True, self.MINERAL_ICON, "Mineral", pyxel.COLOR_WHITE)
+        self.minerals_progressbar = ProgressStatusbarItem(1, 0, self.get_minerals_count, pyxel.COLOR_WHITE, 0, 75, 10, self.MINERAL_ICON, "Mineral", pyxel.COLOR_WHITE)
 
         self.statusbar_items = [
             self.minerals_progressbar

@@ -14,10 +14,10 @@
 
 # Imports
 import pyxel
-from .sprite_classes import TilemapBasedSprite
-from game.common import PowerUpType, PowerUp
-from game.game_handler import GameHandler
-from game.utils import tile_to_real
+from core.sprite_classes import TilemapBasedSprite
+from core.common import PowerUpType, PowerUp
+from core.game_handler import GameHandler
+from core.utils import tile_to_real
 
 class PowerUpHandler(TilemapBasedSprite):
     costumes: dict[str, tuple[int, int]] = {

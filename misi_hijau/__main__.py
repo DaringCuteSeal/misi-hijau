@@ -14,7 +14,7 @@
 
 # Imports
 import pyxel
-from game.common import WINDOW_HEIGHT, WINDOW_WIDTH
+from core.common import WINDOW_HEIGHT, WINDOW_WIDTH
 from game.game import Game
 from res.resources_load import startup_load_resources
 

@@ -17,9 +17,9 @@ import os
 
 from res.storyline_text import story_text
 
-from ..game_handler import GameHandler
+from core.game_handler import GameHandler
 from res.resources_load import INTRO_SLIDESHOW_IMAGE_PATH, SPLASH_SCREEN_IMAGE, INSTRUCTIONS_IMAGE_PATH
-from ..common import WINDOW_HEIGHT, KeyFunc, Sfx, SoundType
+from core.common import WINDOW_HEIGHT, KeyFunc, Sfx, SoundType
 from .components.text_engine import TextEngine
 from .. import events
 

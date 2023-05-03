@@ -1,6 +1,6 @@
 from game.game_ui import healthbar, stars, dialog
-from game.game_handler import GameHandler
-from game.game_ui.game_ui_classes import UIComponent
+from core.game_handler import GameHandler
+from core.game_ui_classes import UIComponent
 
 STARS_COUNT = 100
 

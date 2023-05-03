@@ -13,8 +13,8 @@
 # limitations under the License.
 
 import pyxel
-from .sprite_classes import Sprite, SpriteCoordinate, SpriteHandler
-from ..common import (
+from core.sprite_classes import Sprite, SpriteCoordinate, SpriteHandler
+from core.common import (
     ALPHA_COL,
     WINDOW_HEIGHT,
     Direction,
@@ -26,9 +26,9 @@ from ..common import (
     TextStatusbarItem,
     MAP_Y_OFFSET_TILES
 )
-from ..game_handler import GameHandler
+from core.game_handler import GameHandler
 from .. import events
-from ..utils import tile_to_real, real_to_tile, hypotenuse
+from core.utils import tile_to_real, real_to_tile, hypotenuse
 
 class Flame(Sprite):
     """

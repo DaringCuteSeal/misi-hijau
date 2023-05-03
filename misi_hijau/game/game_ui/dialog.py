@@ -16,9 +16,9 @@ import pyxel
 
 from typing import Optional, Callable, Any
 
-from ..common import KeyFunc, WINDOW_WIDTH, WINDOW_HEIGHT, Sfx, SoundType
-from ..game_handler import GameHandler
-from .game_ui_classes import UIComponent, UIComponentCoordinate
+from core.common import KeyFunc, WINDOW_WIDTH, WINDOW_HEIGHT, Sfx, SoundType
+from core.game_handler import GameHandler
+from core.game_ui_classes import UIComponent, UIComponentCoordinate
 from .. import events
 
 class Dialog(UIComponent):

@@ -18,14 +18,14 @@ from enum import Enum
 from typing import Any, Callable, Optional
 from time import time
 
+from game.config import *
+
 """
 Common classes and functions for many files including utilities.
 """
 
 # Constants
 ALPHA_COL = pyxel.COLOR_PURPLE
-WINDOW_WIDTH = 256
-WINDOW_HEIGHT = 256
 BLANK_UV = (0, 0)
 MAP_Y_OFFSET_TILES = WINDOW_HEIGHT // 2 // pyxel.TILE_SIZE # the map y coordinate is offset by half the screen size because of how the player movement is handled.
 
@@ -135,18 +135,20 @@ class Icon:
     h: int
     colkey: Optional[int] = pyxel.COLOR_PURPLE
 
+@dataclass
 class TextStatusbarItem:
     """
     String to be displayed at the statusbar.
     """
-    def __init__(self, idx: int, function: Callable[[], str], color: int, gap: int = 2, custom_coords: bool = False, x: int = 0, y: int = 0):
-        self.idx = idx
-        self.function = function # function that returns a string
-        self.color = color
-        self.gap = gap
-        self.custom_coords = custom_coords
-        self.x = x # only need to be set explicitly if custom_coords is enabled
-        self.y = y
+    idx: int
+    function: Callable[[], str]
+    color: int
+    gap: int = 2
+    custom_coords: bool = False
+    x: int = 0
+    y: int = 0
+
+    def __post_init__(self):
         self.string: str = ""
 
     def update(self):
@@ -167,7 +169,6 @@ class ProgressStatusbarItem:
     progress_col: int
     bar_width: int
     bar_height: int
-    use_icon: bool = False
     icon: Optional[Icon] = None
     text_over_bar: Optional[str] = None
     text_over_bar_col: int = pyxel.COLOR_WHITE
@@ -193,8 +194,8 @@ class ProgressStatusbarItem:
     def _recalculate(self):
         try:
             self.pixels_per_val = (self.bar_width - 2) / self.max_val # set pixels per val
-        except ZeroDivisionError:
-            self.pixels_per_val = self.bar_width
+        except ZeroDivisionError: # if the max_amount is 0:
+            self.pixels_per_val = self.bar_width # set pixels_per_val to the width instead
 
         self._recalculate_bar_coords()
         
@@ -208,7 +209,7 @@ class ProgressStatusbarItem:
             self.text_y = self.bar_y + (self.bar_height - pyxel.FONT_HEIGHT) // 2
 
     def _recalculate_bar_coords(self):
-        if self.use_icon and self.icon:
+        if self.icon:
             self.height = max(self.icon.h, self.bar_height)
             self.bar_y = self.y + (self.icon.h - self.bar_height) // 2
             self.bar_x = self.x + self.icon.w + self.icon_gap

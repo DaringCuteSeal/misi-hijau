@@ -13,14 +13,14 @@
 # limitations under the License.
 
 import pyxel
-from ..common import (
+from core.common import (
     WINDOW_WIDTH,
     ALPHA_COL
 )
-from ..utils import tile_to_real
-from ..game_handler import GameHandler
+from core.utils import tile_to_real
+from core.game_handler import GameHandler
 from .. import events
-from .game_ui_classes import UIComponent, UIComponentCoordinate
+from core.game_ui_classes import UIComponent, UIComponentCoordinate
 
 class HealthBar(UIComponent):
     w = 8

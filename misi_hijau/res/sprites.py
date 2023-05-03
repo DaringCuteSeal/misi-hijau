@@ -13,8 +13,8 @@
 # limitations under the License.
 
 from game.sprites import player, minerals, enemy, flag, bullets, blasts, powerups
-from game.game_handler import GameHandler
-from game.sprites.sprite_classes import Sprite, SpriteHandler, TilemapBasedSprite
+from core.game_handler import GameHandler
+from core.sprite_classes import Sprite, SpriteHandler, TilemapBasedSprite
 
 class SpritesFactory:
     """

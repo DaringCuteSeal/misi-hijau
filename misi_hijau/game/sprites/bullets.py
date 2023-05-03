@@ -14,10 +14,10 @@
 
 import pyxel
 
-from ..common import Sfx, SoundType, WINDOW_HEIGHT
-from .sprite_classes import Sprite, SpriteCoordinate, SpriteHandler
-from ..game_handler import GameHandler
-from .. import events
+from core.common import Sfx, SoundType, WINDOW_HEIGHT
+from core.sprite_classes import Sprite, SpriteCoordinate, SpriteHandler
+from core.game_handler import GameHandler
+from game import events
 
 class Bullet(Sprite):
     w = 2
