@@ -31,7 +31,7 @@ class StoryDialogs:
         self.level_handler = game_handler.levelhandler
         self.event_handler = game_handler.game_components.event_handler
         self.event_handler.add_handler(events.StartGame.name, self.show_dialog_handler)
-        self.event_handler.add_handler(events.LevelInit.name, self.show_dialog_handler)
+        self.event_handler.add_handler(events.LevelNext.name, self.show_dialog_handler)
     
     def show_dialog_handler(self):
         curr_level_idx = self.level_handler.get_curr_lvl().idx - 1

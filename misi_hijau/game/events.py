@@ -30,13 +30,14 @@ class Event:
     data: Optional[dict[str, Any]] = None
 
 # Events with data being passed
+@dataclass
 class PlayerShootBullets(Event):
-    name = "player_shoot_bullets"
     def __init__(self, player_x: float, player_y: float):
         self.data = {
             "player_x": player_x,
             "player_y": player_y
         }
+    name = "player_shoot_bullets"
 
 class BulletsCheck(Event):
     name = "bullets_check"
@@ -102,6 +103,19 @@ class TilemapPlayerCheck(Event):
             "tile_y": tile_y
         }
 
+# Event-based UI components
+class ShowBlinkingTextHint(Event):
+    name = "show_blinking_text_hint"
+    def __init__(self, x: int, y: int, msg: str, background_img_idx: int):
+        self.data = {
+            "x": x,
+            "y": y,
+            "msg": msg,
+            "background_img_idx": background_img_idx
+        }
+
+HideBlinkingTextHint = Event("hide_blinking_text_hint")
+
 class ShowDialog(Event):
     name = "show_dialog"
     def __init__(self,
@@ -132,7 +146,6 @@ class ShowDialog(Event):
         }
 
 # Events without data being passed
-ActivateLevel = Event("activate_level")
 TextengineInterrupt = Event("text_engine_interrupt")
 CheckLevelComplete = Event("check_level_complete")
 UpdateHealthbar = Event("update_healthbar")
@@ -142,5 +155,5 @@ ShowInstructions = Event("show_instruction")
 StarsScroll = Event("stars_scroll")
 StartGame = Event("start_game")
 LevelRestart = Event("restart_level")
-LevelInit = Event("init_level")
 LevelNext = Event("level_next")
+ActivateLevel = Event("activate_level")

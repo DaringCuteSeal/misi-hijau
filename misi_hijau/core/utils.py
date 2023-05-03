@@ -19,7 +19,7 @@ import math
 import pyxel
 
 # Tick handling
-class Ticker:
+class TickerItem:
     """
     Retro games aren't meant to be smooth. However, Pyxel supports high frame rate. This timer can be used to limit a rate of something without messing with the game's actual FPS.
 

@@ -22,8 +22,12 @@ from core.game_ui_classes import UIComponent, UIComponentCoordinate
 from .. import events
 
 class Dialog(UIComponent):
+    """
+    A pop-up dialog.
+    """
+
     soundbank = {
-        "popup": Sfx(SoundType.AUDIO, 0, 18),
+        "popup": Sfx(SoundType.AUDIO, 0, 19),
     }
 
     DISMISS_MSG_GAP = 5
@@ -40,6 +44,10 @@ class Dialog(UIComponent):
         self.bg_color: int = pyxel.COLOR_WHITE
         self.message_len: int = 0
         self.text_color: int = pyxel.COLOR_BLACK
+        self.show_dismiss_msg: bool = False
+        self.dismiss_msg_col: int = 0
+        self.dismiss_msg_str: str = ""
+
 
         game_handler.game_components.keylistener.add({"dialog_dismiss_btn": self.tmp_keyfunc})
         game_handler.game_components.event_handler.add_handler(events.ShowDialog.name, self.show)

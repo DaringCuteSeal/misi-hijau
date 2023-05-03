@@ -361,10 +361,10 @@ class TickerHandler:
     Ticker handler class. Each individual sprite that has a ticker doesn't need to update the ticker
     """
     def __init__(self):
-        self.ticker_items: list[utils.Ticker] = []
+        self.ticker_items: list[utils.TickerItem] = []
     
-    def attach(self, limit: int) -> utils.Ticker:
-        ticker_item = utils.Ticker(limit)
+    def attach(self, limit: int) -> utils.TickerItem:
+        ticker_item = utils.TickerItem(limit)
         self.ticker_items.append(ticker_item)
         return ticker_item
     

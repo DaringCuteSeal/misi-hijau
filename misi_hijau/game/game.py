@@ -49,12 +49,14 @@ class Game():
         # self.debugger = Debugger(self.spr_player, self.game_handler.game_components)
 
         self.ui_stars = None # stars are separated from the other UI components so it can be drawn first
+        self.init_ui()
 
         self._start_intro_slideshow()
 
         self._init_story_dialog()
 
     def _start_intro_slideshow(self):
+        self.game_handler.callable_draw = self.intro_loop
         self.storyline_player = StorylinePlayer(self.game_handler)
         self.storyline_player.slide_intro()
     
@@ -106,6 +108,9 @@ class Game():
     
     def draw(self):
         self.game_handler.callable_draw() if self.game_handler.callable_draw else None
+
+    def intro_loop(self):
+        self.game_handler.game_components.game_ui.draw()
 
     def draw_game_loop(self):
         """
@@ -183,5 +188,4 @@ class Game():
 
     def start_game(self):
         self.init_sprites()
-        self.init_ui()
         self.game_handler.callable_draw = self.draw_game_loop

@@ -49,7 +49,6 @@ class StorylinePlayer:
         game_components.soundplayer.play(self.soundbank["music"], loop=True)
         game_components.event_handler.add_handler(events.SlideshowNext.name, self.slideshow_next_handler)
 
-        self.hint_text_blink_ticker = game_components.ticker.attach(30)
         self.hint_text_blink_idx = False
 
         self.slideshow_idx = 1
@@ -75,25 +74,16 @@ class StorylinePlayer:
         
     def _show_slideshow_slide(self):
         self._post_slideshow_show()
+        self.game_handler.game_components.event_handler.trigger_event(events.HideBlinkingTextHint)
 
         self._load_slide_background_image(self.slideshow_idx)
         self._draw_background()
         self._play_slide_sfx()
 
-        self.textengine.animate_text(self.string_collection["intro"][self.slideshow_idx - 1], self.TEXTENGINE_BORDER, self.TEXTENGINE_BORDER, lambda: self.game_handler.game_components.timer.attach(1).when_over(self._enable_spacebar_hint), sfx=True, speed=0.02, color=pyxel.COLOR_WHITE)
+        self.textengine.animate_text(self.string_collection["intro"][self.slideshow_idx - 1], self.TEXTENGINE_BORDER, self.TEXTENGINE_BORDER, lambda: self.game_handler.game_components.timer.attach(1).when_over(self.enable_spacebar_hint), sfx=True, speed=0.02, color=pyxel.COLOR_WHITE)
 
-    def _enable_spacebar_hint(self):
-        self.game_handler.callable_draw = self._text_hint_wait # activate the text hint loop
-
-    def _text_hint_wait(self):
-        if self.hint_text_blink_ticker.get():
-            self.hint_text_blink_idx = not self.hint_text_blink_idx
-
-            if self.hint_text_blink_idx:
-                pyxel.text(self.SLIDESHOW_WAIT_COORD[0], self.SLIDESHOW_WAIT_COORD[1], self.SLIDESHOW_WAIT_STRING, pyxel.COLOR_WHITE)
-            else: 
-                # blit back of the text with the background image instead of constantly drawing everything (computationally cheaper)
-                pyxel.blt(self.SLIDESHOW_WAIT_COORD[0], self.SLIDESHOW_WAIT_COORD[1], 1, self.SLIDESHOW_WAIT_COORD[0], self.SLIDESHOW_WAIT_COORD[1], self.SLIDESHOW_WAIT_BORDER_WIDTH, self.SLIDESHOW_WAIT_BORDER_HEIGHT)
+    def enable_spacebar_hint(self):
+        self.game_handler.game_components.event_handler.trigger_event(events.ShowBlinkingTextHint(self.SLIDESHOW_WAIT_COORD[0], self.SLIDESHOW_WAIT_COORD[1], self.SLIDESHOW_WAIT_STRING, 1))
 
     def _play_slide_sfx(self):
         self.game_handler.game_components.soundplayer.play(self.soundbank["start_sfx"])
@@ -110,7 +100,6 @@ class StorylinePlayer:
         """
         self.game_handler.game_components.event_handler.trigger_event(events.TextengineInterrupt)
         self._alter_keylistener_state(False)
-        self.game_handler.callable_draw = None
         self.game_handler.game_components.timer.attach(0.2).when_over(lambda: self._alter_keylistener_state(True))
 
     ################
@@ -121,6 +110,7 @@ class StorylinePlayer:
         self._post_slideshow_show()
         pyxel.image(1).load(0, 0, INSTRUCTIONS_IMAGE_PATH)
         self.game_handler.game_components.soundplayer.play(self.soundbank["instruction_sfx"])
+        self.game_handler.game_components.timer.attach(1).when_over(self.enable_spacebar_hint)
         pyxel.blt(0, 0, 1, 0, 0, 256, 256)
 
     ################
@@ -140,3 +130,4 @@ class StorylinePlayer:
         else:
             self.game_handler.game_components.event_handler.trigger_event(events.StartGame)
             self._alter_keylistener_state(False)
+            self.game_handler.game_components.event_handler.trigger_event(events.HideBlinkingTextHint)

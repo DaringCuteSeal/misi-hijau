@@ -304,7 +304,8 @@ class PlayerHandler(SpriteHandler):
 
     def __init__(self, game_handler: GameHandler):
         self.game_handler = game_handler
-        self.game_handler.game_components.event_handler.add_handler(events.ActivateLevel.name, self.enable_player_keys)
+        self.game_handler.game_components.event_handler.add_handler(events.ActivateLevel.name, lambda: self._tweak_player_keys_state(True))
+        self.player = Player(self.game_handler)
         self.setup()
 
         self.soundbank = {
@@ -321,12 +322,12 @@ class PlayerHandler(SpriteHandler):
             TextStatusbarItem(100, self.get_player_speed, pyxel.COLOR_YELLOW),
         ]
 
-    def enable_player_keys(self):
+    def _tweak_player_keys_state(self, state: bool):
         for key in self.keybindings.values():
-            key.active = True
+            key.active = state
 
     def setup(self):
-        self.player = Player(self.game_handler)
+        self._tweak_player_keys_state(False)
         level = self.game_handler.levelhandler.get_curr_lvl()
 
         if level.idx == 3:

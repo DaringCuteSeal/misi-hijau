@@ -19,10 +19,13 @@ from core.common import (
 )
 from core.utils import tile_to_real
 from core.game_handler import GameHandler
-from .. import events
 from core.game_ui_classes import UIComponent, UIComponentCoordinate
+from .. import events
 
 class HealthBar(UIComponent):
+    """
+    A game healthbar.
+    """
     w = 8
     h = 8
     costume = (48, 48)
@@ -33,6 +36,7 @@ class HealthBar(UIComponent):
     def __init__(self, game_handler: GameHandler):
         self.game_handler = game_handler
         self.game_handler.game_components.event_handler.add_handler(events.PlayerHealthChange.name, self.change_health_count)
+        self.active = False
         self.setup()
     
     def setup(self):
@@ -56,7 +60,9 @@ class HealthBar(UIComponent):
         self.coord.y = self.def_gap_x + self.edge_gap
 
     def init_level(self):
+        self.active = True
         self.setup()
     
     def restart_level(self):
+        self.active = True
         self.setup()
