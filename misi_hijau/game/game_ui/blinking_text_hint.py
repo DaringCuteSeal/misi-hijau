@@ -19,6 +19,8 @@ from core.utils import TickerItem
 from core.game_ui_classes import UIComponent
 from game import events
 
+BLINKING_TEXT_HINT_TIMER_ID = "blinking_text"
+
 class BlinkingTextHint(UIComponent):
     """
     A blinking text to hint the player.
@@ -31,7 +33,7 @@ class BlinkingTextHint(UIComponent):
         self.game_handler = game_handler
         self.game_handler.game_components.event_handler.add_handler(events.ShowBlinkingTextHint.name, self.show)
         self.game_handler.game_components.event_handler.add_handler(events.HideBlinkingTextHint.name, self.hide)
-        self.hint_text_blink_idx = 0
+        self.hint_text_blink_idx = True
         
         # We instantiate a new ticker on every show() call. 
         # We use None | TickerItem so the draw() method won't crash the game if the ticker hasn't been properly initialized.
@@ -48,9 +50,7 @@ class BlinkingTextHint(UIComponent):
     
     def hide(self):
         self.active = False
-
-    def _enable_text_hint(self):
-        self.active = False
+        self.game_handler.game_components.timer.destroy_by_id(BLINKING_TEXT_HINT_TIMER_ID) # delete stale timers
 
     def _draw(self):
         if self.hint_text_blink_ticker and self.hint_text_blink_ticker.get():

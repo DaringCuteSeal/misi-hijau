@@ -103,6 +103,13 @@ class TilemapPlayerCheck(Event):
             "tile_y": tile_y
         }
 
+class BroadcastEnemiesCount(Event):
+    name = "broadcast_enemies_count"
+    def __init__(self, count: int):
+        self.data = {
+            "count": count
+        }
+
 # Event-based UI components
 class ShowBlinkingTextHint(Event):
     name = "show_blinking_text_hint"
@@ -146,14 +153,15 @@ class ShowDialog(Event):
         }
 
 # Events without data being passed
-TextengineInterrupt = Event("text_engine_interrupt")
-CheckLevelComplete = Event("check_level_complete")
+TextengineInterrupt = Event("text_engine_interrupt") # stop currently running text engine
+CheckLevelComplete = Event("check_level_complete") # check whether or not level has been completed
 UpdateHealthbar = Event("update_healthbar")
 UpdateStatusbar = Event("update_statusbar")
-SlideshowNext = Event("slideshow_next")
-ShowInstructions = Event("show_instruction")
+SlideshowNext = Event("slideshow_next") # next game intro slide
+ShowInstructions = Event("show_instruction") # show game instruction
 StarsScroll = Event("stars_scroll")
-StartGame = Event("start_game")
-LevelRestart = Event("restart_level")
-LevelNext = Event("level_next")
-ActivateLevel = Event("activate_level")
+StartGame = Event("start_game") # start game
+LevelRestart = Event("restart_level") # restart level
+LevelNext = Event("level_next") # switch to next level
+ActivateLevel = Event("activate_level") # activate keybinds or other things in level
+ShowLevelStats = Event("show_level_stats")

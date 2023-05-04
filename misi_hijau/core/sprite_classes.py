@@ -32,7 +32,7 @@ class SpriteCoordinate:
 
 class Sprite(ABC):
     """
-    A sprite object class.
+    A ("raw") sprite object class.
     """
     img: int = 0
     u: int = 0 # 2D coord of the spritesheet

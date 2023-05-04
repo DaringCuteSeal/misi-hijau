@@ -35,8 +35,9 @@ class HealthBar(UIComponent):
 
     def __init__(self, game_handler: GameHandler):
         self.game_handler = game_handler
+        self.active = False # UI components are instantiated during the very start of the game (since the intro; not the main game) so we deactivate it when this healthbar is instantiated.
+        self.game_handler.game_components.event_handler.add_handler(events.StartGame.name, self._show_healthbar) # show the healthbar on game start
         self.game_handler.game_components.event_handler.add_handler(events.PlayerHealthChange.name, self.change_health_count)
-        self.active = False
         self.setup()
     
     def setup(self):
@@ -59,10 +60,13 @@ class HealthBar(UIComponent):
         self.coord.x = WINDOW_WIDTH - pyxel.TILE_SIZE - self.health_count * self.def_gap_x - tile_to_real(self.health_count) - self.edge_gap
         self.coord.y = self.def_gap_x + self.edge_gap
 
-    def init_level(self):
+    def _show_healthbar(self):
         self.active = True
+
+    def init_level(self):
+        self._show_healthbar()
         self.setup()
     
     def restart_level(self):
-        self.active = True
+        self._show_healthbar()
         self.setup()

@@ -117,7 +117,7 @@ class Level:
     bullet_color: int
     enemies_statusbar_color: int
     minerals_statusbar_color: int
-    max_minerals: int
+    minerals_count: int
     max_health: int
 
     minerals_all_collected = False

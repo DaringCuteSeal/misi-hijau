@@ -128,10 +128,10 @@ class EnemyHandler(SpriteHandler):
         tilemap = pyxel.tilemap(0)
         for y in range(self.levelmap.map_y + MAP_Y_OFFSET_TILES, self.levelmap.map_y + MAP_Y_OFFSET_TILES +  self.levelmap.level_height):
             for x in range(self.levelmap.map_x, self.levelmap.map_x + self.levelmap.level_width):
-                tile_type = tilemap.pget(x, y)
-                if tile_type == ENEMY_SPAWNER_UV:
+                if tilemap.pget(x, y) == ENEMY_SPAWNER_UV:
                     enemies_matrix.append((x, y))
         self.enemies_count = len(enemies_matrix)
+        self.game_components.event_handler.trigger_event(events.BroadcastEnemiesCount(self.enemies_count))
         return enemies_matrix
 
     def spawn(self):

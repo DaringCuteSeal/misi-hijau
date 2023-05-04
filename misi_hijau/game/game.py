@@ -25,7 +25,7 @@ from res.ui import UIComponentFactory
 from res.levels import levels
 
 from game.storyline.intro import StorylinePlayer
-from game.storyline.story_dialogs import StoryDialogs
+from game.storyline.story_dialogs import InGameStoryline
 
 class Game():
     ##################
@@ -43,8 +43,6 @@ class Game():
         # Add event handler
         self._init_event_handlers()
 
-        self.callable_draw: Callable[[None], None] | None
-
         # Debugging
         # self.debugger = Debugger(self.spr_player, self.game_handler.game_components)
 
@@ -56,12 +54,12 @@ class Game():
         self._init_story_dialog()
 
     def _start_intro_slideshow(self):
-        self.game_handler.callable_draw = self.intro_loop
+        self.game_handler.callable_draw = self.intro_loop_draw
         self.storyline_player = StorylinePlayer(self.game_handler)
         self.storyline_player.slide_intro()
     
     def _init_story_dialog(self):
-        self.story_dialog = StoryDialogs(self.game_handler)
+        self.story_dialog = InGameStoryline(self.game_handler)
 
     def _init_event_handlers(self):
         self.game_handler.game_components.event_handler.add_handler(events.UpdateStatusbar.name, self.update_statusbar)
@@ -109,10 +107,10 @@ class Game():
     def draw(self):
         self.game_handler.callable_draw() if self.game_handler.callable_draw else None
 
-    def intro_loop(self):
+    def intro_loop_draw(self):
         self.game_handler.game_components.game_ui.draw()
 
-    def draw_game_loop(self):
+    def game_loop_draw(self):
         """
         Draw game scene.
         """
@@ -134,13 +132,9 @@ class Game():
         # Statusbar
         self.game_handler.game_components.statusbar.draw()
     
-    ##################
-    # Game functions #
-    ##################
-
-    ###################
-    # Object creation #
-    ###################
+    #####################
+    # Enitity creations #
+    #####################
 
     def init_sprites(self):
         self.sprites_factory = SpritesFactory(self.game_handler)
@@ -174,18 +168,27 @@ class Game():
         self.game_handler.game_components.statusbar.update()
     
     def level_restart(self):
+        self.game_handler.callable_draw = self.game_loop_draw
+
         self.game_handler.game_components.game_sprites.restart_level()
         self.game_handler.game_components.game_ui.restart_level()
         self.game_handler.game_components.statusbar.update() # make sure the new item values show up
 
     def level_next(self):
-        curr_level = self.game_handler.levelhandler.get_curr_lvl_idx()
-        self.game_handler.levelhandler.set_lvl_by_idx(curr_level + 1)
+        self.callable_draw = self.game_loop_draw
+        self._increment_level()
 
         self.game_handler.game_components.game_sprites.init_level()
         self.game_handler.game_components.game_ui.init_level()
         self.game_handler.game_components.statusbar.update() # make sure the new item values show up
+    
+    def _increment_level(self):
+        curr_level = self.game_handler.levelhandler.get_curr_lvl_idx()
+        self.game_handler.levelhandler.set_lvl_by_idx(curr_level + 1)
 
     def start_game(self):
         self.init_sprites()
-        self.game_handler.callable_draw = self.draw_game_loop
+        self.game_handler.callable_draw = self.game_loop_draw
+
+        # Force to hide; there's a weird bug where the blinking text just doesn't hide when you skip through slideshows very quickly
+        self.game_handler.game_components.event_handler.trigger_event(events.HideBlinkingTextHint)

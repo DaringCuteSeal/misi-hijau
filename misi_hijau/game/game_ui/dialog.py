@@ -48,7 +48,6 @@ class Dialog(UIComponent):
         self.dismiss_msg_col: int = 0
         self.dismiss_msg_str: str = ""
 
-
         game_handler.game_components.keylistener.add({"dialog_dismiss_btn": self.tmp_keyfunc})
         game_handler.game_components.event_handler.add_handler(events.ShowDialog.name, self.show)
 
@@ -100,10 +99,11 @@ class Dialog(UIComponent):
 
         if self.show_dismiss_msg:
             self.h = (self.message_rows_count * pyxel.FONT_HEIGHT) + (self.text_gap * 2) + self.DISMISS_MSG_GAP + pyxel.FONT_HEIGHT
-        else:
-            # The height is calculated last because we need message_rows_count which we can get after
-            # we parsed (wrapped) the message.
-            self.h = (self.message_rows_count * pyxel.FONT_HEIGHT) + self.text_gap * 2
+            return
+
+        # The height is calculated last because we need message_rows_count which we can get after
+        # we parsed (wrapped) the message.
+        self.h = (self.message_rows_count * pyxel.FONT_HEIGHT) + self.text_gap * 2
 
     def hide(self):
         self._alter_keyfunc_state(False)

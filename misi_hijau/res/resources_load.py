@@ -19,9 +19,12 @@ PYXEL_RESOURCE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "
 
 IMG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "img")
 
+TEMP_IMG_BANK_IDX = 1
 SPLASH_SCREEN_IMAGE = os.path.join(IMG_PATH, "game_splash_screen.png")
-INTRO_SLIDESHOW_IMAGE_PATH = os.path.join(IMG_PATH, "intro_slideshow_image")
+INTRO_SLIDESHOW_IMAGE_PATH = os.path.join(IMG_PATH, "intro_slideshow_images")
 INSTRUCTIONS_IMAGE_PATH = os.path.join(IMG_PATH, "instructions.png")
+LEVEL_STATS_IMAGE_PATH = os.path.join(IMG_PATH, "level_stats_images")
+FINISH_SCREEN_IMAGE_PATH = os.path.join(IMG_PATH, "finish_screen.png")
 
 # FONT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "font", "PIXELADE.ttf")
 

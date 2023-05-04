@@ -40,4 +40,4 @@ class LevelFlag(TilemapBasedSprite):
 
     def player_level_completed_check(self, uv: tuple[int, int], tile_x: int, tile_y: int): # FIXME: Some functions still call this function with these arguments. If one removes them, breakage will occur. Refactoring should be done later
         if self._is_level_complete() and uv == self.FLAG_UV:
-            self.game_handler.game_components.event_handler.trigger_event(events.LevelNext)
+            self.game_handler.game_components.event_handler.trigger_event(events.ShowLevelStats)

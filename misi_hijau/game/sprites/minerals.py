@@ -62,14 +62,14 @@ class MineralsHandler(TilemapBasedSprite):
 
     def _reset_progressbar(self):
         self.minerals_progressbar.progress_col = self.level.minerals_statusbar_color
-        self.minerals_progressbar.new_max_val(self.level.max_minerals)
+        self.minerals_progressbar.new_max_val(self.level.minerals_count)
 
     def spawn(self):
         """
         Spawn the minerals in random coordinates, the max minerals count is set by the level's `max_minerals` attribute.
         """
         self._clean_grid()
-        self.mineral_coordinates_list = self._generate_random_mimerals_map_matrix(self.level.max_minerals, self.level.levelmap.level_width, self.level.levelmap.level_height, self.level.levelmap.map_x, self.level.levelmap.map_y)
+        self.mineral_coordinates_list = self._generate_random_mimerals_map_matrix(self.level.minerals_count, self.level.levelmap.level_width, self.level.levelmap.level_height, self.level.levelmap.map_x, self.level.levelmap.map_y)
         for x, y in self.mineral_coordinates_list:
             pyxel.tilemap(0).pset(x, y, self.mineral_costume)
     
@@ -101,7 +101,7 @@ class MineralsHandler(TilemapBasedSprite):
     def player_collision_check_handler(self, uv: tuple[int, int], tile_x: int, tile_y: int) -> bool:
         if uv == (self.mineral_costume):
             self.collected_minerals += 1
-            if self.collected_minerals == self.level.max_minerals:
+            if self.collected_minerals == self.level.minerals_count:
                 self.level.minerals_all_collected = True
                 self.game_handler.game_components.event_handler.trigger_event(events.CheckLevelComplete)
                 self.minerals_progressbar.progress_col = pyxel.COLOR_GREEN

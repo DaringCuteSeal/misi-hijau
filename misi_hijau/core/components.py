@@ -31,7 +31,9 @@ from .common import (
     LevelMap,
     TextStatusbarItem,
     ProgressStatusbarItem,
-    TimerItem
+    TimerItem,
+    WINDOW_WIDTH,
+    WINDOW_HEIGHT
 )
 
 from game.events import Event
@@ -87,7 +89,8 @@ class KeyListener:
                             if not pyxel.btn(key):
                                 continue
                             keyfunc.func()
-                            break # don't execute another function if 2 keys are pressed at the same time
+                            break # don't execute another function if 2 keys (still same keyfunc) are pressed at the same time
+
                     case KeyTypes.BTNP:
                         for key in keyfunc.binding:
                             if not pyxel.btnp(key, hold=keyfunc.hold_time, repeat=keyfunc.repeat_time):
@@ -129,7 +132,7 @@ class Camera:
     speed: float = 8
     x: float = 0
     y: float = 0
-    # where the camera is heading; should be the same as player's vel variable. Only used by stars
+    # where the camera is heading; should be the same as player's vel variable. Only used for moving the stars in the background
     dir_x: float = 0
     dir_y: float = 0
 
@@ -137,7 +140,7 @@ class Camera:
        pyxel.camera()
   
     def draw(self, levelmap: LevelMap):
-        pyxel.bltm(0, 0, 0, self.x + utils.tile_to_real(levelmap.map_x), self.y + utils.tile_to_real(levelmap.map_y), 256, 256, pyxel.COLOR_BLACK)
+        pyxel.bltm(0, 0, 0, self.x + utils.tile_to_real(levelmap.map_x), self.y + utils.tile_to_real(levelmap.map_y), WINDOW_WIDTH, WINDOW_HEIGHT, pyxel.COLOR_BLACK)
 
 # Statusbar handling
 class GameStatusbar:
@@ -433,6 +436,7 @@ class EventHandler:
     """
     
     def __init__(self):
+        self.debug_mode = True
         self._handlers: dict[str, list[Callable[..., bool | None]]] = {}
     
     def add_handler(self, event_name: str, handler: Callable[..., bool | None]):
@@ -455,7 +459,7 @@ class EventHandler:
         Trigger an event.
         """
         if event.name in self._handlers:
-        
+
             results: list[bool | None] = []
             for handler in self._handlers[event.name]:
                 if event.data:
@@ -463,9 +467,9 @@ class EventHandler:
                 else:
                     results.append(handler())
 
-        # The value return is either "succeeded" or "failed", so if
-        # there's a handler function that returned False, this
-        # event trigger result should be False, and so on.
+            # The value return is either "succeeded" or "failed", so if
+            # there's a handler function that returned False, this
+            # event trigger result should be False, and so on.
 
             if any(result is False for result in results):
                 return False
