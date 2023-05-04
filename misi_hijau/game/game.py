@@ -188,10 +188,11 @@ class Game():
         curr_level = self.game_handler.levelhandler.get_curr_lvl_idx()
 
         if curr_level == LEVELS_COUNT:
-            self.game_handler.game_components.event_handler.trigger_event(events.FinishGame)
             self._start_outro_slide()
+            self.game_handler.game_components.event_handler.trigger_event(events.FinishGame)
             return
 
+        self.game_handler.game_components.event_handler.trigger_event(events.ShowLevelDialog) # show dialog at start
         self.game_handler.levelhandler.set_lvl_by_idx(curr_level + 1)
         self.setup_next_level()
 

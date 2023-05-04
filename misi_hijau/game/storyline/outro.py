@@ -56,9 +56,12 @@ class OutroPlayer:
 
     def __init__(self, game_handler: GameHandler):
         self.game_handler = game_handler
+        self.game_handler.game_components.event_handler.add_handler(events.FinishGame.name, self.show_outro)
+    
+    def show_outro(self):
         self.plane = OutroPlane(self.game_handler) # create plane for animation
         self.exit_game_keyfunc = KeyFunc([pyxel.KEY_Q, pyxel.KEY_ESCAPE], self.quit_game)
-        self.game_handler.game_components.timer.attach(2).when_over(self.show_quit_hint)
+        self.game_handler.game_components.timer.attach(3).when_over(self.show_quit_hint)
         self.game_handler.callable_update = self.update
         self.game_handler.callable_draw = self.draw
         self.draw_background()
@@ -70,14 +73,14 @@ class OutroPlayer:
     def show_quit_hint(self):
         quit_string_width = len(self.QUIT_HINT_STRING) * pyxel.FONT_WIDTH
         x = (WINDOW_WIDTH - quit_string_width) // 2
-        y = WINDOW_HEIGHT - 10
-        self.game_handler.game_components.event_handler.trigger_event(events.ShowBlinkingTextHint(x, y, self.QUIT_HINT_STRING, TEMP_IMG_BANK_IDX))
+        y = WINDOW_HEIGHT - pyxel.FONT_HEIGHT - 10
+        self.game_handler.game_components.event_handler.trigger_event(events.ShowBlinkingTextHint(x, y, self.QUIT_HINT_STRING, TEMP_IMG_BANK_IDX, True))
 
     def draw(self):
-        self.game_handler.game_components.game_ui.draw()
         self.draw_background()
         if self.plane:
             self.plane.draw()
+        self.game_handler.game_components.game_ui.draw()
     
     def update(self):
         if self.plane:

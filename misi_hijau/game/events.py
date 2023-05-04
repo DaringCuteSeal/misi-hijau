@@ -113,12 +113,13 @@ class BroadcastEnemiesCount(Event):
 # Event-based UI components
 class ShowBlinkingTextHint(Event):
     name = "show_blinking_text_hint"
-    def __init__(self, x: int, y: int, msg: str, background_img_idx: int):
+    def __init__(self, x: int, y: int, msg: str, background_img_idx: int, keep_drawing: bool = False):
         self.data = {
             "x": x,
             "y": y,
             "msg": msg,
-            "background_img_idx": background_img_idx
+            "background_img_idx": background_img_idx,
+            "keep_drawing": keep_drawing
         }
 
 HideBlinkingTextHint = Event("hide_blinking_text_hint")
@@ -191,3 +192,4 @@ ShowLevelStats = Event("show_level_stats") # show level stats (after finishing a
 StopGameLoop = Event("stop_game_loop") # change the game's draw call to UI components-only draw loop
 ResumeGameLoop = Event("resume_game_loop") # change the game's update and draw call to the actual game loop
 FinishGame = Event("finish_game")
+ShowLevelDialog = Event("show_level_dialog")

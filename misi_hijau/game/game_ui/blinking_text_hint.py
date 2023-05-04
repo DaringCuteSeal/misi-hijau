@@ -40,13 +40,14 @@ class BlinkingTextHint(UIComponent):
         # We use None | TickerItem so the draw() method won't crash the game if the ticker hasn't been properly initialized.
         self.hint_text_blink_ticker: None | TickerItem = None 
 
-    def show(self, x: int, y: int, msg: str, background_img_idx: int):
+    def show(self, x: int, y: int, msg: str, background_img_idx: int, keep_drawing: bool = False):
         self.img = background_img_idx
         self.coord.x = x
         self.coord.y = y
         self.hint_text_blink_ticker = self.game_handler.game_components.ticker.attach(30)
         self.msg = msg
         self.msg_width = len(msg) * pyxel.FONT_WIDTH
+        self.keep_drawing = keep_drawing
         self.active = True
     
     def hide(self):
@@ -56,12 +57,15 @@ class BlinkingTextHint(UIComponent):
     def _draw(self):
         if self.hint_text_blink_ticker and self.hint_text_blink_ticker.get():
             self.hint_text_blink_idx = not self.hint_text_blink_idx
+            self._draw_text() if not self.keep_drawing else None
+        self._draw_text() if self.keep_drawing else None
 
-            if self.hint_text_blink_idx:
-                pyxel.text(self.coord.x, self.coord.y, self.msg, pyxel.COLOR_WHITE)
-            else: 
-                # blit back of the text with the background image instead of constantly drawing everything (computationally cheaper)
-                pyxel.blt(self.coord.x, self.coord.y, self.img, self.coord.x, self.coord.y, self.msg_width, pyxel.FONT_HEIGHT)
+    def _draw_text(self):
+        if self.hint_text_blink_idx:
+            pyxel.text(self.coord.x, self.coord.y, self.msg, pyxel.COLOR_WHITE)
+        else: 
+            # blit back of the text with the background image instead of constantly drawing everything (computationally cheaper)
+            pyxel.blt(self.coord.x, self.coord.y, self.img, self.coord.x, self.coord.y, self.msg_width, pyxel.FONT_HEIGHT)
 
     def init_level(self):
         self.active = False

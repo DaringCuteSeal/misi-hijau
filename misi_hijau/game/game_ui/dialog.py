@@ -36,6 +36,7 @@ class Dialog(UIComponent):
         # XXX
         # iF WE HAVE ENOUGH TIME, implement center alignment.
 
+        self.game_handler = game_handler
         self.timer = game_handler.game_components.timer
         self.soundplayer = game_handler.game_components.soundplayer
         self.tmp_keyfunc = KeyFunc([pyxel.KEY_SPACE], self.hide, active=False)
@@ -50,11 +51,14 @@ class Dialog(UIComponent):
         self.show_dismiss_msg: bool = False
         self.dismiss_msg_col: int = 0
         self.dismiss_msg_str: str = ""
-
-        game_handler.game_components.keylistener.add("dialog_dismiss_btn", self.tmp_keyfunc)
-        game_handler.game_components.event_handler.add_handler(events.ShowDialog.name, self.show)
+        self.init_event_handlers()
 
         self.coord = UIComponentCoordinate(0, 0)
+
+    def init_event_handlers(self):
+        self.game_handler.game_components.keylistener.add("dialog_dismiss_btn", self.tmp_keyfunc)
+        self.game_handler.game_components.event_handler.add_handler(events.ShowDialog.name, self.show)
+        self.game_handler.game_components.event_handler.add_handler(events.FinishGame.name, self.hide)
     
     def show(self,
             message: str,

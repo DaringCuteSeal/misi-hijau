@@ -41,8 +41,7 @@ class InGameStoryline:
     def init_event_handlers(self):
         # Dialog
         self.event_handler.add_handler(events.StartGame.name, self.show_dialog_handler)
-        self.event_handler.add_handler(events.LevelNext.name, self.show_dialog_handler)
-        self.event_handler.add_handler(events.LevelNext.name, self.show_dialog_handler)
+        self.event_handler.add_handler(events.ShowLevelDialog.name, self.show_dialog_handler)
         self.event_handler.add_handler(events.LevelRestart.name, self._show_level_restart_dialog)
 
         # Level stats

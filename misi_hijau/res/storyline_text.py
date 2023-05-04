@@ -35,7 +35,7 @@ story_text = {
     ],
 
     "story_start_level_3": [
-        "Elemen kedua: Electricium. Terakhir, Electricium. Electricium adalah mineral yang sangat konduktif. Electricium dapat menghantarkan listrik 230 kali lebih efisien dari tembaga biasa. Electricium dapat menjadi bahan dasar dari kabel listrik yang dapat mengalirkan listrik dengan tegangan luar biasa. Kabel listrik Electricium dapat digunakan untuk membuat alat pendukung pembangkit listrik yang menggunakan mineral Nethonite dan Photosium."
+        "Elemen terakhir, Electricium. Electricium adalah mineral yang sangat konduktif. Electricium dapat menghantarkan listrik 230 kali lebih efisien dari tembaga biasa. Electricium dapat menjadi bahan dasar dari kabel listrik yang dapat mengalirkan listrik dengan tegangan luar biasa. Kabel listrik Electricium dapat digunakan untuk membuat alat pendukung pembangkit listrik yang menggunakan mineral Nethonite dan Photosium."
     ]
 
 }

@@ -36,10 +36,14 @@ class HealthBar(UIComponent):
     def __init__(self, game_handler: GameHandler):
         self.game_handler = game_handler
         self.active = False # UI components are instantiated during the very start of the game (since the intro; not the main game) so we deactivate it when this healthbar is instantiated.
+        self.init_event_handlers()
+        self.setup()
+
+    def init_event_handlers(self):
         self.game_handler.game_components.event_handler.add_handler(events.StartGame.name, lambda: self._alter_healthbar_visibility(True)) # show the healthbar on game start
         self.game_handler.game_components.event_handler.add_handler(events.StopGameLoop.name, lambda: self._alter_healthbar_visibility(False)) # hide healthbar when game loop is stopped
         self.game_handler.game_components.event_handler.add_handler(events.PlayerHealthChange.name, self.change_health_count)
-        self.setup()
+        self.game_handler.game_components.event_handler.add_handler(events.FinishGame.name, lambda: self._alter_healthbar_visibility(False))
     
     def setup(self):
         self.health_count = self.game_handler.levelhandler.get_curr_lvl().max_health
