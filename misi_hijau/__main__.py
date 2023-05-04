@@ -25,7 +25,7 @@ class App:
         Initialize game.
         """
         # Pyxel stuff
-        pyxel.init(WINDOW_WIDTH, WINDOW_HEIGHT, capture_scale=8, title="Misi Hijau", fps=30)
+        pyxel.init(WINDOW_WIDTH, WINDOW_HEIGHT, capture_scale=8, title="Misi Hijau", fps=30, quit_key=pyxel.KEY_NONE)
         startup_load_resources()
         
         self.game = Game()

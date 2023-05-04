@@ -19,11 +19,11 @@ from res.storyline_text import story_text
 
 from game.game_ui.blinking_text_hint import BLINKING_TEXT_HINT_TIMER_ID
 from core.game_handler import GameHandler
-from core.common import WINDOW_HEIGHT, KeyFunc, Sfx, SoundType
+from core.common import WINDOW_HEIGHT, WINDOW_WIDTH, KeyFunc, Sfx, SoundType
 from res.resources_load import INTRO_SLIDESHOW_IMAGE_PATH, SPLASH_SCREEN_IMAGE, INSTRUCTIONS_IMAGE_PATH, TEMP_IMG_BANK_IDX
 from .. import events
 
-class StorylinePlayer:
+class IntroPlayer:
     soundbank = {
         "music": Sfx(SoundType.MUSIC, 3, 0),
         "start_sfx": Sfx(SoundType.AUDIO, 0, 16),
@@ -47,13 +47,9 @@ class StorylinePlayer:
         self.slideshow_idx = 1
         self.set_keybindings()
 
-
     def set_keybindings(self):
-        self.keybindings = {
-            "slideshow_next": KeyFunc([pyxel.KEY_SPACE], lambda: self.game_handler.game_components.event_handler.trigger_event(events.SlideshowNext), active=False, repeat_time=3)
-        }
-
-        self.game_handler.game_components.keylistener.add(self.keybindings)
+        self.slideshow_next_keyfunc = KeyFunc([pyxel.KEY_SPACE], lambda: self.game_handler.game_components.event_handler.trigger_event(events.SlideshowNext), active=False, repeat_time=3)
+        self.game_handler.game_components.keylistener.add("slideshow_next", self.slideshow_next_keyfunc)
     
     ##################
     # Main functions #
@@ -61,7 +57,7 @@ class StorylinePlayer:
 
     def slide_intro(self):
         pyxel.image(TEMP_IMG_BANK_IDX).load(0, 0, SPLASH_SCREEN_IMAGE)
-        pyxel.blt(0, 0, TEMP_IMG_BANK_IDX, 0, 0, 256, 256)
+        pyxel.blt(0, 0, TEMP_IMG_BANK_IDX, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
         self.game_handler.game_components.timer.attach(4.8).when_over(self._show_slideshow_slide) # start slideshow after 5 seconds
         
     def _show_slideshow_slide(self):
@@ -120,7 +116,7 @@ class StorylinePlayer:
     ################
 
     def _alter_keylistener_state(self, state: bool):
-        self.keybindings["slideshow_next"].active = state
+        self.slideshow_next_keyfunc.active = state
 
     def slideshow_next_handler(self):
         if self.slideshow_idx < self.INTRO_SLIDESHOW_COUNT: # a normal slideshow

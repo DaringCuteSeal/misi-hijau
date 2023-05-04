@@ -17,6 +17,8 @@ Sprite base classes.
 """
 
 # Imports
+import pyxel
+
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
 from core import common
@@ -44,7 +46,7 @@ class Sprite(ABC):
     w: int = 8 # width
     h: int = 8 # height
     coord: SpriteCoordinate = SpriteCoordinate(-20, -20, -20, -20)
-    colkey: Optional[int]
+    colkey: Optional[int] = pyxel.COLOR_PURPLE
     keybindings: dict[str, common.KeyFunc] = {}
     statusbar_items: list[common.TextStatusbarItem | common.ProgressStatusbarItem] = []
     soundbank: dict[str, common.Sfx] = {}

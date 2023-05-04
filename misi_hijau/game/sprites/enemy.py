@@ -86,11 +86,30 @@ class EnemySquidge(EnemyEntity):
     v = 56
     health = 8
 
+    def __init__(self, x_map: float, y_map: float, level: Level):
+        self.coord = SpriteCoordinate(-20, -20, -20, -20)
+        self.coord.x_map = x_map
+        self.coord.y_map = y_map
+        self.level_height = tile_to_real(level.levelmap.level_height)
+        self.level_width = tile_to_real(level.levelmap.level_width)
+
     def update(self):
-        pass
+        self.coord.x_map += pyxel.rndf(-2, 2)
+        self.coord.y_map += pyxel.rndf(-2, 2)
+        if self.coord.x_map > self.level_width: 
+            self.coord.x_map = self.level_width - 2
+        if self.coord.x_map < 0:
+            self.coord.x_map = 0
+        if self.coord.y_map > self.level_height:
+            self.coord.y_map = self.level_height
 
 class EnemyHandler(SpriteHandler):
-    ENEMY_ICON = Icon(0, 0, 96, 8, 8)
+
+    enemies_icon = [
+        Icon(0, 16, 96, 8, 8),
+        Icon(0, 24, 96, 8, 8),
+        Icon(0, 16, 104, 8, 8)
+    ]
 
     def __init__(self, game_handler: GameHandler):
         self.game_handler = game_handler
@@ -98,7 +117,7 @@ class EnemyHandler(SpriteHandler):
         self.game_components = game_handler.game_components
         self.enemy_coordinates_list: list[tuple[int, int]] = []
         self.enemies: list[EnemyEntity] = []
-        self.enemies_hit_progressbar = ProgressStatusbarItem(2, 1, self.get_enemies_eliminated_count, pyxel.COLOR_WHITE, 0, 75, 10, self.ENEMY_ICON, "Alien", pyxel.COLOR_WHITE)
+        self.enemies_hit_progressbar = ProgressStatusbarItem(2, 1, self.get_enemies_eliminated_count, pyxel.COLOR_WHITE, 0, 75, 10, self.enemies_icon[0], "Alien", pyxel.COLOR_WHITE)
         self.setup()
         self._reset_progressbar()
 
@@ -112,6 +131,7 @@ class EnemyHandler(SpriteHandler):
         self.enemy_type = self.level.enemy_type
         self.enemies_eliminated = 0
         self.enemy_coordinates_list = self._generate_enemies_matrix()
+        self.enemies_hit_progressbar.icon = self.enemies_icon[self.level.idx - 1]
         self.spawn()
 
     def _reset_progressbar(self):
@@ -139,7 +159,8 @@ class EnemyHandler(SpriteHandler):
         Spawn all enemies based on the the tilemap. 
         """
         self.clear_enemies_spawnpoints()
-        [self._append_enemy(self.enemy_type, x + pyxel.rndf(-1, 1), y + pyxel.rndi(-1, 1)) for x, y in self.enemy_coordinates_list]
+        for x, y in self.enemy_coordinates_list:
+            self._append_enemy(self.enemy_type, x + pyxel.rndf(-1, 1), y + pyxel.rndf(-1, 1))
             
     def clear_enemies_spawnpoints(self):
         """
@@ -158,7 +179,7 @@ class EnemyHandler(SpriteHandler):
             case EnemyType.ENEMY_2:
                 enemy = EnemyPhong(x, y, self.level)
             case EnemyType.ENEMY_3:
-                enemy = EnemySquidge(x, y)
+                enemy = EnemySquidge(x, y, self.level)
         self.enemies.append(enemy)
 
     def update(self):

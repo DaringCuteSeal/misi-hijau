@@ -24,7 +24,7 @@ from dataclasses import dataclass
 
 from .common import (
     KeyFunc,
-    KeyTypes, 
+    KeyType, 
     SoundType, 
     Sfx, 
     Level, 
@@ -62,11 +62,11 @@ class KeyListener:
     def __init__(self):
         self.keys_to_check: list[dict[str, KeyFunc]] = []
 
-    def add(self, keyfunc_dict: dict[str, KeyFunc]):
+    def add(self, name: str, keyfunc: KeyFunc):
         """
-        Add a new dict of `KeyFunc`s.
+        Add a new `KeyFunc`s.
         """
-        self.keys_to_check.append(keyfunc_dict)
+        self.keys_to_check.append({name: keyfunc})
     
     def append(self, keyfunc_list: list[dict[str, KeyFunc]]):
         """
@@ -84,14 +84,14 @@ class KeyListener:
                     continue
 
                 match keyfunc.btn_type:
-                    case KeyTypes.BTN:
+                    case KeyType.BTN:
                         for key in keyfunc.binding:
                             if not pyxel.btn(key):
                                 continue
                             keyfunc.func()
                             break # don't execute another function if 2 keys (still same keyfunc) are pressed at the same time
 
-                    case KeyTypes.BTNP:
+                    case KeyType.BTNP:
                         for key in keyfunc.binding:
                             if not pyxel.btnp(key, hold=keyfunc.hold_time, repeat=keyfunc.repeat_time):
                                 continue

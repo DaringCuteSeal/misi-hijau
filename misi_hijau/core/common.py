@@ -71,7 +71,7 @@ class PowerUpType(Enum):
     SHIELD = 1
     SPEED_BOOST = 2
 
-class KeyTypes(Enum):
+class KeyType(Enum):
     BTN = 0
     BTNP = 1
 
@@ -82,7 +82,7 @@ class KeyFunc:
     """
     binding: list[int]
     func: Callable[[], Any]
-    btn_type: KeyTypes = KeyTypes.BTN
+    btn_type: KeyType = KeyType.BTN
     active: bool = True
     hold_time: Optional[int] = None
     repeat_time: Optional[int] = None
@@ -266,6 +266,7 @@ class TimerItem:
         """
         Check whether the timer is over.
         """
+        
         time_now = time()
         return time_now - self.start_timestamp > self.time_limit
 

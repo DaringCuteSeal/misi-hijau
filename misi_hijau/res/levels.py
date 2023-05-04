@@ -56,7 +56,7 @@ map_3 = LevelMap(map_3_x, map_3_y, map_3_width, map_3_height, [])
 levels: list[Level] = [
     Level(1, map_1, PlayerShipType.SHIP1, EnemyType.ENEMY_1, MineralType.MINERAL_1, pyxel.COLOR_LIME, pyxel.COLOR_LIME, pyxel.COLOR_LIGHT_BLUE, 14, 3),
     Level(2, map_2, PlayerShipType.SHIP2, EnemyType.ENEMY_2, MineralType.MINERAL_2, pyxel.COLOR_CYAN, pyxel.COLOR_RED, pyxel.COLOR_PINK, 20, 4),
-    Level(3, map_2, PlayerShipType.SHIP3, EnemyType.ENEMY_3, MineralType.MINERAL_3, pyxel.COLOR_GRAY, pyxel.COLOR_PINK, pyxel.COLOR_YELLOW, 35, 5) # ship doesn't have flame
+    Level(3, map_3, PlayerShipType.SHIP3, EnemyType.ENEMY_3, MineralType.MINERAL_3, pyxel.COLOR_GRAY, pyxel.COLOR_PINK, pyxel.COLOR_YELLOW, 35, 5) # ship doesn't have flame
 ]
 
 LEVELS_COUNT = len(levels)

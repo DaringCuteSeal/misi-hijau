@@ -15,7 +15,7 @@
 import pyxel
 import os
 
-from core.common import WINDOW_WIDTH, WINDOW_HEIGHT, KeyFunc, KeyTypes
+from core.common import WINDOW_WIDTH, WINDOW_HEIGHT, KeyFunc, KeyType
 from core.game_handler import GameHandler
 from game import events
 
@@ -35,8 +35,8 @@ class InGameStoryline:
         self.setup_level_stats_keyfunc()
 
     def setup_level_stats_keyfunc(self):
-        self.close_stats_keyfunc = KeyFunc([pyxel.KEY_SPACE], self.close_level_stats, KeyTypes.BTN, active=False)
-        self.game_handler.game_components.keylistener.add({"close_stats_keyfunc": self.close_stats_keyfunc})
+        self.close_stats_keyfunc = KeyFunc([pyxel.KEY_SPACE], self.close_level_stats, KeyType.BTN, active=False)
+        self.game_handler.game_components.keylistener.add("close_stats_keyfunc", self.close_stats_keyfunc)
     
     def init_event_handlers(self):
         # Dialog

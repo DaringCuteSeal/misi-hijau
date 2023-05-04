@@ -20,7 +20,6 @@ from core.common import MineralType, Sfx, SoundType, ProgressStatusbarItem, BLAN
 from game import events
 
 class MineralsHandler(TilemapBasedSprite):
-    MINERAL_ICON = Icon(0, 8, 96, 8, 8)
 
     costumes = {
         "mineral_1": (1, 2),
@@ -28,12 +27,18 @@ class MineralsHandler(TilemapBasedSprite):
         "mineral_3": (0, 3)
     }
 
+    minerals_icon = [
+        Icon(0, 8, 96, 8, 8),
+        Icon(0, 0, 104, 8, 8),
+        Icon(0, 8, 104, 8, 8)
+    ]
+
     soundbank = {
         "mineral_increment": Sfx(SoundType.AUDIO, 1, 12)
     }
 
     def __init__(self, game_handler: GameHandler):
-        self.minerals_progressbar = ProgressStatusbarItem(1, 0, self.get_minerals_count, pyxel.COLOR_WHITE, 0, 75, 10, self.MINERAL_ICON, "Mineral", pyxel.COLOR_WHITE)
+        self.minerals_progressbar = ProgressStatusbarItem(1, 0, self.get_minerals_count, pyxel.COLOR_WHITE, 0, 75, 10, self.minerals_icon[0], "Mineral", pyxel.COLOR_WHITE)
 
         self.statusbar_items = [
             self.minerals_progressbar
@@ -47,9 +52,9 @@ class MineralsHandler(TilemapBasedSprite):
     
     def setup(self):
         self.collected_minerals = 0
-
-        self.game_handler.game_components.event_handler.trigger_event(events.UpdateStatusbar)
         self.level = self.game_handler.levelhandler.get_curr_lvl()
+        self.minerals_progressbar.icon = self.minerals_icon[self.level.idx - 1]
+        self.game_handler.game_components.event_handler.trigger_event(events.UpdateStatusbar)
         mineral_type = self.level.mineral_type
         match mineral_type:
             case MineralType.MINERAL_1:

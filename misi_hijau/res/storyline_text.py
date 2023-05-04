@@ -31,11 +31,11 @@ story_text = {
     ],
 
     "story_start_level_2": [
-        "Elemen kedua: Photosium."
+        "Elemen kedua: Photosium. Photosium dapat menyerap photon (partikel cahaya) dengan sangat baik dan efisien sehingga cocok sebagai bahan dasar pembangkit listrik tenaga surya di Bumi maupun Bola Dyson. Mineral ini dapat ditemukan di sebuah planet kerdil berwarna hijau di sabuk kuiper."
     ],
 
     "story_start_level_3": [
-        "Elemen kedua: Electricium."
+        "Elemen kedua: Electricium. Terakhir, Electricium. Electricium adalah mineral yang sangat konduktif. Electricium dapat menghantarkan listrik 230 kali lebih efisien dari tembaga biasa. Electricium dapat menjadi bahan dasar dari kabel listrik yang dapat mengalirkan listrik dengan tegangan luar biasa. Kabel listrik Electricium dapat digunakan untuk membuat alat pendukung pembangkit listrik yang menggunakan mineral Nethonite dan Photosium."
     ]
 
 }

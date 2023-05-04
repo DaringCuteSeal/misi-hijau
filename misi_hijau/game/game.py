@@ -20,6 +20,8 @@ import pyxel
 
 from . import events
 
+from core.common import KeyFunc
+
 from core import components
 from core.game_handler import GameComponents, GameHandler
 
@@ -27,7 +29,8 @@ from res.sprites import SpritesFactory
 from res.ui import UIComponentFactory
 from res.levels import levels, LEVELS_COUNT
 
-from game.storyline.intro import StorylinePlayer
+from game.storyline.intro import IntroPlayer
+from game.storyline.outro import OutroPlayer
 from game.storyline.story_dialogs import InGameStoryline
 
 class Game():
@@ -45,14 +48,20 @@ class Game():
 
         self._init_event_handlers() # add event handlers
         self.ui_stars = None # stars are separated from the other UI components so it can be drawn first
-        self.init_ui()
-        self._start_intro_slideshow()
-        self._init_story_dialog()
+        self.init_ui() # initialize UI components directly
+        self._start_intro_slideshow() # start intro
+        self._init_story_dialog() # instantiate ingame storyline
+        
+        # debugging
+        self.attach_debug_key()
 
     def _start_intro_slideshow(self):
         self.game_handler.callable_draw = self.ui_only_draw
-        self.storyline_player = StorylinePlayer(self.game_handler)
-        self.storyline_player.slide_intro()
+        self.intro_player = IntroPlayer(self.game_handler)
+        self.intro_player.slide_intro()
+    
+    def _start_outro_slide(self):
+        self.outro_player = OutroPlayer(self.game_handler)
     
     def _init_story_dialog(self):
         self.story_dialog = InGameStoryline(self.game_handler)
@@ -60,7 +69,7 @@ class Game():
     def _init_event_handlers(self):
         self.game_handler.game_components.event_handler.add_handler(events.UpdateStatusbar.name, self.update_statusbar)
         self.game_handler.game_components.event_handler.add_handler(events.LevelRestart.name, self.level_restart)
-        self.game_handler.game_components.event_handler.add_handler(events.LevelNext.name, self.level_next)
+        self.game_handler.game_components.event_handler.add_handler(events.LevelNext.name, self.increment_level)
         self.game_handler.game_components.event_handler.add_handler(events.StartGame.name, self.start_game)
         self.game_handler.game_components.event_handler.add_handler(events.StopGameLoop.name, self.stop_game_loop)
         self.game_handler.game_components.event_handler.add_handler(events.ResumeGameLoop.name, self.resume_game_loop)
@@ -88,7 +97,7 @@ class Game():
         level_handler = components.LevelHandler(levels)
         self.game_handler = GameHandler(level_handler, game_components)
         self.game_handler.levelhandler.set_lvl_by_idx(1)
-
+   
     #########
     # Loops #
     #########
@@ -169,22 +178,22 @@ class Game():
         self.game_handler.game_components.game_ui.restart_level()
         self.game_handler.game_components.statusbar.update() # make sure the new item values show up
 
-    def level_next(self):
+    def setup_next_level(self):
         self.game_handler.set_callable_draw(self.game_loop_draw)
-        self._increment_level()
-
         self.game_handler.game_components.game_sprites.init_level()
         self.game_handler.game_components.game_ui.init_level()
         self.game_handler.game_components.statusbar.update() # make sure the new item values show up
     
-    def _increment_level(self):
+    def increment_level(self):
         curr_level = self.game_handler.levelhandler.get_curr_lvl_idx()
 
         if curr_level == LEVELS_COUNT:
             self.game_handler.game_components.event_handler.trigger_event(events.FinishGame)
+            self._start_outro_slide()
             return
 
         self.game_handler.levelhandler.set_lvl_by_idx(curr_level + 1)
+        self.setup_next_level()
 
     def start_game(self):
         self.init_sprites()
@@ -214,3 +223,13 @@ class Game():
         Call the game_handler.callable_update method.
         """
         self.game_handler.update()
+
+    #############
+    # Debugging #
+    #############
+ 
+    def attach_debug_key(self):
+        self.game_handler.game_components.keylistener.add("debug_key", KeyFunc([pyxel.KEY_BACKSPACE], self._debug_show_level_stats, hold_time=10, repeat_time=10))
+    
+    def _debug_show_level_stats(self):
+        self.game_handler.game_components.event_handler.trigger_event(events.LevelNext)

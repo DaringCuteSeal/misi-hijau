@@ -51,7 +51,7 @@ class Dialog(UIComponent):
         self.dismiss_msg_col: int = 0
         self.dismiss_msg_str: str = ""
 
-        game_handler.game_components.keylistener.add({"dialog_dismiss_btn": self.tmp_keyfunc})
+        game_handler.game_components.keylistener.add("dialog_dismiss_btn", self.tmp_keyfunc)
         game_handler.game_components.event_handler.add_handler(events.ShowDialog.name, self.show)
 
         self.coord = UIComponentCoordinate(0, 0)
