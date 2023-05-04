@@ -85,7 +85,7 @@ class Player(Sprite):
 
 
     soundbank = {
-        "attacked": Sfx(SoundType.AUDIO, 0, 14)
+        "attacked": Sfx(SoundType.AUDIO, 0, 14),
     }
 
     costumes = {
@@ -291,26 +291,26 @@ class Player(Sprite):
                 return True
         return False
 
-    def restart_handler(self):
+    def restart_state(self):
         self.coord.x_map = self.level_width // 2
         self.coord.y_map = self.level_height - tile_to_real(4)
         self.x_vel = 0
         self.y_vel = 0
         self.game.game_components.event_handler.trigger_event(events.PlayerHealthChange(self.level.max_health))
         self.health = self.level.max_health
-
   
 class PlayerHandler(SpriteHandler):
+    soundbank = {
+        "shoot": Sfx(SoundType.AUDIO, 0, 10),
+        "restart": Sfx(SoundType.AUDIO, 0, 15)
+    }
 
     def __init__(self, game_handler: GameHandler):
         self.game_handler = game_handler
-        self.game_handler.game_components.event_handler.add_handler(events.ActivateLevel.name, lambda: self._tweak_player_keys_state(True))
+        self.game_handler.game_components.event_handler.add_handler(events.ActivateLevel.name, lambda: self._alter_player_keys_state(True))
         self.player = Player(self.game_handler)
         self.setup()
 
-        self.soundbank = {
-            "shoot": Sfx(SoundType.AUDIO, 0, 10),
-        }
         self.keybindings = {
             "player_right": KeyFunc([pyxel.KEY_RIGHT, pyxel.KEY_D], lambda: self.player.move_handler(Direction.RIGHT), active=False),
             "player_left": KeyFunc([pyxel.KEY_LEFT, pyxel.KEY_A], lambda: self.player.move_handler(Direction.LEFT), active=False),
@@ -322,12 +322,12 @@ class PlayerHandler(SpriteHandler):
             TextStatusbarItem(100, self.get_player_speed, pyxel.COLOR_YELLOW),
         ]
 
-    def _tweak_player_keys_state(self, state: bool):
+    def _alter_player_keys_state(self, state: bool):
         for key in self.keybindings.values():
             key.active = state
 
     def setup(self):
-        self._tweak_player_keys_state(False)
+        self._alter_player_keys_state(False)
         level = self.game_handler.levelhandler.get_curr_lvl()
 
         if level.idx == 3:
@@ -353,15 +353,13 @@ class PlayerHandler(SpriteHandler):
         self.player.player_setup()
 
     def restart_level(self):
-        self.player.restart_handler()
+        self.player.restart_state()
+        self.game_handler.game_components.soundplayer.play(self.soundbank["restart"])
+        self._alter_player_keys_state(False)
     
     def shoot_handler(self):
         self.game_handler.game_components.event_handler.trigger_event(events.PlayerShootBullets(self.player.coord.x_map, self.player.coord.y_map))
         self.game_handler.game_components.soundplayer.play(self.soundbank["shoot"])
-
-    def enable_keybinds(self):
-        for key in self.keybindings.values():
-            key.active = True
 
     # Functions for statusbar
     def get_player_speed(self) -> str:

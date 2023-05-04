@@ -25,7 +25,7 @@ from core.game_handler import GameComponents, GameHandler
 
 from res.sprites import SpritesFactory
 from res.ui import UIComponentFactory
-from res.levels import levels
+from res.levels import levels, LEVELS_COUNT
 
 from game.storyline.intro import StorylinePlayer
 from game.storyline.story_dialogs import InGameStoryline
@@ -170,7 +170,7 @@ class Game():
         self.game_handler.game_components.statusbar.update() # make sure the new item values show up
 
     def level_next(self):
-        self.callable_draw = self.game_loop_draw
+        self.game_handler.set_callable_draw(self.game_loop_draw)
         self._increment_level()
 
         self.game_handler.game_components.game_sprites.init_level()
@@ -179,6 +179,11 @@ class Game():
     
     def _increment_level(self):
         curr_level = self.game_handler.levelhandler.get_curr_lvl_idx()
+
+        if curr_level == LEVELS_COUNT:
+            self.game_handler.game_components.event_handler.trigger_event(events.FinishGame)
+            return
+
         self.game_handler.levelhandler.set_lvl_by_idx(curr_level + 1)
 
     def start_game(self):
@@ -193,7 +198,6 @@ class Game():
     def stop_game_loop(self):
         self.game_handler.set_callable_draw(self.ui_only_draw)
         self.game_handler.set_callable_update(None)
-
 
     #############################
     # Draw and update functions #

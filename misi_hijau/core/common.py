@@ -21,6 +21,7 @@ Common constants and classes.
 # (only the components depend DIRECTLY to this file)
 # although that could introduce unsafe code with hidden dependency?
 # let's figure out later
+# nvm, you can just pass values to components and then the component is gonna construct the classes from this file
 
 import pyxel
 from dataclasses import dataclass

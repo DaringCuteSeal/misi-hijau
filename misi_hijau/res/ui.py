@@ -1,4 +1,4 @@
-from game.game_ui import healthbar, stars, dialog, blinking_text_hint
+from game.game_ui import healthbar, stars, dialog, blinking_text_hint, text_engine
 from core.game_handler import GameHandler
 from core.game_ui_classes import UIComponent
 
@@ -15,7 +15,8 @@ class UIComponentFactory:
         ui_components: dict[str, UIComponent] = {
             "healthbar": healthbar.HealthBar(self.game_handler),
             "dialog": dialog.Dialog(self.game_handler),
-            "blinking_text_hint": blinking_text_hint.BlinkingTextHint(self.game_handler)
+            "blinking_text_hint": blinking_text_hint.BlinkingTextHint(self.game_handler),
+            "text_engine": text_engine.TextEngine(self.game_handler)
         }
         return ui_components
     

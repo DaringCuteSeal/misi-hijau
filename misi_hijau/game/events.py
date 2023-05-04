@@ -123,14 +123,37 @@ class ShowBlinkingTextHint(Event):
 
 HideBlinkingTextHint = Event("hide_blinking_text_hint")
 
+class TextEngineAnimateText(Event):
+    name = "animate_text"
+    def __init__(self,
+                 string: str,
+                 x: int,
+                 y: int,
+                 function_when_done: Optional[Callable[..., None]] = None,
+                 sfx: bool = False,
+                 speed: float = 0.03,
+                 color: int = pyxel.COLOR_WHITE
+                 ):
+
+        self.data = {
+            "string": string,
+            "x": x,
+            "y": y,
+            "function_when_done": function_when_done,
+            "sfx": sfx,
+            "speed": speed,
+            "color": color
+        }
+         
+
 class ShowDialog(Event):
     name = "show_dialog"
     def __init__(self,
                  message: str,
                  width: int,
-                 text_gap: int,
                  text_color: int,
                  bg_color: int,
+                 text_gap: int,
                  function_when_done: Optional[Callable[..., Any]] = None,
                  key_dismiss: int = pyxel.KEY_SPACE,
                  sfx: bool = False,
@@ -167,3 +190,4 @@ ActivateLevel = Event("activate_level") # activate keybinds or other things in l
 ShowLevelStats = Event("show_level_stats") # show level stats (after finishing a level)
 StopGameLoop = Event("stop_game_loop") # change the game's draw call to UI components-only draw loop
 ResumeGameLoop = Event("resume_game_loop") # change the game's update and draw call to the actual game loop
+FinishGame = Event("finish_game")

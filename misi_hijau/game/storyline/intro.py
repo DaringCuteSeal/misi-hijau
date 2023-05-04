@@ -21,7 +21,6 @@ from game.game_ui.blinking_text_hint import BLINKING_TEXT_HINT_TIMER_ID
 from core.game_handler import GameHandler
 from core.common import WINDOW_HEIGHT, KeyFunc, Sfx, SoundType
 from res.resources_load import INTRO_SLIDESHOW_IMAGE_PATH, SPLASH_SCREEN_IMAGE, INSTRUCTIONS_IMAGE_PATH, TEMP_IMG_BANK_IDX
-from .components.text_engine import TextEngine
 from .. import events
 
 class StorylinePlayer:
@@ -42,16 +41,10 @@ class StorylinePlayer:
     def __init__(self, game_handler: GameHandler):
         self.game_handler = game_handler
         game_components = self.game_handler.game_components
-
-        self.textengine = TextEngine(game_components)
-
         game_components.soundplayer.play(self.soundbank["music"], loop=True)
         game_components.event_handler.add_handler(events.SlideshowNext.name, self.slideshow_next_handler)
-
         self.hint_text_blink_idx = False
-
         self.slideshow_idx = 1
-
         self.set_keybindings()
 
 
@@ -78,7 +71,17 @@ class StorylinePlayer:
         self._draw_background()
         self._play_slide_sfx()
 
-        self.textengine.animate_text(self.string_collection["intro"][self.slideshow_idx - 1], self.TEXTENGINE_BORDER, self.TEXTENGINE_BORDER, lambda: self.game_handler.game_components.timer.attach(1).when_over(self.enable_spacebar_hint), sfx=True, speed=0.02, color=pyxel.COLOR_WHITE)
+        self.game_handler.game_components.event_handler.trigger_event(
+            events.TextEngineAnimateText(
+            self.string_collection["intro"][self.slideshow_idx - 1],
+            self.TEXTENGINE_BORDER,
+            self.TEXTENGINE_BORDER,
+            lambda: self.game_handler.game_components.timer.attach(1).when_over(self.enable_spacebar_hint),
+            sfx=True,
+            speed=0.02,
+            color=pyxel.COLOR_WHITE
+            )
+        )
 
     def enable_spacebar_hint(self):
         self.game_handler.game_components.event_handler.trigger_event(events.ShowBlinkingTextHint(self.SLIDESHOW_WAIT_HINT_COORD[0], self.SLIDESHOW_WAIT_HINT_COORD[1], self.SLIDESHOW_WAIT_HINT_STRING, 1))

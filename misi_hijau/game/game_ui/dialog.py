@@ -33,6 +33,9 @@ class Dialog(UIComponent):
     DISMISS_MSG_GAP = 5
 
     def __init__(self, game_handler: GameHandler):
+        # XXX
+        # iF WE HAVE ENOUGH TIME, implement center alignment.
+
         self.timer = game_handler.game_components.timer
         self.soundplayer = game_handler.game_components.soundplayer
         self.tmp_keyfunc = KeyFunc([pyxel.KEY_SPACE], self.hide, active=False)
@@ -67,9 +70,9 @@ class Dialog(UIComponent):
             dismiss_msg_str: str = "UNDEFINED" # too lazy to write name for every pyxel key
             ) -> None:
         """
-        Show a pop-up dialog with text. The width can be specified; while the height is calculated automatically.
+        Show a pop-up dialog with text. The width can be specified; while the height is calculated automatically. *Only works properly when the screen is constantly being updated!*
 
-        Note: you must pass `dismiss_msg_str` argument if `show_dismiss_msg` is enabled or else, the message would show as UNDEFINED.
+        Note: you must pass `dismiss_msg_str` argument if `show_dismiss_msg` is enabled or else, the message will show as UNDEFINED.
         """
         
         self.tmp_keyfunc.binding = [key_dismiss]
@@ -90,8 +93,8 @@ class Dialog(UIComponent):
 
         self.active = True
 
-    def _calculate_dialog_size(self, w: int, message: str):
-        self.w = w + self.text_gap * 2
+    def _calculate_dialog_size(self, width: int, message: str):
+        self.w = width
         self.message = self._wrap_string(message)
 
         self.message_rows_count = len(self.message.splitlines())
@@ -124,10 +127,9 @@ class Dialog(UIComponent):
         self.tmp_keyfunc.active = state
 
     def _draw_text(self):
-        # x + message_len × font width + x = dialog width
-        # we can then find the position (x) like this:
-        base_x = self.coord.x + (self.w - (self.message_len * pyxel.FONT_WIDTH))/2
-
+        # coord.x + gap + message_len × font width + gap = dialog width
+        # we can then find the position (x +) like this:
+        base_x = self.coord.x + (self.w - self.message_len*pyxel.FONT_WIDTH) // 2
         base_y = self.coord.y + self.text_gap
 
         pyxel.text(base_x, base_y, self.message, self.text_color)
@@ -145,7 +147,7 @@ class Dialog(UIComponent):
         current_line: str = ''
 
         for word in words:
-            if (len(current_line + word) + 1) * pyxel.FONT_WIDTH + self.coord.x + self.text_gap * 2 > self.w:
+            if self.coord.x + (len(current_line + word) * pyxel.FONT_WIDTH) + (self.text_gap * 2) > self.w:
                 lines.append(current_line.strip())
                 current_line = ''
             current_line += word + ' '

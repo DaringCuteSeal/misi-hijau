@@ -32,7 +32,6 @@ class InGameStoryline:
         self.event_handler = game_handler.game_components.event_handler
         self.timer = game_handler.game_components.timer
         self.init_event_handlers()
-
         self.setup_level_stats_keyfunc()
 
     def setup_level_stats_keyfunc(self):
@@ -40,8 +39,13 @@ class InGameStoryline:
         self.game_handler.game_components.keylistener.add({"close_stats_keyfunc": self.close_stats_keyfunc})
     
     def init_event_handlers(self):
+        # Dialog
         self.event_handler.add_handler(events.StartGame.name, self.show_dialog_handler)
         self.event_handler.add_handler(events.LevelNext.name, self.show_dialog_handler)
+        self.event_handler.add_handler(events.LevelNext.name, self.show_dialog_handler)
+        self.event_handler.add_handler(events.LevelRestart.name, self._show_level_restart_dialog)
+
+        # Level stats
         self.event_handler.add_handler(events.ShowLevelStats.name, self.show_level_stats_handler)
         self.event_handler.add_handler(events.BroadcastEnemiesCount.name, self.save_enemies_count)
 
@@ -64,15 +68,32 @@ class InGameStoryline:
             events.ShowDialog(
                 self.dialog_strings[level_idx],
                 self.DIALOG_WIDTH,
-                5,
                 pyxel.COLOR_WHITE,
                 pyxel.COLOR_BROWN,
+                5,
                 lambda: self.event_handler.trigger_event(events.ActivateLevel),
                 pyxel.KEY_Q,
-                True,
+                sfx=True,
                 show_dismiss_msg=True,
                 dismiss_msg_col= pyxel.COLOR_YELLOW,
                 dismiss_msg_str="q untuk abaikan dan mulai.."
+            )
+        )
+    
+    def _show_level_restart_dialog(self):
+        self.event_handler.trigger_event(
+            events.ShowDialog(
+                "Pesawat ruang angkasamu hancur, levelmu telah diulang!",
+                self.DIALOG_WIDTH,
+                pyxel.COLOR_WHITE,
+                pyxel.COLOR_NAVY,
+                5,
+                lambda: self.event_handler.trigger_event(events.ActivateLevel),
+                pyxel.KEY_Q,
+                sfx=False,
+                show_dismiss_msg=True,
+                dismiss_msg_col=pyxel.COLOR_YELLOW,
+                dismiss_msg_str="q untuk abaikan dan mulai kembali..",
             )
         )
     

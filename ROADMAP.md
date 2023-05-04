@@ -68,7 +68,7 @@ IDEAS
 - [ ] Reimplement colors to a managable `Color` class so we can have better type checking
 
 # Storyline
-Manusia kemungkinan besar akan berhasil menjadi makhluk pertama yang dapat pergi ke galaksi lain dan benar-benar menjadi penguasa alam ini. 100 taun yang lalu, seluruh negara di bumi bergabung dalam ISRP (*Interntional Space Research Project*), organisasi raksasa yang akan melakukan banyak penelitian terhadap dunia luar angkasa.
+Manusia kemungkinan besar akan berhasil menjadi makhluk pertama yang dapat pergi ke galaksi lain dan benar-benar menjadi penguasa alam ini. 100 tahun yang lalu, seluruh negara di bumi bergabung dalam ISRP (*Interntional Space Research Project*), organisasi raksasa yang akan melakukan banyak penelitian terhadap dunia luar angkasa.
 
 🛰️
 
