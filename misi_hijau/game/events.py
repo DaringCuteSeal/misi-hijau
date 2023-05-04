@@ -164,4 +164,6 @@ StartGame = Event("start_game") # start game
 LevelRestart = Event("restart_level") # restart level
 LevelNext = Event("level_next") # switch to next level
 ActivateLevel = Event("activate_level") # activate keybinds or other things in level
-ShowLevelStats = Event("show_level_stats")
+ShowLevelStats = Event("show_level_stats") # show level stats (after finishing a level)
+StopGameLoop = Event("stop_game_loop") # change the game's draw call to UI components-only draw loop
+ResumeGameLoop = Event("resume_game_loop") # change the game's update and draw call to the actual game loop

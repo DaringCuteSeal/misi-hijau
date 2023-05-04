@@ -15,7 +15,8 @@
 """
 Common utilities.
 """
-import math
+
+import math # don't use pyxel's sqrt beacuse it returns denormalized number (pyxel.sqrt(0) returns max possible value of int)
 import pyxel
 
 # Tick handling
@@ -72,10 +73,13 @@ def round_to_tile(size: float) -> int:
     return pyxel.ceil(size / pyxel.TILE_SIZE) * pyxel.TILE_SIZE
 
 def hypotenuse(a: int | float, b: int | float) -> float:
-    "get the hypotenuse of a triangle, given that A and B are the sides."
-
+    """
+    Get the hypotenuse of a triangle, given that A and B are the sides.
+    """
     return math.sqrt(a**2+b**2)
 
 def reverse_hypotenuse(c: int | float, a: int | float) -> float:
-    "get one missing side of a traingle, given the hypotenuse and one other side."
+    """
+    Get one missing side of a triangle, given the hypotenuse and one other side.
+    """
     return math.sqrt(c**2-a**2)

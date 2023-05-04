@@ -18,17 +18,13 @@ import os
 from core.common import WINDOW_WIDTH, WINDOW_HEIGHT, KeyFunc, KeyTypes
 from core.game_handler import GameHandler
 from game import events
+
 from res.storyline_text import story_text
 from res.resources_load import LEVEL_STATS_IMAGE_PATH, TEMP_IMG_BANK_IDX
 
 class InGameStoryline:
-    DIALOG_WIDTH = 200
 
-    dialog_strings: list[str] = [
-        story_text["story_start_level_1"][0],
-        story_text["story_start_level_2"][0],
-        story_text["story_start_level_3"][0]
-    ]
+    DIALOG_WIDTH = 200
 
     def __init__(self, game_handler: GameHandler):
         self.game_handler = game_handler
@@ -37,7 +33,11 @@ class InGameStoryline:
         self.timer = game_handler.game_components.timer
         self.init_event_handlers()
 
-        self.close_stats_keyfunc = KeyFunc([pyxel.KEY_SPACE], self._close_level_stats, KeyTypes.BTN, active=False)
+        self.setup_level_stats_keyfunc()
+
+    def setup_level_stats_keyfunc(self):
+        self.close_stats_keyfunc = KeyFunc([pyxel.KEY_SPACE], self.close_level_stats, KeyTypes.BTN, active=False)
+        self.game_handler.game_components.keylistener.add({"close_stats_keyfunc": self.close_stats_keyfunc})
     
     def init_event_handlers(self):
         self.event_handler.add_handler(events.StartGame.name, self.show_dialog_handler)
@@ -48,6 +48,12 @@ class InGameStoryline:
     ##########
     # Dialog #
     ##########
+
+    dialog_strings: list[str] = [
+        story_text["story_start_level_1"][0],
+        story_text["story_start_level_2"][0],
+        story_text["story_start_level_3"][0]
+    ]
 
     def show_dialog_handler(self):
         curr_level_idx = self.level_handler.get_curr_lvl().idx - 1
@@ -82,18 +88,22 @@ class InGameStoryline:
     MINERALS_STATS_COORD = (152, 124)
 
     def show_level_stats_handler(self):
+        self._disable_callable_draw()
+
         curr_level_idx = self.level_handler.get_curr_lvl().idx
-        self.timer.attach(2).when_over(lambda: self._alter_keylistener_state(True))
+        self.timer.attach(2).when_over(lambda: self.alter_keylistener_state(True))
         self.timer.attach(2).when_over(self._show_blinking_text_hint)
-        self.game_handler.callable_draw = None # stop drawing the game loop for a while
         self._load_draw_level_stats_background(curr_level_idx)
         self._get_minerals_count()
         self._draw_stats_text()
 
+    def _disable_callable_draw(self):
+        self.game_handler.game_components.event_handler.trigger_event(events.StopGameLoop)
+
     def _show_blinking_text_hint(self):
         self.event_handler.trigger_event(events.ShowBlinkingTextHint(self.HINT_TEXT_COORD[0], self.HINT_TEXT_COORD[1], self.HINT_TEXT_STRING, TEMP_IMG_BANK_IDX))
 
-    def _alter_keylistener_state(self, state: bool):
+    def alter_keylistener_state(self, state: bool):
         self.close_stats_keyfunc.active = state
 
     def _draw_stats_text(self):
@@ -115,12 +125,13 @@ class InGameStoryline:
         return f"Kamu memusnahkan\n   {self.enemies_count:>3} alien" # lazy to do the math ^_^
     
     def _get_minerals_stats_str(self) -> str:
-        return f"Kamu mengumpulkan\n   {self.minerals_count:>3} mineral" # still lazy to do the math ^w^
+        return f"Kamu mengumpulkan\n  {self.minerals_count:>3} mineral" # still lazy to do the math ^w^
 
-    def _close_level_stats(self):
+    def close_level_stats(self):
         self.event_handler.trigger_event(events.HideBlinkingTextHint)
         self.event_handler.trigger_event(events.LevelNext)
-        self._alter_keylistener_state(False)
+        self.game_handler.game_components.event_handler.trigger_event(events.ResumeGameLoop)
+        self.alter_keylistener_state(False)
 
     def _load_draw_level_stats_background(self, idx: int):
         pyxel.image(TEMP_IMG_BANK_IDX).load(0, 0, os.path.join(LEVEL_STATS_IMAGE_PATH, f"{idx}.png"))

@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Callable
+"""
+Game loop handler.
+"""
+
 import pyxel
 
 from . import events
@@ -38,23 +41,16 @@ class Game():
         """
         game_components = self.init_game_components()
 
-        self.init_game_handler(game_components)
+        self.init_game_handler(game_components) # set up game handler
 
-        # Add event handler
-        self._init_event_handlers()
-
-        # Debugging
-        # self.debugger = Debugger(self.spr_player, self.game_handler.game_components)
-
+        self._init_event_handlers() # add event handlers
         self.ui_stars = None # stars are separated from the other UI components so it can be drawn first
         self.init_ui()
-
         self._start_intro_slideshow()
-
         self._init_story_dialog()
 
     def _start_intro_slideshow(self):
-        self.game_handler.callable_draw = self.intro_loop_draw
+        self.game_handler.callable_draw = self.ui_only_draw
         self.storyline_player = StorylinePlayer(self.game_handler)
         self.storyline_player.slide_intro()
     
@@ -66,6 +62,8 @@ class Game():
         self.game_handler.game_components.event_handler.add_handler(events.LevelRestart.name, self.level_restart)
         self.game_handler.game_components.event_handler.add_handler(events.LevelNext.name, self.level_next)
         self.game_handler.game_components.event_handler.add_handler(events.StartGame.name, self.start_game)
+        self.game_handler.game_components.event_handler.add_handler(events.StopGameLoop.name, self.stop_game_loop)
+        self.game_handler.game_components.event_handler.add_handler(events.ResumeGameLoop.name, self.resume_game_loop)
 
     def init_game_components(self):
         """
@@ -88,31 +86,28 @@ class Game():
         Set up the main game handler.
         """
         level_handler = components.LevelHandler(levels)
-        self.game_handler = GameHandler(level_handler, game_components, None)
+        self.game_handler = GameHandler(level_handler, game_components)
         self.game_handler.levelhandler.set_lvl_by_idx(1)
 
     #########
     # Loops #
     #########
 
-    def update(self):
+    def game_loop_update(self):
         """
-        Update game state.
+        Game scene update loop.
         """
         self.game_handler.game_components.game_sprites.update()
-        self.game_handler.game_components.keylistener.check()
-        self.game_handler.game_components.ticker.update()
-        self.game_handler.game_components.timer.update()
     
-    def draw(self):
-        self.game_handler.callable_draw() if self.game_handler.callable_draw else None
-
-    def intro_loop_draw(self):
+    def ui_only_draw(self):
+        """
+        UI components-only draw loop.
+        """
         self.game_handler.game_components.game_ui.draw()
 
     def game_loop_draw(self):
         """
-        Draw game scene.
+        Game scene draw loop.
         """
         # Draw the black background to prevent ghosting effect
         pyxel.cls(pyxel.COLOR_BLACK)
@@ -189,6 +184,29 @@ class Game():
     def start_game(self):
         self.init_sprites()
         self.game_handler.callable_draw = self.game_loop_draw
+        self.game_handler.callable_update = self.game_loop_update
+    
+    def resume_game_loop(self):
+        self.game_handler.set_callable_draw(self.game_loop_draw)
+        self.game_handler.set_callable_update(self.game_loop_update)
+    
+    def stop_game_loop(self):
+        self.game_handler.set_callable_draw(self.ui_only_draw)
+        self.game_handler.set_callable_update(None)
 
-        # Force to hide; there's a weird bug where the blinking text just doesn't hide when you skip through slideshows very quickly
-        self.game_handler.game_components.event_handler.trigger_event(events.HideBlinkingTextHint)
+
+    #############################
+    # Draw and update functions #
+    #############################
+
+    def draw(self):
+        """
+        Call the game_handler.callable_draw method.
+        """
+        self.game_handler.draw()
+
+    def update(self):
+        """
+        Call the game_handler.callable_update method.
+        """
+        self.game_handler.update()

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-Game handler which holds game components.
+Game handler which holds game components and a level handler.
 """
 
 from dataclasses import dataclass
@@ -54,4 +54,36 @@ class GameHandler:
     """
     levelhandler: LevelHandler
     game_components: GameComponents
-    callable_draw: Optional[Callable[..., None]]
+
+    # We have different loops for draw() and update() and they are dynamically settable.
+    # This is useful so we can safe resource and organize game "scenes".
+    # For example, we don't need to draw the (actual) game and update its state when we are just showing our intro to the player.
+    callable_draw: Optional[Callable[[], None]] = None
+    callable_update: Optional[Callable[[], None]] = None
+
+    def set_callable_draw(self, loop: Callable[[], None] | None):
+        self.callable_draw = loop
+
+    def set_callable_update(self, loop: Callable[[], None] | None):
+        self.callable_update = loop
+
+    def draw(self):
+        """
+        Draw game scene.
+        """
+        self.callable_draw() if self.callable_draw else None
+    
+    def _core_update_loop(self):
+        """
+        Update important components.
+        """
+        self.game_components.keylistener.check()
+        self.game_components.ticker.update()
+        self.game_components.timer.update()
+
+    def update(self):
+        """
+        Update game state.
+        """
+        self._core_update_loop()
+        self.callable_update() if self.callable_update else None

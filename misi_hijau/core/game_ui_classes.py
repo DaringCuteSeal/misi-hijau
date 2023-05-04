@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""
+Game UI Components base classes.
+"""
 # Imports
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod

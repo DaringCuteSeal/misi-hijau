@@ -34,14 +34,6 @@ class App:
         print("Selamat datang di Misi Hijau!")
         pyxel.run(self.update, self.draw)
 
-
-    def setup(self):
-        """
-        Setup initial scene.
-        Anything that initializes the program and only run once should be put on game.__init__ instead.
-        """
-        pass
-
     def update(self):
         """
         Update the state of the game.

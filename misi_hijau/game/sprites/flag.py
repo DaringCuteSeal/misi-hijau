@@ -14,10 +14,14 @@
 
 from core.sprite_classes import TilemapBasedSprite
 from core.game_handler import GameHandler
+from core.common import Sfx, SoundType
 from game import events
 
 class LevelFlag(TilemapBasedSprite):
     FLAG_UV = (2, 7)
+    soundbank = {
+        "level_finished": Sfx(SoundType.AUDIO, 0, 13)
+    }
 
     def __init__(self, game_handler: GameHandler):
        self.game_handler = game_handler
@@ -41,3 +45,4 @@ class LevelFlag(TilemapBasedSprite):
     def player_level_completed_check(self, uv: tuple[int, int], tile_x: int, tile_y: int): # FIXME: Some functions still call this function with these arguments. If one removes them, breakage will occur. Refactoring should be done later
         if self._is_level_complete() and uv == self.FLAG_UV:
             self.game_handler.game_components.event_handler.trigger_event(events.ShowLevelStats)
+            self.game_handler.game_components.soundplayer.play(self.soundbank["level_finished"])

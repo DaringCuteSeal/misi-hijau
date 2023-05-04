@@ -33,6 +33,7 @@ class BlinkingTextHint(UIComponent):
         self.game_handler = game_handler
         self.game_handler.game_components.event_handler.add_handler(events.ShowBlinkingTextHint.name, self.show)
         self.game_handler.game_components.event_handler.add_handler(events.HideBlinkingTextHint.name, self.hide)
+        self.game_handler.game_components.event_handler.add_handler(events.StartGame.name, self.hide)
         self.hint_text_blink_idx = True
         
         # We instantiate a new ticker on every show() call. 

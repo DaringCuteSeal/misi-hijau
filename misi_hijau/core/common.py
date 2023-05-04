@@ -12,6 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""
+Common constants and classes.
+"""
+
+# XXX
+# Would be even better if you can use the components freely without touching this file
+# (only the components depend DIRECTLY to this file)
+# although that could introduce unsafe code with hidden dependency?
+# let's figure out later
+
 import pyxel
 from dataclasses import dataclass
 from enum import Enum
