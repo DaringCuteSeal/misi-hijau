@@ -1,2 +1,7 @@
 **/__pycache__
 .venv
+.vscode
+game.svg
+misi_hijau.svg
+*.kra
+*.png~
