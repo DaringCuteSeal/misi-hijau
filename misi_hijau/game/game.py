@@ -20,7 +20,7 @@ import pyxel
 
 from . import events
 
-from core.common import KeyFunc
+from core.common import KeyFunc, KeyType
 
 from core import components
 from core.game_handler import GameComponents, GameHandler
@@ -190,10 +190,11 @@ class Game():
         if curr_level == LEVELS_COUNT:
             self._start_outro_slide()
             self.game_handler.game_components.event_handler.trigger_event(events.FinishGame)
+            self.game_handler.game_components.event_handler.remove_handler(events.LevelNext.name, self.increment_level) # level should not incremenet anymore
             return
 
-        self.game_handler.game_components.event_handler.trigger_event(events.ShowLevelDialog) # show dialog at start
         self.game_handler.levelhandler.set_lvl_by_idx(curr_level + 1)
+        self.game_handler.game_components.event_handler.trigger_event(events.ShowLevelDialog) # show dialog at start
         self.setup_next_level()
 
     def start_game(self):
@@ -230,7 +231,7 @@ class Game():
     #############
  
     def attach_debug_key(self):
-        self.game_handler.game_components.keylistener.add("debug_key", KeyFunc([pyxel.KEY_BACKSPACE], self._debug_show_level_stats, hold_time=10, repeat_time=10))
+        self.game_handler.game_components.keylistener.add("debug_key", KeyFunc([pyxel.KEY_BACKSPACE],self._debug_show_level_stats, KeyType.BTNP, hold_time=10, repeat_time=100))
     
     def _debug_show_level_stats(self):
         self.game_handler.game_components.event_handler.trigger_event(events.LevelNext)

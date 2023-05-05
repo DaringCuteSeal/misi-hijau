@@ -10,7 +10,6 @@ packages = [{include = "misi_hijau"}]
 [tool.poetry.dependencies]
 python = "^3.10"
 pyxel = "^1.9.12"
-pyxelunicode = "^1.0.4"
 
 
 [tool.poetry.group.dev.dependencies]

@@ -18,6 +18,7 @@ from core.sprite_classes import Sprite
 from core.game_handler import GameHandler
 from core.common import WINDOW_HEIGHT, WINDOW_WIDTH, KeyFunc
 from res.resources_load import FINISH_SCREEN_IMAGE_PATH, TEMP_IMG_BANK_IDX
+from res.storyline_text import story_text
 from game import events
 
 class OutroPlane(Sprite):
@@ -53,6 +54,8 @@ class OutroPlane(Sprite):
 
 class OutroPlayer:
     QUIT_HINT_STRING = "q untuk keluar dari permainan..."
+    OUTRO_TEXT = story_text["outro_message"][0]
+    OUTRO_TEXT_COORD = (17, 100)
 
     def __init__(self, game_handler: GameHandler):
         self.game_handler = game_handler
@@ -60,21 +63,39 @@ class OutroPlayer:
     
     def show_outro(self):
         self.plane = OutroPlane(self.game_handler) # create plane for animation
-        self.exit_game_keyfunc = KeyFunc([pyxel.KEY_Q, pyxel.KEY_ESCAPE], self.quit_game)
-        self.game_handler.game_components.timer.attach(3).when_over(self.show_quit_hint)
+        self.game_handler.game_components.timer.attach(3).when_over(self.show_outro_text)
         self.game_handler.callable_update = self.update
         self.game_handler.callable_draw = self.draw
         self.draw_background()
+        self._setup_keylistener()
+    
+    def _setup_keylistener(self):
+        self.game_handler.game_components.keylistener.destroy_all()
+        self.exit_game_keyfunc = KeyFunc([pyxel.KEY_Q, pyxel.KEY_ESCAPE], self.quit_game)
+        self.game_handler.game_components.keylistener.add("exit_game", self.exit_game_keyfunc)
     
     def draw_background(self):
         pyxel.image(TEMP_IMG_BANK_IDX).load(0, 0, FINISH_SCREEN_IMAGE_PATH)
         pyxel.blt(0, 0, TEMP_IMG_BANK_IDX, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
 
+    def show_outro_text(self):
+        self.game_handler.game_components.event_handler.trigger_event(events.TextEngineAnimateText(
+            self.OUTRO_TEXT,
+            self.OUTRO_TEXT_COORD[0],
+            self.OUTRO_TEXT_COORD[1],
+            lambda: self.game_handler.game_components.timer.attach(1).when_over(self.show_quit_hint),
+            True,
+            5,
+            0.03,
+            pyxel.COLOR_WHITE,
+        ))
+
     def show_quit_hint(self):
         quit_string_width = len(self.QUIT_HINT_STRING) * pyxel.FONT_WIDTH
         x = (WINDOW_WIDTH - quit_string_width) // 2
         y = WINDOW_HEIGHT - pyxel.FONT_HEIGHT - 10
-        self.game_handler.game_components.event_handler.trigger_event(events.ShowBlinkingTextHint(x, y, self.QUIT_HINT_STRING, TEMP_IMG_BANK_IDX, True))
+        self.game_handler.game_components.event_handler.trigger_event(events.ShowBlinkingTextHint(x, y, self.QUIT_HINT_STRING, pyxel.COLOR_WHITE, TEMP_IMG_BANK_IDX, True))
+        self.exit_game_keyfunc.active = True
 
     def draw(self):
         self.draw_background()

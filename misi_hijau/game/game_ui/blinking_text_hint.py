@@ -34,18 +34,24 @@ class BlinkingTextHint(UIComponent):
         self.game_handler.game_components.event_handler.add_handler(events.ShowBlinkingTextHint.name, self.show)
         self.game_handler.game_components.event_handler.add_handler(events.HideBlinkingTextHint.name, self.hide)
         self.game_handler.game_components.event_handler.add_handler(events.StartGame.name, self.hide)
-        self.hint_text_blink_idx = True
+        self.hint_text_blink_idx = False
         
         # We instantiate a new ticker on every show() call. 
         # We use None | TickerItem so the draw() method won't crash the game if the ticker hasn't been properly initialized.
         self.hint_text_blink_ticker: None | TickerItem = None 
 
-    def show(self, x: int, y: int, msg: str, background_img_idx: int, keep_drawing: bool = False):
+    def show(self, x: int, y: int, msg: str, text_color: int = pyxel.COLOR_WHITE, background_img_idx: int = 0, keep_drawing: bool = False):
+        """
+        Show a blinking text that hints the player to do something.
+        The `keep_drawing` can be set to `True` and is useful when your game screen is constantly being drawn (not just the text that keeps being overlaid on top of a static image).
+        """
+        self.game_handler.game_components.timer.destroy_by_id(BLINKING_TEXT_HINT_TIMER_ID) # delete stale timers
         self.img = background_img_idx
         self.coord.x = x
         self.coord.y = y
         self.hint_text_blink_ticker = self.game_handler.game_components.ticker.attach(30)
         self.msg = msg
+        self.text_color = text_color
         self.msg_width = len(msg) * pyxel.FONT_WIDTH
         self.keep_drawing = keep_drawing
         self.active = True
@@ -58,11 +64,12 @@ class BlinkingTextHint(UIComponent):
         if self.hint_text_blink_ticker and self.hint_text_blink_ticker.get():
             self.hint_text_blink_idx = not self.hint_text_blink_idx
             self._draw_text() if not self.keep_drawing else None
-        self._draw_text() if self.keep_drawing else None
+            return
+        self._draw_text()
 
     def _draw_text(self):
         if self.hint_text_blink_idx:
-            pyxel.text(self.coord.x, self.coord.y, self.msg, pyxel.COLOR_WHITE)
+            pyxel.text(self.coord.x, self.coord.y, self.msg, self.text_color)
         else: 
             # blit back of the text with the background image instead of constantly drawing everything (computationally cheaper)
             pyxel.blt(self.coord.x, self.coord.y, self.img, self.coord.x, self.coord.y, self.msg_width, pyxel.FONT_HEIGHT)

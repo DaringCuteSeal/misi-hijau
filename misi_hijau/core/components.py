@@ -98,6 +98,12 @@ class KeyListener:
                             keyfunc.func()
                             break
 
+    def destroy_all(self):
+        """
+        Empty list of keys to check.
+        """ 
+        self.keys_to_check = []
+
 
 # Camera handling
 @dataclass
@@ -200,6 +206,9 @@ class SoundPlayer():
     """
     A sound player.
     """
+    def __init__(self):
+        pass
+
     def play(self, sfx: Sfx, loop: bool = False):
         """
         Play a sound (Sfx).
@@ -427,7 +436,7 @@ class EventHandler:
         """
         Remove a handler (unsubscribe) from an event.
         """
-        if event_name in self._handlers:
+        if event_name in self._handlers and handler in self._handlers[event_name]:
             self._handlers[event_name].remove(handler)
     
     def trigger_event(self, event: Event) -> bool | None:

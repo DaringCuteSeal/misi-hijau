@@ -151,7 +151,7 @@ class Dialog(UIComponent):
         current_line: str = ''
 
         for word in words:
-            if self.coord.x + (len(current_line + word) * pyxel.FONT_WIDTH) + (self.text_gap * 2) > self.w:
+            if (len(current_line + word) * pyxel.FONT_WIDTH) + (self.text_gap * 2) > self.w:
                 lines.append(current_line.strip())
                 current_line = ''
             current_line += word + ' '

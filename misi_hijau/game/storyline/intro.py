@@ -80,7 +80,7 @@ class IntroPlayer:
         )
 
     def enable_spacebar_hint(self):
-        self.game_handler.game_components.event_handler.trigger_event(events.ShowBlinkingTextHint(self.SLIDESHOW_WAIT_HINT_COORD[0], self.SLIDESHOW_WAIT_HINT_COORD[1], self.SLIDESHOW_WAIT_HINT_STRING, 1))
+        self.game_handler.game_components.event_handler.trigger_event(events.ShowBlinkingTextHint(self.SLIDESHOW_WAIT_HINT_COORD[0], self.SLIDESHOW_WAIT_HINT_COORD[1], self.SLIDESHOW_WAIT_HINT_STRING, pyxel.COLOR_WHITE, TEMP_IMG_BANK_IDX, False))
 
     def _play_slide_sfx(self):
         self.game_handler.game_components.soundplayer.play(self.soundbank["start_sfx"])

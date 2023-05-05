@@ -113,11 +113,12 @@ class BroadcastEnemiesCount(Event):
 # Event-based UI components
 class ShowBlinkingTextHint(Event):
     name = "show_blinking_text_hint"
-    def __init__(self, x: int, y: int, msg: str, background_img_idx: int, keep_drawing: bool = False):
+    def __init__(self, x: int, y: int, msg: str, text_color: int, background_img_idx: int, keep_drawing: bool = False):
         self.data = {
             "x": x,
             "y": y,
             "msg": msg,
+            "text_color": text_color,
             "background_img_idx": background_img_idx,
             "keep_drawing": keep_drawing
         }
@@ -132,6 +133,7 @@ class TextEngineAnimateText(Event):
                  y: int,
                  function_when_done: Optional[Callable[..., None]] = None,
                  sfx: bool = False,
+                 padding: int = 0,
                  speed: float = 0.03,
                  color: int = pyxel.COLOR_WHITE
                  ):
@@ -142,6 +144,7 @@ class TextEngineAnimateText(Event):
             "y": y,
             "function_when_done": function_when_done,
             "sfx": sfx,
+            "padding": padding,
             "speed": speed,
             "color": color
         }

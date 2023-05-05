@@ -22,7 +22,7 @@ story_text = {
         "Proyek pembangunan kapal terbang raksasa dengan kecepatan 25 kali kecepatan cahaya yang berpusat di Amerika Serikat, Rusia, Jepang, dan Singapura telah berlangsung selama kurang lebih 87 tahun. Proyek tersebut dikerjakan cukup lama karena sulitnya realisasi pembangunan mesin yang ternyata tidak sesuai rencana, serta beberapa isu politik antara Amerika dan Rusia. Akan tetapi, baru-baru ini, telah terungkap bahwa wakil pemimpin dari proyek ini berbohong tentang penggunaan energi dalam mesin pembangkit energi untuk mesin inti kapal tersebut.",
         "Kebohongan besar tersebut akhirnya memicu kemarahan dari seluruh umat bumi yang akhirnya mengetahui bahwa bumi kini telah mengalami krisis energi. Proyek tersebut dan proyek pembangunan Bola Dyson di matahari yang telah dikerjakan selama 14 tahun pun ditunda sampai krisis energi ini dapat diselesaikan.",
         "Baru-baru ini, seorang ilmuwan wanita genius berusia 22 tahun yang bernama Sarah dari Indonesia, menggemparkan berita internasional karena penemuannya. Ia menemukan 3 elemen baru yang dapat mencegah krisis energi bumi yang sekarang ini terjadi.",
-        "Sarah diundang ke ISRP untuk membicarakan mengenai pencarian elemen yang ia temukan. Ia sekarang baru memiliki sedikit sampel yang ia peroleh dari puing komet yang ia prediksikan lokasi jatuhnya. Akhirnya, setelah beberapa waktu berbincang, Sarah setuju untuk pergi ke ujung sabuk kuiper, tempat yang ia perkirakan memiliki 3 elemen yang diperlukan bumi, bersama dengan tim dengan anggota dari beberapa negara.",
+        "Sarah diundang ke ISRP untuk membicarakan mengenai pencarian elemen yang ia temukan. Ia sekarang baru memiliki sedikit sampel yang ia peroleh dari puing komet yang ia prediksikan lokasi jatuhnya. Akhirnya, setelah beberapa waktu berbincang, Sarah setuju untuk pergi ke ujung sabuk kuiper, tempat yang ia perkirakan memiliki 3 elemen yang diperlukan bumi. Ia akan memimpin 3 sub tim yang akan mengendalikan masing-masing satu kapal yang dirancang khusus untuk tiap lokasi mineral."
         "Bumi masih memiliki cukup energi untuk 7 tahun ke depan, apabila dihemat dengan baik. Misi Sarah dan timnya kemungkinan besar akan memakan waktu selama 5 tahun. Sarah dan timnya adalah harapan satu-satunya bagi kelangsungan hidup umat manusia."
     ],
 
@@ -36,6 +36,10 @@ story_text = {
 
     "story_start_level_3": [
         "Elemen terakhir, Electricium. Electricium adalah mineral yang sangat konduktif. Electricium dapat menghantarkan listrik 230 kali lebih efisien dari tembaga biasa. Electricium dapat menjadi bahan dasar dari kabel listrik yang dapat mengalirkan listrik dengan tegangan luar biasa. Kabel listrik Electricium dapat digunakan untuk membuat alat pendukung pembangkit listrik yang menggunakan mineral Nethonite dan Photosium."
+    ],
+
+    "outro_message": [
+        "Tim Sarah pun pulang ke bumi, dengan membawa mineral-mineral yang telah dikumpulkan. Terima kasih atas bantuanmu, ilmuwan muda. Kamu adalah generasi penerus bangsa ini. Maknailah hidup yang misterius ini dengan terus belajar dan belajar untuk memajukan kehidupan manusia."
     ]
 
 }

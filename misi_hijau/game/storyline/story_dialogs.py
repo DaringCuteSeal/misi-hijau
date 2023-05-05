@@ -121,7 +121,7 @@ class InGameStoryline:
         self.game_handler.game_components.event_handler.trigger_event(events.StopGameLoop)
 
     def _show_blinking_text_hint(self):
-        self.event_handler.trigger_event(events.ShowBlinkingTextHint(self.HINT_TEXT_COORD[0], self.HINT_TEXT_COORD[1], self.HINT_TEXT_STRING, TEMP_IMG_BANK_IDX))
+        self.event_handler.trigger_event(events.ShowBlinkingTextHint(self.HINT_TEXT_COORD[0], self.HINT_TEXT_COORD[1], self.HINT_TEXT_STRING, pyxel.COLOR_WHITE, TEMP_IMG_BANK_IDX, False))
 
     def alter_keylistener_state(self, state: bool):
         self.close_stats_keyfunc.active = state

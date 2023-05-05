@@ -50,7 +50,7 @@ class TextEngine(UIComponent):
         lines: list[str] = []
         current_line: str = ''
         for word in words:
-            if (len(current_line + word) + 1) * pyxel.FONT_WIDTH + self.x > WINDOW_WIDTH:
+            if self.x + (len(current_line + word) + 1) * pyxel.FONT_WIDTH + (self.padding * 2) > WINDOW_WIDTH:
                 lines.append(current_line.strip())
                 current_line = ''
             current_line += word + ' '
@@ -63,6 +63,7 @@ class TextEngine(UIComponent):
                      x: int,
                      y: int,
                      function_when_done: Optional[Callable[..., None]] = None,
+                     padding: int = 0,
                      sfx: bool = False,
                      speed: float = 0.03,
                      color: int = pyxel.COLOR_WHITE):
@@ -75,6 +76,7 @@ class TextEngine(UIComponent):
         self.string_pos = 0
         self.x = x
         self.y = y
+        self.padding = padding
         self.current_string = self._wrap_string(string)
         self.current_color = color
         self.current_speed = speed
@@ -103,7 +105,7 @@ class TextEngine(UIComponent):
         self.string_pos = 0
     
     def _draw(self):
-        pyxel.text(self.x, self.y, self.current_string[:self.string_pos], self.current_color)
+        pyxel.text(self.x + self.padding, self.y + self.padding, self.current_string[:self.string_pos], self.current_color)
     
     def _interrupt_handler(self):
         self.soundplayer.stop_sfx_channel_playback(self.typing_sfx)
