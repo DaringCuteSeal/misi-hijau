@@ -80,13 +80,24 @@ class Sprite(ABC):
 
     def is_colliding(self, x: float, y: float, w: float, h: float) -> bool:
         """
-        Returns `True` if sprite is colliding with another sprite with attributes specified by argument `x`, `y`, `w`, and `h`.
+        Returns `True` if sprite is colliding with another sprite with attributes specified by parameter `x`, `y`, `w`, and `h`.
         """
         return (
             self.coord.x + self.w > x
                 and x + w > self.coord.x
                 and self.coord.y + self.h > y
                 and y + h > self.coord.y
+        )
+    
+    def is_near(self, distance: float, x: float, y: float, w: int, h: int) -> bool:
+        """
+        Returns `True` if sprite is near other sprite with attributes specified by parameter `x`, `y`, `w`, and `h`.
+        """
+        return (
+            self.coord.x + distance > x
+                and x + w + distance > self.coord.x
+                and self.coord.y + self.h + distance > y
+                and y + h + distance > self.coord.y
         )
 
 class SpriteHandler(ABC):

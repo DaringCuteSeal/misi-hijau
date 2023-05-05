@@ -39,7 +39,7 @@ class PlayerShootBullets(Event):
         }
     name = "player_shoot_bullets"
 
-class BulletsCheck(Event):
+class EnemiesBulletsCheck(Event):
     name = "bullets_check"
     def __init__(self, enemy_x: float, enemy_y: float, enemy_w: float, enemy_h: int):
         self.data = {
@@ -47,6 +47,16 @@ class BulletsCheck(Event):
             "enemy_y_map": enemy_y,
             "enemy_w": enemy_w,
             "enemy_h": enemy_h
+        }
+
+class PlayerBulletsCheck(Event):
+    name = "player_bullets_check"
+    def __init__(self, x_player: float, y_player: float, w_player: int, h_player: int):
+        self.data = {
+            "x_player": x_player,
+            "y_player": y_player,
+            "w_player": w_player,
+            "h_player": h_player
         }
 
 class PlayerCollidingEnemy(Event):
@@ -59,6 +69,13 @@ class PlayerCollidingEnemy(Event):
             "enemy_h": enemy_h
         }
 
+class DecreasePlayerHealth(Event):
+    name = "decrease_player_health"
+    def __init__(self, value: int):
+        self.data = {
+            "value": value
+        }
+
 class MineralsCheck(Event):
     name = "minerals_check"
     def __init__(self, player_x_map: float, player_y_map: float, player_h: int):
@@ -68,7 +85,7 @@ class MineralsCheck(Event):
             "player_h": player_h
         }
 
-class PlayerHealthChange(Event):
+class HealthbarPlayerHealthChange(Event):
     name = "player_health_change"
     def __init__(self, value: int):
         self.data = {
@@ -108,6 +125,26 @@ class BroadcastEnemiesCount(Event):
     def __init__(self, count: int):
         self.data = {
             "count": count
+        }
+
+class SquidgeNearPlayer(Event):
+    name = "send_coord_to_squidge"
+    def __init__(self, x_enemy: float, y_enemy: float, w_enemy: int, h_enemy: int):
+        self.data = {
+            "x_enemy": x_enemy,
+            "y_enemy": y_enemy,
+            "w_enemy": w_enemy,
+            "h_enemy": h_enemy
+        }
+
+class SquidgeShootBullet(Event):
+    name = "squidge_shoot_bullet"
+    def __init__(self, x_enemy: float, y_enemy: float, x_player: float, y_player: float):
+        self.data = {
+            "x_enemy": x_enemy,
+            "y_enemy": y_enemy,
+            "x_player": x_player,
+            "y_player": y_player
         }
 
 # Event-based UI components

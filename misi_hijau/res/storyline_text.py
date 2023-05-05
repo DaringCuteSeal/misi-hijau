@@ -26,15 +26,15 @@ story_text = {
         "Bumi masih memiliki cukup energi untuk 7 tahun ke depan, apabila dihemat dengan baik. Misi Sarah dan timnya kemungkinan besar akan memakan waktu selama 5 tahun. Sarah dan timnya adalah harapan satu-satunya bagi kelangsungan hidup umat manusia."
     ],
 
-    "story_start_level_1": [
-        "Elemen pertama: Nethonite. Nethonite berwarna biru safir. Menurut prediksi Sarah, Nethonite merupakan mineral yang terdiri sepenuhnya dari Dimensium, elemen dengan interaksi paling aneh yang diketahui manusia. Apabile Nethonite diputar dengan kecepatan >32 ribu RPM dalam sebuah bola kaca tebal hampa, Nathonite dapat menghasilkan listrik yang stabil dengan tegangan yang luar biasa."
+    "story_level_1": [
+        "Elemen pertama: Nethonite. Nethonite berwarna biru safir. Menurut prediksi Sarah, Nethonite merupakan mineral yang terdiri sepenuhnya dari Dimensium, elemen dengan interaksi paling aneh yang diketahui manusia. Apabile Nethonite diputar dengan kecepatan >32 ribu RPM dalam sebuah bola kaca tebal hampa, Nathonite dapat menghasilkan listrik yang stabil dengan tegangan yang luar biasa.",
     ],
 
-    "story_start_level_2": [
+    "story_level_2": [
         "Elemen kedua: Photosium. Photosium dapat menyerap photon (partikel cahaya) dengan sangat baik dan efisien sehingga cocok sebagai bahan dasar panel surya di Bumi dan Bola Dyson. Mineral ini dapat ditemukan di sebuah planet kerdil berwarna hijau di sabuk kuiper."
     ],
 
-    "story_start_level_3": [
+    "story_level_3": [
         "Elemen terakhir, Electricium. Electricium adalah mineral yang sangat konduktif. Electricium dapat menghantarkan listrik 230 kali lebih efisien dari tembaga biasa. Electricium dapat menjadi bahan dasar dari kabel listrik yang dapat mengalirkan listrik dengan tegangan luar biasa. Kabel listrik Electricium dapat digunakan untuk membuat alat pendukung pembangkit listrik yang menggunakan mineral Nethonite dan Photosium."
     ],
 

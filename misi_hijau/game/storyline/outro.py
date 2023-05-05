@@ -16,7 +16,7 @@ import pyxel
 
 from core.sprite_classes import Sprite
 from core.game_handler import GameHandler
-from core.common import WINDOW_HEIGHT, WINDOW_WIDTH, KeyFunc
+from core.common import WINDOW_HEIGHT, WINDOW_WIDTH, KeyFunc, Sfx, SoundType
 from res.resources_load import FINISH_SCREEN_IMAGE_PATH, TEMP_IMG_BANK_IDX
 from res.storyline_text import story_text
 from game import events
@@ -53,6 +53,7 @@ class OutroPlane(Sprite):
         pyxel.blt(self.coord.x, self.coord.y, self.img, self.u, self.v, self.w, self.h, self.colkey)
 
 class OutroPlayer:
+    outro_music = Sfx(SoundType.MUSIC, 2, 1)
     QUIT_HINT_STRING = "q untuk keluar dari permainan..."
     OUTRO_TEXT = story_text["outro_message"][0]
     OUTRO_TEXT_COORD = (17, 100)
@@ -63,6 +64,7 @@ class OutroPlayer:
     
     def show_outro(self):
         self.plane = OutroPlane(self.game_handler) # create plane for animation
+        self.game_handler.game_components.soundplayer.play(self.outro_music)
         self.game_handler.game_components.timer.attach(3).when_over(self.show_outro_text)
         self.game_handler.callable_update = self.update
         self.game_handler.callable_draw = self.draw
@@ -94,8 +96,8 @@ class OutroPlayer:
         quit_string_width = len(self.QUIT_HINT_STRING) * pyxel.FONT_WIDTH
         x = (WINDOW_WIDTH - quit_string_width) // 2
         y = WINDOW_HEIGHT - pyxel.FONT_HEIGHT - 10
-        self.game_handler.game_components.event_handler.trigger_event(events.ShowBlinkingTextHint(x, y, self.QUIT_HINT_STRING, pyxel.COLOR_WHITE, TEMP_IMG_BANK_IDX, True))
         self.exit_game_keyfunc.active = True
+        self.game_handler.game_components.event_handler.trigger_event(events.ShowBlinkingTextHint(x, y, self.QUIT_HINT_STRING, pyxel.COLOR_WHITE, TEMP_IMG_BANK_IDX, True))
 
     def draw(self):
         self.draw_background()

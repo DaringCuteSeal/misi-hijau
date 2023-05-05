@@ -14,15 +14,18 @@
 
 import pyxel
 from abc import abstractmethod
-from core.common import ALPHA_COL, Level, BLANK_UV, MAP_Y_OFFSET_TILES, ProgressStatusbarItem, EnemyType, Icon, TickerItem
+from core.components import EventHandler
+from core.common import ALPHA_COL, Level, BLANK_UV, MAP_Y_OFFSET_TILES, ProgressStatusbarItem, EnemyType, Icon, TickerItem, Sfx, SoundType
 from core.utils import tile_to_real
 from core.sprite_classes import Sprite, SpriteCoordinate, SpriteHandler
 from core.game_handler import GameHandler
-from misi_hijau.game import events
+from game import events
 
 ENEMY_SPAWNER_UV = (7, 1)
 
 class EnemyEntity(Sprite):
+    health: int = 1
+
     def __init__(self, x_map: float, y_map: float):
         self.coord = SpriteCoordinate()
         self.coord.x_map = x_map
@@ -32,6 +35,10 @@ class EnemyEntity(Sprite):
         pyxel.blt(self.coord.x, self.coord.y, self.img, self.u, self.v, self.w, self.h, ALPHA_COL)
     
     @abstractmethod
+    def check_deletion(self) -> bool:
+        pass
+
+    @abstractmethod
     def update(self):
         pass
 
@@ -40,7 +47,7 @@ class EnemyGrug(EnemyEntity):
     v = 48
     w = 8
     h = 8
-    health = 2
+    health = 1
 
     def __init__(self, x_map: float, y_map: float, level: Level, ticker: TickerItem):
         self.coord = SpriteCoordinate(-20, -20, -20, -20)
@@ -60,11 +67,14 @@ class EnemyGrug(EnemyEntity):
                 self.coord.x_map = 0
             if self.coord.y_map > self.level_height:
                 self.coord.y_map = self.level_height
+        
+    def check_deletion(self) -> bool:
+        return self.health == 0
     
 class EnemyPhong(EnemyEntity):
     u = 8
     v = 48
-    health = 4
+    health = 2
 
     def __init__(self, x_map: float, y_map: float, level: Level, ticker: TickerItem):
         self.coord = SpriteCoordinate(-20, -20, -20, -20)
@@ -95,28 +105,52 @@ class EnemyPhong(EnemyEntity):
 
         self.coord.x_map += self.direction_x + pyxel.rndf(-2, 2)
         self.coord.y_map += self.direction_y + pyxel.rndf(-2, 2)
+
+    def check_deletion(self) -> bool:
+        return self.health == 0
     
 class EnemySquidge(EnemyEntity):
     u = 0
     v = 56
-    health = 8
+    health = 3
 
-    def __init__(self, x_map: float, y_map: float, level: Level):
+    def __init__(self, x_map: float, y_map: float, level: Level, ticker: TickerItem, shoot_ticker: TickerItem):
         self.coord = SpriteCoordinate(-20, -20, -20, -20)
         self.coord.x_map = x_map
         self.coord.y_map = y_map
+        self.update_ticker = ticker
+        self.shoot_ticker = shoot_ticker
         self.level_height = tile_to_real(level.levelmap.level_height)
         self.level_width = tile_to_real(level.levelmap.level_width)
+        self.direction_x = pyxel.rndf(-0.8, 0.8)
+        self.direction_y = pyxel.rndf(-1, 1)
 
     def update(self):
-        self.coord.x_map += pyxel.rndf(-2, 2)
-        self.coord.y_map += pyxel.rndf(-2, 2)
-        if self.coord.x_map > self.level_width: 
-            self.coord.x_map = self.level_width - 2
+        if not self.update_ticker.get():
+            return
+
         if self.coord.x_map < 0:
-            self.coord.x_map = 0
-        if self.coord.y_map > self.level_height:
-            self.coord.y_map = self.level_height
+            self.coord.x_map = 1
+            self.direction_x *= -1
+        if self.coord.x_map > self.level_width - self.w:
+            self.coord.x_map = self.level_width - self.w - 1
+            self.direction_x *= -1
+        if self.coord.y_map > self.level_height - self.h:
+            self.direction_y *= -1
+            self.coord.y_map = self.level_height - self.h - 1
+        if self.coord.y_map < 0:
+            self.direction_y *= -1
+            self.coord.y_map = 1
+
+        self.coord.x_map += self.direction_x + pyxel.rndf(-1, 1)
+        self.coord.y_map += self.direction_y + pyxel.rndf(-1, 1)
+
+
+    def check_deletion(self) -> bool:
+        return self.health == 0
+    
+    def check_shoot(self, event_handler: EventHandler):
+        event_handler.trigger_event(events.SquidgeNearPlayer(self.coord.x_map, self.coord.y_map, self.w, self.h)) if self.shoot_ticker.get() else None
 
 class EnemyHandler(SpriteHandler):
 
@@ -125,6 +159,10 @@ class EnemyHandler(SpriteHandler):
         Icon(0, 24, 96, 8, 8),
         Icon(0, 16, 104, 8, 8)
     ]
+
+    soundbank = {
+        "attacked": Sfx(SoundType.AUDIO, 0, 21)
+    }
 
     def __init__(self, game_handler: GameHandler):
         self.game_handler = game_handler
@@ -149,7 +187,6 @@ class EnemyHandler(SpriteHandler):
         self.enemy_coordinates_list = self._generate_enemies_matrix()
         self.enemies_hit_progressbar.icon = self.enemies_icon[self.level.idx - 1]
         self.spawn()
-        self.update_enemies = None
         self.update_enemies = False
 
     def _reset_progressbar(self):
@@ -197,7 +234,7 @@ class EnemyHandler(SpriteHandler):
             case EnemyType.ENEMY_2:
                 enemy = EnemyPhong(x, y, self.level, self.game_components.ticker.attach(pyxel.rndi(4, 8)))
             case EnemyType.ENEMY_3:
-                enemy = EnemySquidge(x, y, self.level)
+                enemy = EnemySquidge(x, y, self.level, self.game_components.ticker.attach(pyxel.rndi(6, 10)), self.game_components.ticker.attach(15))
         self.enemies.append(enemy)
 
     def _activate_enemy(self):
@@ -208,16 +245,21 @@ class EnemyHandler(SpriteHandler):
             enemy.map_to_view(self.game_components.camera.y)
             # XXX try checking collision on individual sprite update instead (without the EnemiesHandler)
             # also maybe this can mean the enemy will only need to trigger one event and then the player can also have a handler
-            if enemy.is_sprite_in_viewport() and not self.level.enemies_all_eliminated:
-                if self.game_components.event_handler.trigger_event(events.BulletsCheck(enemy.coord.x_map, enemy.coord.y_map, enemy.w, enemy.h)):
-                    self.enemies.remove(enemy)
-                    self.enemies_eliminated += 1
-                    self.game_components.event_handler.trigger_event(events.UpdateStatusbar)
+            if isinstance(enemy, EnemySquidge):
+                enemy.check_shoot(self.game_components.event_handler)
 
-                    if self.enemies_eliminated == self.enemies_count:
-                        self.level.enemies_all_eliminated = True
-                        self.enemies_hit_progressbar.progress_col = pyxel.COLOR_GREEN
-                        self.game_components.event_handler.trigger_event(events.CheckLevelComplete)
+            if enemy.is_sprite_in_viewport() and not self.level.enemies_all_eliminated:
+                if self.game_components.event_handler.trigger_event(events.EnemiesBulletsCheck(enemy.coord.x_map, enemy.coord.y_map, enemy.w, enemy.h)):
+                    enemy.health -= 1
+                    if enemy.check_deletion():
+                        self.enemies.remove(enemy)
+                        self.game_components.soundplayer.play(self.soundbank["attacked"])
+                        self.enemies_eliminated += 1
+                        self.game_components.event_handler.trigger_event(events.UpdateStatusbar)
+                        if self.enemies_eliminated == self.enemies_count:
+                            self.level.enemies_all_eliminated = True
+                            self.enemies_hit_progressbar.progress_col = pyxel.COLOR_GREEN
+                            self.game_components.event_handler.trigger_event(events.CheckLevelComplete)
                 
                 self.game_components.event_handler.trigger_event(events.PlayerCollidingEnemy(enemy.coord.x, enemy.coord.y, enemy.w, enemy.h))
 

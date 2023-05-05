@@ -193,6 +193,7 @@ class Game():
             self.game_handler.game_components.event_handler.remove_handler(events.LevelNext.name, self.increment_level) # level should not incremenet anymore
             return
 
+        self.game_handler.game_components.event_handler.trigger_event(events.ResumeGameLoop)
         self.game_handler.levelhandler.set_lvl_by_idx(curr_level + 1)
         self.game_handler.game_components.event_handler.trigger_event(events.ShowLevelDialog) # show dialog at start
         self.setup_next_level()

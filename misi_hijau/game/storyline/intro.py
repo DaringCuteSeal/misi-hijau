@@ -31,6 +31,7 @@ class IntroPlayer:
     }
     string_collection = story_text
 
+    SPACEBAR_HINT_TIMER_ID = "spacebar_hint"
     TEXTENGINE_BORDER = 5
 
     SLIDESHOW_WAIT_HINT_STRING = "tekan spasi untuk lanjut..."
@@ -73,7 +74,7 @@ class IntroPlayer:
             self.string_collection["intro"][self.slideshow_idx - 1],
             self.TEXTENGINE_BORDER,
             self.TEXTENGINE_BORDER,
-            lambda: self.game_handler.game_components.timer.attach(1).when_over(self.enable_spacebar_hint),
+            lambda: self.game_handler.game_components.timer.attach(1, self.SPACEBAR_HINT_TIMER_ID).when_over(self.enable_spacebar_hint),
             sfx=True,
             speed=0.02,
             color=pyxel.COLOR_WHITE
@@ -98,6 +99,7 @@ class IntroPlayer:
         """
         self.game_handler.game_components.event_handler.trigger_event(events.HideBlinkingTextHint)
         self.game_handler.game_components.event_handler.trigger_event(events.TextengineInterrupt)
+        self.game_handler.game_components.timer.destroy_by_id(self.SPACEBAR_HINT_TIMER_ID)
         self._alter_keylistener_state(False)
         self.game_handler.game_components.timer.attach(0.2).when_over(lambda: self._alter_keylistener_state(True))
 

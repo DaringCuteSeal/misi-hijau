@@ -19,6 +19,7 @@ from core.common import PowerUpType, PowerUp
 from core.game_handler import GameHandler
 from core.utils import tile_to_real
 
+# NOTE: I didn't implement this... sad
 class PowerUpHandler(TilemapBasedSprite):
     costumes: dict[str, tuple[int, int]] = {
             "health": (16, 48),

@@ -86,6 +86,7 @@ class Player(Sprite):
 
     soundbank = {
         "attacked": Sfx(SoundType.AUDIO, 0, 14),
+        "explode": Sfx(SoundType.AUDIO, 1, 11)
     }
 
     costumes = {
@@ -102,17 +103,19 @@ class Player(Sprite):
 
     def __init__(self, game_handler: GameHandler):
 
-        self.game = game_handler
+        self.game_handler = game_handler
 
         self.coord = SpriteCoordinate(0, 0, 0, 0)
-        self.blinking_ticker = self.game.game_components.ticker.attach(10)
-        self.speed_statusbar_ticker = self.game.game_components.ticker.attach(10)
+        self.blinking_ticker = self.game_handler.game_components.ticker.attach(10)
+        self.speed_statusbar_ticker = self.game_handler.game_components.ticker.attach(10)
 
         self.player_setup()
         self.setup_event_handlers()
     
     def setup_event_handlers(self):
-        self.game.game_components.event_handler.add_handler(events.PlayerCollidingEnemy.name, self.is_colliding_with_enemy)
+        self.game_handler.game_components.event_handler.add_handler(events.PlayerCollidingEnemy.name, self.is_colliding_with_enemy)
+        self.game_handler.game_components.event_handler.add_handler(events.DecreasePlayerHealth.name, self.alter_health)
+        self.game_handler.game_components.event_handler.add_handler(events.SquidgeNearPlayer.name, self.shoot_if_near_squidge)
 
     def player_setup(self):
         """
@@ -121,7 +124,7 @@ class Player(Sprite):
         self.x_vel = 0
         self.y_vel = 0
 
-        self.level = self.game.levelhandler.get_curr_lvl()
+        self.level = self.game_handler.levelhandler.get_curr_lvl()
 
         self.ship_type = self.level.ship_type
         levelmap = self.level.levelmap # only run ONCE; we don't want to get the level on every tick.
@@ -130,10 +133,10 @@ class Player(Sprite):
 
         self.health = self.level.max_health
         self.reset_coord() # don't reinstantiate or else we will break bound values
-        self.map_to_view(self.game.game_components.camera.y)
+        self.map_to_view(self.game_handler.game_components.camera.y)
 
         if self.level.idx:
-            self.ship3_costume_ticker = self.game.game_components.ticker.attach(5)
+            self.ship3_costume_ticker = self.game_handler.game_components.ticker.attach(5)
             self.ship3_costume_idx = False
 
         self.init_costume(self.ship_type)
@@ -194,7 +197,7 @@ class Player(Sprite):
         tile_y = real_to_tile(self.coord.y_map) + self.level.levelmap.map_y + 1 + MAP_Y_OFFSET_TILES
 
         tilemap = pyxel.tilemap(0).pget(tile_x, tile_y)
-        self.game.game_components.event_handler.trigger_event(events.TilemapPlayerCheck(tilemap, tile_x, tile_y))
+        self.game_handler.game_components.event_handler.trigger_event(events.TilemapPlayerCheck(tilemap, tile_x, tile_y))
 
     def move(self):
         self.player_tilemap_checker()
@@ -209,30 +212,30 @@ class Player(Sprite):
         elif self.coord.x_map > self.level_width - self.w:
             self.coord.x_map = self.level_width - self.w
         else:
-            self.game.game_components.event_handler.trigger_event(events.StarsScroll)
+            self.game_handler.game_components.event_handler.trigger_event(events.StarsScroll)
             
         if self.coord.y_map > self.level_height - self.h:
             self.coord.y_map = self.level_height - self.h
         elif self.coord.y_map < 0:
             self.coord.y_map = 0
         else:
-            self.game.game_components.event_handler.trigger_event(events.StarsScroll)
+            self.game_handler.game_components.event_handler.trigger_event(events.StarsScroll)
 
     def cam_update(self):
-        self.game.game_components.camera.y = self.coord.y_map
+        self.game_handler.game_components.camera.y = self.coord.y_map
 
-        if self.game.game_components.camera.y > self.level_height - WINDOW_HEIGHT // 2:
-            self.game.game_components.camera.y = self.level_height - WINDOW_HEIGHT // 2
-            self.game.game_components.camera.dir_y = 0
-        elif self.game.game_components.camera.y < WINDOW_HEIGHT // 2:
-            self.game.game_components.camera.y = WINDOW_HEIGHT // 2
-            self.game.game_components.camera.dir_y = 0
+        if self.game_handler.game_components.camera.y > self.level_height - WINDOW_HEIGHT // 2:
+            self.game_handler.game_components.camera.y = self.level_height - WINDOW_HEIGHT // 2
+            self.game_handler.game_components.camera.dir_y = 0
+        elif self.game_handler.game_components.camera.y < WINDOW_HEIGHT // 2:
+            self.game_handler.game_components.camera.y = WINDOW_HEIGHT // 2
+            self.game_handler.game_components.camera.dir_y = 0
         else:
-            self.game.game_components.camera.dir_y = self.y_vel
-            self.game.game_components.camera.dir_x = self.x_vel
+            self.game_handler.game_components.camera.dir_y = self.y_vel
+            self.game_handler.game_components.camera.dir_x = self.x_vel
         
     def update(self):
-        self.map_to_view(self.game.game_components.camera.y)
+        self.map_to_view(self.game_handler.game_components.camera.y)
         self.cam_update()
 
         self.move()
@@ -241,7 +244,7 @@ class Player(Sprite):
 
         self.update_if_has_been_hit()
 
-        self.game.game_components.event_handler.trigger_event(events.FlameUpdate(self.coord.x, self.coord.y, self.h))
+        self.game_handler.game_components.event_handler.trigger_event(events.FlameUpdate(self.coord.x, self.coord.y, self.h))
             
         if self.level.idx == 3:
             if self.ship3_costume_ticker.get() and not self.has_been_hit:
@@ -257,7 +260,7 @@ class Player(Sprite):
 
     def update_speed_statusbar(self):
         if self.speed_statusbar_ticker.get():
-            self.game.game_components.event_handler.trigger_event(events.UpdateStatusbar)
+            self.game_handler.game_components.event_handler.trigger_event(events.UpdateStatusbar)
 
     def draw_if_hit(self):
         if self.hit_blink_idx:
@@ -278,25 +281,35 @@ class Player(Sprite):
         self.player_setup()
 
     # Event handler functions
-    
+    def shoot_if_near_squidge(self, x_enemy: float, y_enemy: int, w_enemy: int, h_enemy: int):
+        if self.is_near(40, x_enemy, y_enemy - self.game_handler.game_components.camera.y + WINDOW_HEIGHT / 2, w_enemy, h_enemy): # for the y, we calculate the viewport position first
+            self.game_handler.game_components.event_handler.trigger_event(events.SquidgeShootBullet(
+                x_enemy + (w_enemy // 2), y_enemy + (h_enemy // 2), self.coord.x_map + (self.w // 2), self.coord.y_map + (self.h//2)
+            ))
+
     def is_colliding_with_enemy(self, enemy_x: float, enemy_y: float, enemy_w: int, enemy_h: int) -> bool:
-        if self.is_colliding(enemy_x, enemy_y, enemy_w, enemy_h):
-            if not self.has_been_hit:
-                self.game.game_components.event_handler.trigger_event(events.PlayerHealthChange(-1))
-                self.health -= 1
-                self.has_been_hit = True
-                self.game.game_components.soundplayer.play(self.soundbank["attacked"])
-            if self.health == 0:
-                self.game.game_components.event_handler.trigger_event(events.LevelRestart)
-                return True
+        if self.is_colliding(enemy_x, enemy_y, enemy_w, enemy_h) and self.alter_health(-1):
+            self.alter_health(-1)
         return False
+
+    def alter_health(self, value: int) -> bool:
+        if self.has_been_hit:
+            return False
+        self.has_been_hit = True
+        self.game_handler.game_components.event_handler.trigger_event(events.HealthbarPlayerHealthChange(-1))
+        self.game_handler.game_components.soundplayer.play(self.soundbank["attacked"])
+        self.game_handler.game_components.soundplayer.play(self.soundbank["explode"])
+        self.health += value
+        if self.health == 0:
+            self.game_handler.game_components.event_handler.trigger_event(events.LevelRestart)
+        return True
 
     def restart_state(self):
         self.coord.x_map = self.level_width // 2
         self.coord.y_map = self.level_height - tile_to_real(4)
         self.x_vel = 0
         self.y_vel = 0
-        self.game.game_components.event_handler.trigger_event(events.PlayerHealthChange(self.level.max_health))
+        self.game_handler.game_components.event_handler.trigger_event(events.HealthbarPlayerHealthChange(self.level.max_health))
         self.health = self.level.max_health
   
 class PlayerHandler(SpriteHandler):
@@ -310,6 +323,7 @@ class PlayerHandler(SpriteHandler):
         self.game_handler.game_components.event_handler.add_handler(events.ActivateLevel.name, lambda: self._alter_player_keys_state(True))
         self.player = Player(self.game_handler)
         self.flame = Flame(self.game_handler)
+        self.check_for_enemy_bullets = False
         self.setup()
 
         self.keybindings = {
@@ -333,6 +347,7 @@ class PlayerHandler(SpriteHandler):
 
         if level.idx == 3:
             self.has_flame = False
+            self.check_for_enemy_bullets = True
         else:
             self.has_flame = True
 
@@ -345,6 +360,9 @@ class PlayerHandler(SpriteHandler):
     def update(self):
         if self.has_flame:
             self.flame.update()
+        
+        if self.check_for_enemy_bullets:
+            self.game_handler.game_components.event_handler.trigger_event(events.PlayerBulletsCheck(self.player.coord.x, self.player.coord.y, self.player.w, self.player.h))
 
         self.player.update()
 

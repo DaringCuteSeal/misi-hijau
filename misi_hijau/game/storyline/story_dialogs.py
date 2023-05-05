@@ -53,9 +53,9 @@ class InGameStoryline:
     ##########
 
     dialog_strings: list[str] = [
-        story_text["story_start_level_1"][0],
-        story_text["story_start_level_2"][0],
-        story_text["story_start_level_3"][0]
+        story_text["story_level_1"][0],
+        story_text["story_level_2"][0],
+        story_text["story_level_3"][0]
     ]
 
     def show_dialog_handler(self):
@@ -149,9 +149,8 @@ class InGameStoryline:
 
     def close_level_stats(self):
         self.event_handler.trigger_event(events.HideBlinkingTextHint)
-        self.event_handler.trigger_event(events.LevelNext)
-        self.game_handler.game_components.event_handler.trigger_event(events.ResumeGameLoop)
         self.alter_keylistener_state(False)
+        self.event_handler.trigger_event(events.LevelNext)
 
     def _load_draw_level_stats_background(self, idx: int):
         pyxel.image(TEMP_IMG_BANK_IDX).load(0, 0, os.path.join(LEVEL_STATS_IMAGE_PATH, f"{idx}.png"))

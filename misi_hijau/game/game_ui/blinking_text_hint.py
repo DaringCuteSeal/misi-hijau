@@ -57,22 +57,27 @@ class BlinkingTextHint(UIComponent):
         self.active = True
     
     def hide(self):
-        self.active = False
         self.game_handler.game_components.timer.destroy_by_id(BLINKING_TEXT_HINT_TIMER_ID) # delete stale timers
+        self.active = False
 
     def _draw(self):
         if self.hint_text_blink_ticker and self.hint_text_blink_ticker.get():
             self.hint_text_blink_idx = not self.hint_text_blink_idx
-            self._draw_text() if not self.keep_drawing else None
-            return
-        self._draw_text()
+            if not self.keep_drawing:
+                self._draw_text_with_stacking()
+                return
+        self._draw_text_constantly()
 
-    def _draw_text(self):
+    def _draw_text_with_stacking(self):
         if self.hint_text_blink_idx:
             pyxel.text(self.coord.x, self.coord.y, self.msg, self.text_color)
         else: 
             # blit back of the text with the background image instead of constantly drawing everything (computationally cheaper)
             pyxel.blt(self.coord.x, self.coord.y, self.img, self.coord.x, self.coord.y, self.msg_width, pyxel.FONT_HEIGHT)
+    
+    def _draw_text_constantly(self):
+        if self.hint_text_blink_idx:
+            pyxel.text(self.coord.x, self.coord.y, self.msg, self.text_color)
 
     def init_level(self):
         self.active = False
