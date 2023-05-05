@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "misi-hijau"
-version = "0.1.0"
+version = "1.0.0"
 description = "Misi Hijau adalah permainan petualangan retro tentang edukasi energi terbarukan."
 authors = ["Cikitta W. Tjok <daringcuteseal@gmail.com>"]
 license = "GPL"

@@ -5,6 +5,15 @@ Perangkat lunak ini berada di bawah lisensi [Apache 2.0](/LICENSE.txt).
 
 Proyek ini sekarang masih dalam proses pengembangan, *stay tuned!* 💫
 
+# Mainkan
+## Di Web
+[Klik di sini untuk pergi ke laman gameku dengan Pyxel wasm](https://daringcuteseal.xyz/software/misi-hijau/)
+
+Catatan: kamu memerlukan keyboard untuk memainkan game ini.
+
+## Dengan Python
+Klon repo ini, lalu jalankan `poetry install`. Kemudian jalankan game dengan `python misi_hijau` atau `/tempat/interpreter/python misi_hijau` di direktori ini.
+
 # Cerita
 Manusia kemungkinan besar akan berhasil menjadi makhluk pertama yang dapat pergi ke galaksi lain dan benar-benar menjadi penguasa alam ini. 100 tahun yang lalu, seluruh negara di bumi bergabung dalam ISRP (*Interntional Space Research Project*), organisasi raksasa yang akan melakukan banyak penelitian terhadap dunia luar angkasa.
 
