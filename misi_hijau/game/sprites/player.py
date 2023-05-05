@@ -146,20 +146,20 @@ class Player(Sprite):
 
     def init_costume(self, ship_type: PlayerShipType):
         match ship_type:
-            case PlayerShipType.SHIP1:
+            case PlayerShipType.SHIP_1:
                 self.set_costume(self.costumes["ship_1"])
-            case PlayerShipType.SHIP2:
+            case PlayerShipType.SHIP_2:
                 self.set_costume(self.costumes["ship_2"])
-            case PlayerShipType.SHIP3:
+            case PlayerShipType.SHIP_3:
                 self.set_costume(self.costumes["ship_3_1"])
     
     def switch_to_blink_costume(self, ship_type: PlayerShipType):
         match ship_type:
-            case PlayerShipType.SHIP1:
+            case PlayerShipType.SHIP_1:
                 self.set_costume(self.costumes["blink_ship_1"])
-            case PlayerShipType.SHIP2:
+            case PlayerShipType.SHIP_2:
                 self.set_costume(self.costumes["blink_ship_2"])
-            case PlayerShipType.SHIP3:
+            case PlayerShipType.SHIP_3:
                 self.set_costume(self.costumes["blink_ship_3"])
 
     def ship3_costume_set(self):

@@ -52,9 +52,9 @@ class SoundType(Enum):
     MUSIC = 1
 
 class PlayerShipType(Enum):
-    SHIP1 = 0
-    SHIP2 = 1
-    SHIP3 = 2
+    SHIP_1 = 0
+    SHIP_2 = 1
+    SHIP_3 = 2
 
 class MineralType(Enum):
     MINERAL_1 = 0
@@ -275,3 +275,37 @@ class TimerItem:
         Run function that's set to run after timer is over.
         """
         self._function_when_over() if self._function_when_over else None
+
+# Tick handling
+class TickerItem:
+    """
+    Retro games aren't meant to be smooth. However, Pyxel supports high frame rate. This timer can be used to limit a rate of something without messing with the game's actual FPS.
+
+    The `get` method from this class will return `True` on every `frame_limit` frames.
+    """
+    def __init__(self, frame_limit: int):
+        """
+        Initialize a new tick timer for an entity.
+        """
+        self.time_since_last_move = 0
+        self.time_last_frame = 0
+        self.limit = frame_limit
+    
+    def tick(self):
+        """
+        Update tick counts. Should be run on every game tick.
+        """
+        time_this_frame = pyxel.frame_count
+        self.dt = time_this_frame - self.time_last_frame
+        self.time_last_frame = time_this_frame
+        self.time_since_last_move += self.dt
+    
+    def get(self) -> bool:
+        """
+        Get status of tick.
+        """
+        if self.time_since_last_move * 10 >= self.limit * 10:
+            self.time_since_last_move = 0
+            return True
+        return False
+

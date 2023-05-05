@@ -58,6 +58,7 @@ class IntroPlayer:
     def slide_intro(self):
         pyxel.image(TEMP_IMG_BANK_IDX).load(0, 0, SPLASH_SCREEN_IMAGE)
         pyxel.blt(0, 0, TEMP_IMG_BANK_IDX, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
+        pyxel.text(5, WINDOW_HEIGHT - 10, "(C) 2023 Cikitta", pyxel.COLOR_WHITE)
         self.game_handler.game_components.timer.attach(4.8).when_over(self._show_slideshow_slide) # start slideshow after 5 seconds
         
     def _show_slideshow_slide(self):

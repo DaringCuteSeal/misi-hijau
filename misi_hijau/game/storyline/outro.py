@@ -71,7 +71,7 @@ class OutroPlayer:
     
     def _setup_keylistener(self):
         self.game_handler.game_components.keylistener.destroy_all()
-        self.exit_game_keyfunc = KeyFunc([pyxel.KEY_Q, pyxel.KEY_ESCAPE], self.quit_game)
+        self.exit_game_keyfunc = KeyFunc([pyxel.KEY_Q, pyxel.KEY_ESCAPE], self.quit_game, active=False)
         self.game_handler.game_components.keylistener.add("exit_game", self.exit_game_keyfunc)
     
     def draw_background(self):

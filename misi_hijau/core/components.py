@@ -32,6 +32,7 @@ from .common import (
     TextStatusbarItem,
     ProgressStatusbarItem,
     TimerItem,
+    TickerItem,
     WINDOW_WIDTH,
     WINDOW_HEIGHT
 )
@@ -349,10 +350,10 @@ class TickerHandler:
     Ticker handler class. Each individual sprite that has a ticker doesn't need to update the ticker
     """
     def __init__(self):
-        self.ticker_items: list[utils.TickerItem] = []
+        self.ticker_items: list[TickerItem] = []
     
-    def attach(self, limit: int) -> utils.TickerItem:
-        ticker_item = utils.TickerItem(limit)
+    def attach(self, limit: int) -> TickerItem:
+        ticker_item = TickerItem(limit)
         self.ticker_items.append(ticker_item)
         return ticker_item
     

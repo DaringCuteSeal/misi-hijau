@@ -14,11 +14,11 @@
 
 import pyxel
 from abc import abstractmethod
-from core.common import ALPHA_COL, Level, BLANK_UV, MAP_Y_OFFSET_TILES, ProgressStatusbarItem, EnemyType, Icon
+from core.common import ALPHA_COL, Level, BLANK_UV, MAP_Y_OFFSET_TILES, ProgressStatusbarItem, EnemyType, Icon, TickerItem
 from core.utils import tile_to_real
 from core.sprite_classes import Sprite, SpriteCoordinate, SpriteHandler
 from core.game_handler import GameHandler
-from .. import events
+from misi_hijau.game import events
 
 ENEMY_SPAWNER_UV = (7, 1)
 
@@ -42,44 +42,59 @@ class EnemyGrug(EnemyEntity):
     h = 8
     health = 2
 
-    def __init__(self, x_map: float, y_map: float, level: Level):
+    def __init__(self, x_map: float, y_map: float, level: Level, ticker: TickerItem):
         self.coord = SpriteCoordinate(-20, -20, -20, -20)
         self.coord.x_map = x_map
         self.coord.y_map = y_map
         self.level_height = tile_to_real(level.levelmap.level_height)
         self.level_width = tile_to_real(level.levelmap.level_width)
+        self.update_ticker = ticker
 
     def update(self):
-        self.coord.x_map += pyxel.rndf(-2, 2)
-        self.coord.y_map += pyxel.rndf(-2, 2)
-        if self.coord.x_map > self.level_width:
-            self.coord.x_map = self.level_width - 2
-        if self.coord.x_map < 0:
-            self.coord.x_map = 0
-        if self.coord.y_map > self.level_height:
-            self.coord.y_map = self.level_height
+        if self.update_ticker.get():
+            self.coord.x_map += pyxel.rndf(-2, 2)
+            self.coord.y_map += pyxel.rndf(-2, 2)
+            if self.coord.x_map > self.level_width:
+                self.coord.x_map = self.level_width - 2
+            if self.coord.x_map < 0:
+                self.coord.x_map = 0
+            if self.coord.y_map > self.level_height:
+                self.coord.y_map = self.level_height
     
 class EnemyPhong(EnemyEntity):
     u = 8
     v = 48
     health = 4
 
-    def __init__(self, x_map: float, y_map: float, level: Level):
+    def __init__(self, x_map: float, y_map: float, level: Level, ticker: TickerItem):
         self.coord = SpriteCoordinate(-20, -20, -20, -20)
         self.coord.x_map = x_map
         self.coord.y_map = y_map
         self.level_height = tile_to_real(level.levelmap.level_height)
         self.level_width = tile_to_real(level.levelmap.level_width)
+        self.direction_x = pyxel.rndf(-2.5, 3)
+        self.direction_y = pyxel.rndf(1, 4)
+        self.update_ticker = ticker
 
     def update(self):
-        self.coord.x_map += pyxel.rndf(-2, 2)
-        self.coord.y_map += pyxel.rndf(-2, 2)
-        if self.coord.x_map > self.level_width: 
-            self.coord.x_map = self.level_width - 2
+        if not self.update_ticker.get():
+            return
+
         if self.coord.x_map < 0:
-            self.coord.x_map = 0
-        if self.coord.y_map > self.level_height:
-            self.coord.y_map = self.level_height
+            self.coord.x_map = 1
+            self.direction_x *= -1
+        if self.coord.x_map > self.level_width - self.w:
+            self.coord.x_map = self.level_width - self.w - 1
+            self.direction_x *= -1
+        if self.coord.y_map > self.level_height - self.h:
+            self.direction_y *= -1
+            self.coord.y_map = self.level_height - self.h - 1
+        if self.coord.y_map < 0:
+            self.direction_y *= -1
+            self.coord.y_map = 1
+
+        self.coord.x_map += self.direction_x + pyxel.rndf(-2, 2)
+        self.coord.y_map += self.direction_y + pyxel.rndf(-2, 2)
     
 class EnemySquidge(EnemyEntity):
     u = 0
@@ -120,6 +135,7 @@ class EnemyHandler(SpriteHandler):
         self.enemies_hit_progressbar = ProgressStatusbarItem(2, 1, self.get_enemies_eliminated_count, pyxel.COLOR_WHITE, 0, 75, 10, self.enemies_icon[0], "Alien", pyxel.COLOR_WHITE)
         self.setup()
         self._reset_progressbar()
+        self.game_components.event_handler.add_handler(events.ActivateLevel.name, self._activate_enemy)
 
         self.statusbar_items = [
             self.enemies_hit_progressbar
@@ -133,6 +149,8 @@ class EnemyHandler(SpriteHandler):
         self.enemy_coordinates_list = self._generate_enemies_matrix()
         self.enemies_hit_progressbar.icon = self.enemies_icon[self.level.idx - 1]
         self.spawn()
+        self.update_enemies = None
+        self.update_enemies = False
 
     def _reset_progressbar(self):
         self.enemies_hit_progressbar.progress_col = self.level.enemies_statusbar_color
@@ -175,12 +193,15 @@ class EnemyHandler(SpriteHandler):
         y = tile_to_real(y - MAP_Y_OFFSET_TILES - self.levelmap.map_y)
         match enemy_type:
             case EnemyType.ENEMY_1:
-                enemy = EnemyGrug(x, y, self.level)
+                enemy = EnemyGrug(x, y, self.level, self.game_components.ticker.attach(pyxel.rndi(4, 8)))
             case EnemyType.ENEMY_2:
-                enemy = EnemyPhong(x, y, self.level)
+                enemy = EnemyPhong(x, y, self.level, self.game_components.ticker.attach(pyxel.rndi(4, 8)))
             case EnemyType.ENEMY_3:
                 enemy = EnemySquidge(x, y, self.level)
         self.enemies.append(enemy)
+
+    def _activate_enemy(self):
+        self.update_enemies = True
 
     def update(self):
         for enemy in self.enemies:
@@ -200,10 +221,7 @@ class EnemyHandler(SpriteHandler):
                 
                 self.game_components.event_handler.trigger_event(events.PlayerCollidingEnemy(enemy.coord.x, enemy.coord.y, enemy.w, enemy.h))
 
-        # XXX fire the events (a.k.a check collision) from bullets instead so we don't need 2 loops.
-        if self.enemies_ticker.get():
-            for enemy in self.enemies:
-                enemy.update()
+            enemy.update() if self.update_enemies else None
 
     def draw(self):
         for enemy in self.enemies:
@@ -216,6 +234,7 @@ class EnemyHandler(SpriteHandler):
         self._reset_progressbar()
 
     def restart_level(self):
+        self.update_enemies = None
         self.enemies = []
         self.enemies_eliminated = 0
         self.spawn()

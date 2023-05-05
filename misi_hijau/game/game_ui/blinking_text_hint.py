@@ -15,7 +15,7 @@
 import pyxel
 
 from core.game_handler import GameHandler
-from core.utils import TickerItem
+from core.common import TickerItem
 from core.game_ui_classes import UIComponent
 from game import events
 

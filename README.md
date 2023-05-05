@@ -22,7 +22,7 @@ Bumi masih memiliki cukup energi untuk 7 tahun ke depan, apabila dihemat dengan 
 
 3 elemen tersebut akan dicari Sarah, dalam bentuk batuan mineral. Mineral yang pertama adalah ***Nethonite***. Menurut prediksi Sarah, Nethonite merupakan mineral yang terdiri sepenuhnya dari Dimensium, elemen dengan interaksi paling aneh yang diketahui manusia. Apabile Nethonite diputar dengan kecepatan >32 ribu RPM dalam sebuah bola kaca tebal hampa, Nathonite dapat menghasilkan listrik yang stabil dengan tegangan yang luar biasa.
 
-Mineral yang kedua adalah ***Photosium***. Photosium dapat menyerap photon (partikel cahaya) dengan sangat baik dan efisien sehingga cocok sebagai bahan dasar pembangkit listrik tenaga surya di Bumi maupun Bola Dyson. Mineral ini dapat ditemukan di sebuah planet kerdil berwarna hijau di sabuk kuiper.
+Mineral yang kedua adalah ***Photosium***. Photosium dapat menyerap photon (partikel cahaya) dengan sangat baik dan efisien sehingga cocok sebagai bahan dasar panel surya di Bumi dan Bola Dyson. Mineral ini dapat ditemukan di sebuah planet kerdil berwarna hijau di sabuk kuiper.
 
 Terakhir, ***Electricium***. Electricium adalah mineral yang sangat konduktif. Electricium dapat menghantarkan listrik 230 kali lebih efisien dari tembaga biasa. Electricium dapat menjadi bahan dasar dari kabel listrik yang dapat mengalirkan listrik dengan tegangan luar biasa. Kabel listrik Electricium dapat digunakan untuk membuat alat pendukung pembangkit listrik yang menggunakan mineral ***Nethonite*** dan ***Photosium***.
 
@@ -54,3 +54,8 @@ Baca proses pembuatan game ini di blog websiteku:
 * [Kylee](https://kylee.site) yang telah memberi masukan terhadap beberapa bagian *engine* game
 * Penguji beta lain game ini
 * Beberapa teman lain yang telah mendukung dan memberi masukan terhadap proyek ini
+
+# Kredit
+* Musik: 100% [saya](https://github.com/DaringCuteSeal) 100%; 
+* Seni: 100% [saya](https://github.com/DaringCuteSeal) 100%
+*
