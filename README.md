@@ -54,8 +54,3 @@ Baca proses pembuatan game ini di blog websiteku:
 * [Kylee](https://kylee.site) yang telah memberi masukan terhadap beberapa bagian *engine* game
 * Penguji beta lain game ini
 * Beberapa teman lain yang telah mendukung dan memberi masukan terhadap proyek ini
-
-# Kredit
-* Musik: 100% [saya](https://github.com/DaringCuteSeal) 100%; 
-* Seni: 100% [saya](https://github.com/DaringCuteSeal) 100%
-*
