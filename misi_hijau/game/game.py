@@ -20,8 +20,6 @@ import pyxel
 
 from . import events
 
-from core.common import KeyFunc, KeyType
-
 from core import components
 from core.game_handler import GameComponents, GameHandler
 
@@ -53,7 +51,7 @@ class Game():
         self._init_story_dialog() # instantiate ingame storyline
         
         # debugging
-        self.attach_debug_key()
+        # self.attach_debug_key()
 
     def _start_intro_slideshow(self):
         self.game_handler.callable_draw = self.ui_only_draw
@@ -231,8 +229,8 @@ class Game():
     # Debugging #
     #############
  
-    def attach_debug_key(self):
-        self.game_handler.game_components.keylistener.add("debug_key", KeyFunc([pyxel.KEY_BACKSPACE],self._debug_show_level_stats, KeyType.BTNP, hold_time=10, repeat_time=100))
+    # def attach_debug_key(self):
+        # self.game_handler.game_components.keylistener.add("debug_key", KeyFunc([pyxel.KEY_BACKSPACE],self._debug_show_level_stats, KeyType.BTNP, hold_time=10, repeat_time=100))
     
-    def _debug_show_level_stats(self):
-        self.game_handler.game_components.event_handler.trigger_event(events.LevelNext)
+    # def _debug_show_level_stats(self):
+        # self.game_handler.game_components.event_handler.trigger_event(events.LevelNext)
