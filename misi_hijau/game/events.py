@@ -21,6 +21,10 @@ import pyxel
 from dataclasses import dataclass
 from typing import Callable, Optional, Any
 
+# XXX
+# This was what I submitted.
+# However, I think the Event class should go to core.common
+
 @dataclass
 class Event:
     """
