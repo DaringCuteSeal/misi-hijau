@@ -3,5 +3,7 @@
 .vscode
 game.svg
 misi_hijau.svg
+misi_hijau.html
+misi_hijau.pyxapp
 *.kra
 *.png~
