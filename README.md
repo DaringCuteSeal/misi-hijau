@@ -24,11 +24,11 @@ Catatan: **Proyek ini tidak menerima PR sampai 5 Mei 2023.**
 
 # Blog
 Baca proses pembuatan game ini di blog websiteku:
-* [Blog 1](https://daringcuteseal.xyz/blog/misi-hijau-devlog/)
-* [Blog 2](https://daringcuteseal.xyz/blog/misi-hijau-devlog-2/)
-* [Blog 3](https://daringcuteseal.xyz/blog/misi-hijau-devlog-3/)
-* [Blog 4](https://daringcuteseal.xyz/blog/misi-hijau-devlog-4/)
-* [Blog 5](https://daringcuteseal.xyz/blog/misi-hijau-devlog-5/)
+* [Blog 1](https://daringcuteseal.github.io/blog/misi-hijau-devlog/)
+* [Blog 2](https://daringcuteseal.github.io/blog/misi-hijau-devlog-2/)
+* [Blog 3](https://daringcuteseal.github.io/blog/misi-hijau-devlog-3/)
+* [Blog 4](https://daringcuteseal.github.io/blog/misi-hijau-devlog-4/)
+* [Blog 5](https://daringcuteseal.github.io/blog/misi-hijau-devlog-5/)
 
 # Terima Kasih
 ## Proyek Lain
