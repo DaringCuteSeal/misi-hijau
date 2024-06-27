@@ -7,7 +7,7 @@ Proyek ini sekarang masih dalam proses pengembangan, *stay tuned!* 💫
 
 # Mainkan
 ## Di Web
-[Klik di sini untuk pergi ke laman gameku dengan Pyxel wasm](https://daringcuteseal.xyz/software/misi-hijau/)
+[Klik di sini untuk pergi ke laman gameku dengan Pyxel wasm](https://daringcuteseal.github.io/software/misi-hijau/)
 
 Catatan: kamu memerlukan keyboard untuk memainkan game ini.
 
