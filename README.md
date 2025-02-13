@@ -3,8 +3,6 @@ Misi Hijau adalah permainan edukasi tentang energi terbarukan.
 Game ini dikembangkan oleh [Cikitta](https://github.com/Daringcuteseal) untuk proyek koding PENABUR Kids Festival 2023.
 Perangkat lunak ini berada di bawah lisensi [Apache 2.0](/LICENSE.txt).
 
-Proyek ini sekarang masih dalam proses pengembangan, *stay tuned!* 💫
-
 # Mainkan
 ## Di Web
 [Klik di sini untuk pergi ke laman gameku dengan Pyxel wasm](https://daringcuteseal.github.io/software/misi-hijau/)
